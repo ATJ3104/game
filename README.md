@@ -1,0 +1,68 @@
+# ロボファイター 🤖🥊
+
+小学5年生の夏休み自由研究として作った、ブロックロボが戦う **2D対戦格闘ゲーム** です。
+キャラクターは完全オリジナルの8体。PC でもスマホでも遊べます。
+
+- キャラのビジュアル(ポートレート画像)は子供が考案したオリジナルデザイン
+- 戦闘中のキャラは Canvas でコード描画する「共通ブロックリグ」1つを8体で使い回し
+- 効果音は Web Audio API でその場で合成(音声ファイルなし)
+- フレームワーク不使用(HTML5 Canvas + TypeScript + Vite)
+
+## あそびかた
+
+| そうさ | 1P | 2P |
+|---|---|---|
+| 移動 | A / D | ← / → |
+| ジャンプ | W | ↑ |
+| しゃがみ | S | ↓ |
+| パンチ | J | 1 |
+| キック | K | 2 |
+| 必殺技(ゲージ満タンで) | L | 3 |
+| ガード | 相手と反対方向を押す(しゃがみガードもできる) | |
+
+- **99秒・2本先取** のラウンド制
+- スマホは横持ちで、画面のタッチパッド+3ボタンで操作(1P vs CPU のみ)
+- CPU の強さは「よわい / ふつう / つよい」の3段階
+
+## キャラを改造したいとき
+
+**`src/characters.ts` を書きかえるだけ**で、名前・色・強さ・必殺技名・かけごえが全部変わります。
+くわしくはファイル先頭のコメントを読んでください。設計用紙は `docs/キャラ設計シート.md` にあります。
+
+## 開発
+
+```bash
+npm install
+npm run dev      # 開発サーバー(http://localhost:5173)
+npm run build    # dist/ に静的出力(tsc + vite build)
+npm run preview  # ビルド結果の確認
+```
+
+## 公開(Cloudflare Pages)
+
+```bash
+npm run build
+npx wrangler pages project create robo-fighter --production-branch=main
+npx wrangler pages deploy dist --project-name=robo-fighter
+```
+
+初回は `npx wrangler login` で Cloudflare にログインしてから実行してください。
+`dist/` は完全な静的サイトなので、GitHub Pages など他の静的ホスティングでもそのまま動きます。
+
+## フォルダ構成
+
+```
+├── index.html
+├── public/assets/characters/  # ポートレート画像(512px)+サムネ(160px)× 8体
+├── src/
+│   ├── main.ts        # ゲームループ(60fps固定)、シーン管理
+│   ├── characters.ts  # ★キャラ設定8体分(ここを書きかえて改造する)
+│   ├── robot.ts       # 共通ブロックリグの描画・アニメーション
+│   ├── fight.ts       # 対戦ロジック(状態、当たり判定、ダメージ、必殺技)
+│   ├── input.ts       # キーボード + タッチ仮想パッド
+│   ├── ai.ts          # CPU思考ルーチン(3段階)
+│   ├── audio.ts       # Web Audio API 効果音合成
+│   ├── stage.ts       # ステージ背景(4種、コード描画)
+│   └── scenes/        # タイトル / 難易度 / キャラ選択 / VS / バトル / リザルト
+└── docs/              # 元の仕様書とキャラ設計シート
+```
