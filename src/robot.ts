@@ -207,22 +207,48 @@ export function getPose(anim: AnimName, t: number, progress: number): Pose {
   }
 }
 
-/** 色を暗くする(奥側の腕・脚を立体的に見せるため) */
-function shade(hex: string, f: number): string {
+// ---- 色ヘルパー(立体感のある陰影のため) ----
+function hexRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
-  const r = Math.round(((n >> 16) & 255) * f);
-  const g = Math.round(((n >> 8) & 255) * f);
-  const b = Math.round((n & 255) * f);
-  return `rgb(${r},${g},${b})`;
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-/** 輪郭線つきの四角を描く(リグの基本部品) */
+function toHex(r: number, g: number, b: number): string {
+  const h = (v: number) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
+  return `#${h(r)}${h(g)}${h(b)}`;
+}
+
+/** 色を暗くする(f=1でそのまま、小さいほど暗い) */
+function shade(hex: string, f: number): string {
+  const [r, g, b] = hexRgb(hex);
+  return toHex(r * f, g * f, b * f);
+}
+
+/** 色を明るくする(白にちかづける) */
+function light(hex: string, f: number): string {
+  const [r, g, b] = hexRgb(hex);
+  return toHex(r + (255 - r) * f, g + (255 - g) * f, b + (255 - b) * f);
+}
+
+/**
+ * 立体感のあるブロックを描く(リグの基本部品)。
+ * 上が明るく下が暗いグラデーション+上面ハイライトで、
+ * ただの四角でも「光が当たっている」ように見せる。
+ */
 function box(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string): void {
-  ctx.fillStyle = color;
+  const grad = ctx.createLinearGradient(0, y, 0, y + h);
+  grad.addColorStop(0, light(color, 0.3));
+  grad.addColorStop(0.45, color);
+  grad.addColorStop(1, shade(color, 0.68));
+  ctx.fillStyle = grad;
   ctx.fillRect(x, y, w, h);
-  ctx.strokeStyle = '#15151c';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x, y, w, h);
+  // ふちどりはパーツ色を濃くした色で(黒一色よりなじんで見える)
+  ctx.strokeStyle = shade(color, 0.4);
+  ctx.lineWidth = 1.6;
+  ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+  // 上面のハイライト
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.fillRect(x + 1.5, y + 1, Math.max(0, w - 3), 1.6);
 }
 
 /** 腕・脚(2関節の四角パーツ)を描く。a1=つけ根の角度 a2=関節の曲げ */
@@ -230,7 +256,8 @@ function limb(
   ctx: CanvasRenderingContext2D,
   jx: number, jy: number, a1: number, a2: number,
   len1: number, len2: number, w: number,
-  c1: string, c2: string, tipColor?: string,
+  c1: string, c2: string,
+  tip?: { type: 'fist' | 'foot'; color: string },
 ): void {
   ctx.save();
   ctx.translate(jx, jy);
@@ -238,8 +265,27 @@ function limb(
   box(ctx, -w / 2, -2, w, len1 + 4, c1);
   ctx.translate(0, len1);
   ctx.rotate(-a2);
-  box(ctx, -w / 2, -2, w, len2 + 4, c2);
-  if (tipColor) box(ctx, -w / 2 - 1, len2 - 1, w + 2, w * 0.9, tipColor); // こぶし/足先
+  const w2 = w * 0.86; // 先ほそりさせて腕・脚らしく
+  box(ctx, -w2 / 2, -2, w2, len2 + 4, c2);
+  // 関節(ひじ・ひざ)の影
+  ctx.fillStyle = shade(c2, 0.62);
+  ctx.fillRect(-w2 / 2 + 1, -1.5, w2 - 2, 3);
+  if (tip) {
+    if (tip.type === 'fist') {
+      // にぎりこぶし: 少し大きめ+指のライン
+      box(ctx, -w2 / 2 - 1.5, len2 - 2, w2 + 3, w2 + 1.5, tip.color);
+      ctx.strokeStyle = shade(tip.color, 0.55);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-w2 / 2 - 0.5, len2 + w2 * 0.42);
+      ctx.lineTo(w2 / 2 + 1, len2 + w2 * 0.42);
+      ctx.stroke();
+    } else {
+      // くつ: つま先が前につき出た形
+      box(ctx, -w2 / 2 - 1, len2 - 2, w2 + 2, 6.5, tip.color);
+      box(ctx, w2 / 2 - 1, len2 - 2, 6, 6.5, tip.color);
+    }
+  }
   ctx.restore();
 }
 
@@ -374,7 +420,7 @@ export function drawRobot(
       G.uarm, G.farm, G.armW,
       side === 1 ? cArms : shade(cArms, f),
       side === 1 ? cArms : shade(cArms, f),
-      side === 1 ? cFists : shade(cFists, f),
+      { type: 'fist', color: side === 1 ? cFists : shade(cFists, f) },
     );
     ctx.restore();
   };
@@ -383,21 +429,37 @@ export function drawRobot(
   armLayer(-1);
 
   // 脚(奥・手前)
-  limb(ctx, -5, hipY, pose.lhip, pose.lknee, G.thigh, G.shin, G.legW, shade(cLegs, dark), shade(cLegs, dark), shade(cFeet, dark));
-  limb(ctx, 5, hipY, pose.rhip, pose.rknee, G.thigh, G.shin, G.legW, cLegs, cLegs, cFeet);
+  limb(ctx, -5, hipY, pose.lhip, pose.lknee, G.thigh, G.shin, G.legW, shade(cLegs, dark), shade(cLegs, dark), { type: 'foot', color: shade(cFeet, dark) });
+  limb(ctx, 5, hipY, pose.rhip, pose.rknee, G.thigh, G.shin, G.legW, cLegs, cLegs, { type: 'foot', color: cFeet });
 
   // 胴体+頭
   ctx.save();
   ctx.translate(0, hipY);
   ctx.rotate(pose.lean);
   box(ctx, -G.torsoW / 2, -th, G.torsoW, th + 4, cTorso);
-  // 胸のライト(アクセント色)
+  // 服のディテール: えりもとの影と中心のぬい目
+  ctx.fillStyle = 'rgba(0,0,0,0.16)';
+  ctx.fillRect(-G.torsoW / 2 + 2, -th + 1.5, G.torsoW - 4, 4);
+  ctx.strokeStyle = 'rgba(0,0,0,0.14)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(0.5, -th + 7);
+  ctx.lineTo(0.5, -8);
+  ctx.stroke();
+  // 胸のライト(アクセント色。ほんのり光る)
+  ctx.save();
+  ctx.shadowColor = cAcc;
+  ctx.shadowBlur = 5;
   ctx.fillStyle = cAcc;
-  ctx.fillRect(-4, -th + 12, 9, 9);
-  ctx.strokeStyle = '#15151c';
-  ctx.strokeRect(-4, -th + 12, 9, 9);
-  // ベルト(腰まわりの差し色。衣装っぽさを出す)
+  ctx.fillRect(-3, -th + 13, 7, 7);
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(-3, -th + 13, 7, 7);
+  // ベルト(腰まわりの差し色)+バックル
   box(ctx, -G.torsoW / 2 - 1, -8, G.torsoW + 2, 8, cBelt);
+  ctx.fillStyle = light(cBelt, 0.35);
+  ctx.fillRect(-3, -7, 7, 6);
 
   // 頭(首のかたむきつき)
   ctx.save();
@@ -405,18 +467,38 @@ export function drawRobot(
   ctx.rotate(pose.head);
   const hs = G.headS;
   box(ctx, -hs / 2, -hs, hs, hs, cSkin);
+  if (!flash) {
+    // あごまわりの影で顔の立体感を出す
+    ctx.fillStyle = 'rgba(0,0,0,0.10)';
+    ctx.fillRect(-hs / 2 + 1.5, -hs * 0.3, hs - 3, hs * 0.28);
+    // 耳(顔のうしろがわ)
+    ctx.fillStyle = shade(cSkin, 0.82);
+    ctx.fillRect(-hs * 0.34, -hs * 0.52, hs * 0.16, hs * 0.2);
+  }
   // 口もとのマスク(忍者など): 顔の下半分をおおう
   if (look.faceMask) {
     box(ctx, -hs / 2 + 1, -hs * 0.44, hs - 2, hs * 0.44 - 1, flash ? '#ffffff' : look.faceMask);
   }
-  // 目(アクセント色で光る)。バイザーのキャラは drawHeadGear 側で覆う
-  if (cfg.headGear !== 'techvisor') {
-    ctx.save();
-    ctx.shadowColor = cAcc;
-    ctx.shadowBlur = 6;
-    ctx.fillStyle = cAcc;
-    ctx.fillRect(hs * 0.08, -hs * 0.68, hs * 0.3, 5);
-    ctx.restore();
+  // 顔(横向き)。バイザーのキャラは drawHeadGear 側で目が隠れる
+  if (cfg.headGear !== 'techvisor' && !flash) {
+    // まゆ毛(かみの色に合わせる)
+    const gearDefault = ['ponytail', 'dreads'].includes(cfg.headGear) ? cfg.colors.secondary : cfg.colors.accent;
+    ctx.fillStyle = shade(cfg.look?.gear ?? gearDefault, 0.65);
+    ctx.fillRect(hs * 0.04, -hs * 0.76, hs * 0.36, hs * 0.09);
+    // 白目とひとみ
+    ctx.fillStyle = '#f2f0ea';
+    ctx.fillRect(hs * 0.06, -hs * 0.64, hs * 0.32, hs * 0.2);
+    ctx.fillStyle = '#20202a';
+    ctx.fillRect(hs * 0.22, -hs * 0.62, hs * 0.14, hs * 0.16);
+    // 口(マスクをしていないキャラだけ)
+    if (!look.faceMask) {
+      ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(hs * 0.1, -hs * 0.2);
+      ctx.lineTo(hs * 0.32, -hs * 0.18);
+      ctx.stroke();
+    }
   }
   drawHeadGear(ctx, cfg, hs, t, flash);
   ctx.restore(); // 頭おわり
