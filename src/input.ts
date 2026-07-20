@@ -76,6 +76,8 @@ export class Input {
 
   // タッチ関係
   private touches = new Map<number, { x: number; y: number }>();
+  /** フローティング十字パッド: 左半分は「さわった場所」がスティックの中心になる */
+  private sticks = new Map<number, { ox: number; oy: number }>();
   private touchJust: { x: number; y: number }[] = []; // 一瞬のタップも1フレームは押した扱いにする
   private tapQueue: { x: number; y: number }[] = [];
   /** バトル中だけ true にすると仮想パッドが反応・表示される */
@@ -120,6 +122,11 @@ export class Input {
         this.touches.set(t.identifier, p);
         this.touchJust.push(p); // すぐ指をはなしても1フレームは反応させる
         this.tapQueue.push(p);
+        // 左半分にさわったら、そこがスティックの基準点になる
+        // (画面のずれや持ちかたに関係なく、指の動きだけで操作できる)
+        if (this.touchUIEnabled && p.x < 460) {
+          this.sticks.set(t.identifier, { ox: p.x, oy: p.y });
+        }
       }
     }, opts);
     canvas.addEventListener('touchmove', (e) => {
@@ -131,7 +138,10 @@ export class Input {
     }, opts);
     const end = (e: TouchEvent) => {
       e.preventDefault();
-      for (const t of Array.from(e.changedTouches)) this.touches.delete(t.identifier);
+      for (const t of Array.from(e.changedTouches)) {
+        this.touches.delete(t.identifier);
+        this.sticks.delete(t.identifier);
+      }
     };
     canvas.addEventListener('touchend', end, opts);
     canvas.addEventListener('touchcancel', end, opts);
@@ -142,28 +152,63 @@ export class Input {
     });
   }
 
+  /** 右半分のタッチを「いちばん近いボタン」に割り当てる(多少ずれてもOK) */
+  private nearestButton(x: number, y: number): PadKey | null {
+    let best: PadKey | null = null;
+    let bd = 90; // これより遠いタッチはボタンあつかいしない
+    for (const b of BUTTONS) {
+      const d = Math.hypot(x - b.x, y - b.y);
+      if (d < bd) {
+        bd = d;
+        best = b.key;
+      }
+    }
+    return best;
+  }
+
+  /** 十字パッド1点分の方向判定(cx,cyが基準点) */
+  private stickDir(out: Partial<Record<PadKey, boolean>>, x: number, y: number, cx: number, cy: number, dead: number): void {
+    const dx = x - cx;
+    const dy = y - cy;
+    if (dx < -dead) out.left = true;
+    if (dx > dead) out.right = true;
+    if (dy < -dead * 1.3) out.up = true;
+    if (dy > dead * 1.3) out.down = true;
+  }
+
   /** タッチ仮想パッドから現在の入力を計算する(1P専用) */
   private touchPad(): Partial<Record<PadKey, boolean>> {
     const out: Partial<Record<PadKey, boolean>> = {};
-    const points = [...this.touches.values(), ...this.touchJust];
+    const just = this.touchJust;
     this.touchJust = []; // ジャストタッチは1フレームで使いきり
     if (!this.touchUIEnabled) return out;
-    for (const { x, y } of points) {
-      // 左半分 → 十字パッド
-      if (x < 480) {
-        const dx = x - DPAD.x;
-        const dy = y - DPAD.y;
-        if (Math.hypot(dx, dy) < DPAD.r * 1.7) {
-          if (dx < -DPAD.dead) out.left = true;
-          if (dx > DPAD.dead) out.right = true;
-          if (dy < -DPAD.dead * 1.4) out.up = true;
-          if (dy > DPAD.dead * 1.4) out.down = true;
+    // 押しっぱなし中のタッチ
+    for (const [id, { x, y }] of this.touches) {
+      const stick = this.sticks.get(id);
+      if (stick) {
+        // フローティングスティック: さわった場所からの指の動きで方向をきめる
+        this.stickDir(out, x, y, stick.ox, stick.oy, 12);
+        // 見えている十字パッドの近くをさわった場合は、パッドの絵の位置でも判定
+        // (矢印を直接おす操作もそのまま効く)
+        if (Math.hypot(stick.ox - DPAD.x, stick.oy - DPAD.y) < DPAD.r * 1.4) {
+          this.stickDir(out, x, y, DPAD.x, DPAD.y, DPAD.dead);
+        }
+      } else if (x >= 460) {
+        const k = this.nearestButton(x, y);
+        if (k) out[k] = true;
+      }
+    }
+    // 一瞬のタップ(1フレームだけ反映)
+    for (const { x, y } of just) {
+      if (x < 460) {
+        // タップは見えている十字パッドの近くだけ反応(はなれた場所の
+        // タップで勝手に動かないように。ドラッグはどこでもOK)
+        if (Math.hypot(x - DPAD.x, y - DPAD.y) < DPAD.r * 1.7) {
+          this.stickDir(out, x, y, DPAD.x, DPAD.y, DPAD.dead);
         }
       } else {
-        // 右半分 → 3ボタン
-        for (const b of BUTTONS) {
-          if (Math.hypot(x - b.x, y - b.y) < BTN_R * 1.25) out[b.key] = true;
-        }
+        const k = this.nearestButton(x, y);
+        if (k) out[k] = true;
       }
     }
     return out;
@@ -249,6 +294,35 @@ export class Input {
       ctx.fillStyle = '#111';
       ctx.font = 'bold 30px sans-serif';
       ctx.fillText(b.label, b.x, b.y + 1);
+    }
+    // いま認識しているタッチの位置を表示する
+    // (スティックはさわった場所に出る。ずれの確認にもなる)
+    for (const [id, t] of this.touches) {
+      const stick = this.sticks.get(id);
+      if (stick) {
+        // フローティングスティックの台とノブ
+        ctx.globalAlpha = 0.3;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(stick.ox, stick.oy, 44, 0, Math.PI * 2);
+        ctx.stroke();
+        const dx = t.x - stick.ox;
+        const dy = t.y - stick.oy;
+        const d = Math.hypot(dx, dy) || 1;
+        const cl = Math.min(d, 44);
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(stick.ox + (dx / d) * cl, stick.oy + (dy / d) * cl, 18, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.globalAlpha = 0.22;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, 16, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
     ctx.restore();
   }
