@@ -101,7 +101,7 @@ export class TitleScene implements Scene {
     const ty = 140 + Math.sin(this.frame * 0.04) * 4;
     outlineText(ctx, GAME_TITLE, VIEW_W / 2 + 5, ty + 6, 84, '#7a2020');
     outlineText(ctx, GAME_TITLE, VIEW_W / 2, ty, 84, '#ffd23c');
-    outlineText(ctx, '— ブロックロボ かくとうゲーム —', VIEW_W / 2, ty + 70, 20, '#cfcfe8');
+    outlineText(ctx, '― 激突！ロボ格闘ゲーム ―', VIEW_W / 2, ty + 70, 20, '#cfcfe8');
 
     drawMenuItem(ctx, ITEMS[0], 'ひとりであそぶ (VS CPU)', this.cursor === 0, this.frame);
     drawMenuItem(
