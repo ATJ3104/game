@@ -13,7 +13,9 @@ import { Sfx } from './audio';
 import { VIEW_W, VIEW_H, type GameCtx, type Scene, type SceneName } from './game';
 import { TitleScene } from './scenes/title';
 import { HowToScene } from './scenes/howto';
+import { TutorialScene } from './scenes/tutorial';
 import { OnlineScene } from './scenes/online';
+import { loadSave } from './storage';
 import { DifficultyScene } from './scenes/difficulty';
 import { SelectScene } from './scenes/select';
 import { VsScene } from './scenes/vs';
@@ -68,6 +70,7 @@ window.addEventListener('touchstart', unlock);
 const scenes: Record<SceneName, Scene> = {
   title: new TitleScene(),
   howto: new HowToScene(),
+  tutorial: new TutorialScene(),
   online: new OnlineScene(),
   difficulty: new DifficultyScene(),
   select: new SelectScene(),
@@ -90,7 +93,7 @@ const game: GameCtx = {
   images: new Map(),
   isTouch,
   mode: 'cpu',
-  difficulty: 1,
+  difficulty: loadSave().difficulty ?? 1, // 前回えらんだ強さをおぼえている
   net: null,
   p1: CHARACTERS[0],
   p2: CHARACTERS[1],

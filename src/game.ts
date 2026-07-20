@@ -13,7 +13,7 @@ import type { NetSession } from './net';
 export const VIEW_W = 960;
 export const VIEW_H = 540;
 
-export type SceneName = 'title' | 'howto' | 'online' | 'difficulty' | 'select' | 'vs' | 'battle' | 'result';
+export type SceneName = 'title' | 'howto' | 'tutorial' | 'online' | 'difficulty' | 'select' | 'vs' | 'battle' | 'result';
 
 export interface Scene {
   /** シーンが表示されたときに1回呼ばれる */

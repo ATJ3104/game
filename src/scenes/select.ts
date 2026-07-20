@@ -7,8 +7,18 @@
 
 import { CHARACTERS } from '../characters';
 import { VIEW_W, VIEW_H, type GameCtx, type Scene } from '../game';
+import type { PadState } from '../input';
 import { STAGE_NAMES } from '../stage';
 import { inRect, outlineText, type MenuRect } from './ui';
+
+/** 2つのパッドをまとめる(1人用モードでは矢印キーでも操作できるように) */
+function mergePads(a: PadState, b: PadState): PadState {
+  const out = { ...a };
+  (Object.keys(out) as (keyof PadState)[]).forEach((k) => {
+    out[k] = a[k] || b[k];
+  });
+  return out;
+}
 
 // グリッドの配置(4列x2行)
 const COLS = 4;
@@ -64,8 +74,11 @@ export class SelectScene implements Scene {
       this.updateOnline(g);
       return;
     }
-    // えらぶ人のパッド(1Pのあとは2P)
-    const pad = g.input.getPad(this.phase === 0 ? 0 : 1);
+    // えらぶ人のパッド(1Pのあとは2P)。CPU戦は矢印キーでも選べる
+    const pad =
+      g.mode === 'cpu'
+        ? mergePads(g.input.getPad(0), g.input.getPad(1))
+        : g.input.getPad(this.phase === 0 ? 0 : 1);
     if (pad.leftP) this.moveCursor(g, -1, 0);
     if (pad.rightP) this.moveCursor(g, 1, 0);
     if (pad.upP) this.moveCursor(g, 0, -1);
@@ -126,9 +139,9 @@ export class SelectScene implements Scene {
         return;
       }
     }
-    // 自分の操作(まだえらんでいないあいだだけ)
+    // 自分の操作(まだえらんでいないあいだだけ)。矢印キーでもOK
     if (!this.myPick) {
-      const pad = g.input.getPad(0);
+      const pad = mergePads(g.input.getPad(0), g.input.getPad(1));
       const before = this.cursor;
       if (pad.leftP) this.moveCursor(g, -1, 0);
       if (pad.rightP) this.moveCursor(g, 1, 0);

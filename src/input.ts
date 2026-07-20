@@ -83,8 +83,9 @@ export class Input {
   // メニュー用: このフレームに「決定」が押されたか
   confirmPressed = false;
   private confirmQueued = false;
-  // あいことば入力用: 押された数字キーなどの記録
+  // あいことば入力・ポーズ用: 押された数字キーなどの記録
   private typed: string[] = [];
+  private blurredFlag = false; // ウィンドウからフォーカスが外れたか
 
   constructor(canvas: HTMLCanvasElement, private toInternal: (cx: number, cy: number) => { x: number; y: number }) {
     window.addEventListener('keydown', (e) => {
@@ -102,7 +103,10 @@ export class Input {
     window.addEventListener('keyup', (e) => {
       this.held.delete(e.code);
     });
-    window.addEventListener('blur', () => this.held.clear());
+    window.addEventListener('blur', () => {
+      this.held.clear();
+      this.blurredFlag = true; // バトル中なら自動ポーズに使う
+    });
 
     // タッチ: passive:false + preventDefault でスクロール暴発を防ぐ(マルチタッチ対応)
     const opts: AddEventListenerOptions = { passive: false };
@@ -176,6 +180,8 @@ export class Input {
     this.confirmPressed =
       this.confirmQueued || this.pads[0].punchP || this.pads[1].punchP;
     this.confirmQueued = false;
+    // どのシーンも読まなかったキー記録がたまり続けないように制限する
+    if (this.typed.length > 8) this.typed = this.typed.slice(-8);
   }
 
   getPad(player: 0 | 1): PadState {
@@ -194,6 +200,13 @@ export class Input {
     const t = this.typed;
     this.typed = [];
     return t;
+  }
+
+  /** フォーカスが外れたかを1回だけ受け取る(自動ポーズ用) */
+  consumeBlur(): boolean {
+    const b = this.blurredFlag;
+    this.blurredFlag = false;
+    return b;
   }
 
   /** バトル画面用: タッチ仮想パッドを描画する */

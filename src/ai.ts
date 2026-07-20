@@ -8,21 +8,28 @@
 import { emptyPad, type PadState } from './input';
 import { GAUGE_MAX, type Fighter } from './fight';
 
+// ---- 難易度ごとの設定データ(数字を変えるだけで強さが変わる) ----
 interface LevelCfg {
   decide: number; // 何フレームごとに次の行動を考えるか(小さいほど機敏)
   guard: number; // 攻撃を見てからガードする確率
-  react: number; // 反応遅延(フレーム)
+  react: number; // 反応遅延(フレーム)。0にはしない=人間らしさ
   special: number; // ゲージ満タン時に必殺技を使いたがる度合い
   aggr: number; // 攻撃的さ(前に出る度合い)
+  grace: number; // ラウンド開始後、攻撃をがまんするフレーム数
+  atkCooldown: number; // 一度攻撃したあと、次の攻撃までの最短フレーム
 }
 
-export const LEVEL_NAMES = ['よわい', 'ふつう', 'つよい'];
+export const LEVEL_NAMES = ['EASY (よわい)', 'NORMAL (ふつう)', 'HARD (つよい)'];
 
 const LEVELS: LevelCfg[] = [
-  { decide: 52, guard: 0.08, react: 24, special: 0.15, aggr: 0.45 }, // よわい
-  { decide: 32, guard: 0.4, react: 14, special: 0.5, aggr: 0.6 }, // ふつう
-  { decide: 19, guard: 0.8, react: 8, special: 0.95, aggr: 0.75 }, // つよい
+  // EASY: 開始2秒は攻撃せず、連続攻撃もひかえる
+  { decide: 52, guard: 0.08, react: 24, special: 0.15, aggr: 0.45, grace: 120, atkCooldown: 80 },
+  { decide: 32, guard: 0.4, react: 14, special: 0.5, aggr: 0.6, grace: 30, atkCooldown: 20 },
+  // HARD: 高反応だが反応遅延は必ず残す(入力読みはしない)
+  { decide: 19, guard: 0.8, react: 8, special: 0.95, aggr: 0.75, grace: 0, atkCooldown: 0 },
 ];
+
+const ATTACK_PLANS: Plan[] = ['punch', 'kick', 'sweep', 'special', 'jumpIn', 'antiAir'];
 
 type Plan = 'wait' | 'approach' | 'retreat' | 'jumpIn' | 'punch' | 'kick' | 'sweep' | 'guard' | 'special' | 'antiAir';
 
@@ -35,10 +42,22 @@ export class CpuBrain {
   private guardHold = 0;
   private guardLow = false;
   private spLow = false; // 必殺技②(しゃがみ版)を使うか
+  private frames = 0; // ラウンドが始まってからのフレーム数
+  private lastAttackAt = -9999; // さいごに攻撃プランを選んだフレーム
   private L: LevelCfg;
 
   constructor(level: 0 | 1 | 2) {
     this.L = LEVELS[level];
+  }
+
+  /** ラウンド開始時に呼ぶ(開始直後のがまん時間をリセット) */
+  resetRound(): void {
+    this.frames = 0;
+    this.lastAttackAt = -9999;
+    this.plan = 'wait';
+    this.planT = 0;
+    this.reactT = -1;
+    this.guardHold = 0;
   }
 
   /** 重みつきランダムで行動を1つ選ぶ */
@@ -55,6 +74,10 @@ export class CpuBrain {
   update(self: Fighter, foe: Fighter): PadState {
     const pad = emptyPad();
     const L = this.L;
+    this.frames++;
+    // 攻撃していい状態か(開始直後のがまん・連続攻撃のクールダウン)
+    const attackOK =
+      this.frames >= L.grace && this.frames - this.lastAttackAt >= L.atkCooldown;
     const dist = Math.abs(foe.x - self.x);
     const fwd = foe.x > self.x; // 相手は右にいるか
     const gaugeFull = self.gauge >= GAUGE_MAX;
@@ -83,7 +106,7 @@ export class CpuBrain {
     }
 
     // ---- 対空: 相手が飛びこんできたら迎えうつ(強いほど反応する) ----
-    if (!foe.onGround && dist < 190 && self.onGround && Math.random() < L.guard * 0.1) {
+    if (attackOK && !foe.onGround && dist < 190 && self.onGround && Math.random() < L.guard * 0.1) {
       this.plan = 'antiAir';
       this.planT = 12;
       this.planAge = 0;
@@ -128,10 +151,16 @@ export class CpuBrain {
             ['wait', 1],
           ];
         }
+        // 攻撃してはいけない時間帯は、攻撃系のプランをテーブルから外す
+        if (!attackOK) {
+          table = table.filter(([p]) => !ATTACK_PLANS.includes(p));
+          if (table.length === 0) table = [['wait', 1]];
+        }
         this.plan = this.pick(table);
         this.planNew = true;
         this.planAge = 0;
         this.planT = L.decide + Math.floor(Math.random() * 12);
+        if (ATTACK_PLANS.includes(this.plan)) this.lastAttackAt = this.frames;
         if (this.plan === 'special') this.spLow = Math.random() < 0.5; // ①と②を半々で使う
       } else {
         this.planT = 6; // 動けない間はちょっと待つ

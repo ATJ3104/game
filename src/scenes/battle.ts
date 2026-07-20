@@ -14,7 +14,16 @@ import { drawRobot } from '../robot';
 import { drawStage, FLOOR_Y } from '../stage';
 import type { PadState } from '../input';
 import { INPUT_DELAY, encodePad, decodePad } from '../net';
-import { FONT, outlineText } from './ui';
+import { FONT, REDUCED_MOTION, drawKeycaps, drawMenuItem, inRect, outlineText, type MenuRect } from './ui';
+
+// ポーズメニュー(対戦中にEscapeで開く)
+const PAUSE_LABELS = ['さいかい', 'わざひょう', 'さいしょから', 'タイトルへ'];
+const PAUSE_ITEMS: MenuRect[] = PAUSE_LABELS.map((_, i) => ({
+  x: VIEW_W / 2 - 160,
+  y: 190 + i * 66,
+  w: 320,
+  h: 52,
+}));
 
 const ROUND_TIME = 99;
 const WINS_NEEDED = 2;
@@ -51,6 +60,17 @@ export class BattleScene implements Scene, World {
   private simFrame = 0; // 何フレーム目まで進んだか
   private stallT = 0; // 相手の入力まちが続いているフレーム数
   private matchOver = false;
+  // 戦闘フィードバック
+  private combos = [
+    { n: 0, t: 0 },
+    { n: 0, t: 0 },
+  ]; // 連続ヒット数(両プレイヤーぶん)
+  private rings: { x: number; y: number; r: number; max: number; life: number; color: string }[] = [];
+  private flashT = 0; // 必殺技ヒット時の画面フラッシュ
+  // ポーズ(オフライン対戦のみ)
+  private paused = false;
+  private pauseView: 'menu' | 'moves' = 'menu';
+  private pauseCursor = 0;
 
   enter(g: GameCtx): void {
     this.sfx = g.sfx;
@@ -62,6 +82,14 @@ export class BattleScene implements Scene, World {
     this.simFrame = 0;
     this.stallT = 0;
     this.matchOver = false;
+    this.combos = [
+      { n: 0, t: 0 },
+      { n: 0, t: 0 },
+    ];
+    this.rings = [];
+    this.flashT = 0;
+    this.paused = false;
+    this.pauseView = 'menu';
     if (g.mode === 'online' && g.net) g.net.newBattle(); // 入力バッファをリセット
     this.startRound();
     g.input.touchUIEnabled = g.isTouch && g.mode !== 'vs';
@@ -75,6 +103,7 @@ export class BattleScene implements Scene, World {
     this.phaseT = 0;
     this.timeLeft = ROUND_TIME;
     this.koByTimeup = false;
+    this.brain?.resetRound(); // CPUの「開始直後は攻撃しない」をリセット
   }
 
   // ---- Worldインターフェース(ファイターからエフェクトを出す窓口) ----
@@ -103,11 +132,41 @@ export class BattleScene implements Scene, World {
   }
 
   shake(mag: number): void {
-    this.shakeMag = Math.max(this.shakeMag, mag);
+    // 「視差効果を減らす」設定のときは画面ゆれをひかえめにする
+    this.shakeMag = Math.max(this.shakeMag, REDUCED_MOTION ? mag * 0.25 : mag);
   }
 
   // ---- 更新 ----
   update(g: GameCtx): void {
+    // ---- ポーズ(オフライン対戦のみ。オンラインは相手が止まってしまうため無し) ----
+    if (g.mode !== 'online' && this.phase !== 'matchEnd') {
+      const escape = g.input.takeTyped().includes('Escape');
+      if (g.input.consumeBlur() && !this.paused) {
+        // ウィンドウのフォーカスが外れたら自動でポーズ
+        this.paused = true;
+        this.pauseView = 'menu';
+        this.pauseCursor = 0;
+      }
+      if (escape) {
+        if (this.paused && this.pauseView === 'moves') {
+          this.pauseView = 'menu';
+        } else {
+          this.paused = !this.paused;
+          this.pauseView = 'menu';
+          this.pauseCursor = 0;
+          g.sfx.cancel();
+        }
+      }
+      if (this.paused) {
+        // ポーズ中はタイマー・CPU・物理・エフェクトすべて停止
+        this.updatePause(g);
+        return;
+      }
+    } else {
+      g.input.consumeBlur();
+      g.input.takeTyped();
+    }
+
     // パーティクルは見た目だけなので同期に関係なく毎回動かす
     g.input.takeTaps(); // バトル中のタップは仮想パッドが処理する
     g.input.specialReady = this.fighters[0].gauge >= GAUGE_MAX;
@@ -118,6 +177,12 @@ export class BattleScene implements Scene, World {
       s.life--;
       return s.life > 0;
     });
+    this.rings = this.rings.filter((r) => {
+      r.r += (r.max - r.r) * 0.22 + 1;
+      r.life--;
+      return r.life > 0;
+    });
+    if (this.flashT > 0) this.flashT--;
 
     if (g.mode === 'online') {
       this.updateOnline(g);
@@ -186,6 +251,57 @@ export class BattleScene implements Scene, World {
     this.stallT = advanced ? 0 : this.stallT + 1;
   }
 
+  /** ポーズ中のメニュー操作(タイマー・CPU・物理はすべて止まっている) */
+  private updatePause(g: GameCtx): void {
+    const p0 = g.input.getPad(0);
+    const p1 = g.input.getPad(1);
+    const taps = g.input.takeTaps();
+    if (this.pauseView === 'moves') {
+      // わざひょうから戻る
+      if (g.input.confirmPressed || p0.kickP || p1.kickP || taps.length > 0) {
+        this.pauseView = 'menu';
+        g.sfx.cursor();
+      }
+      return;
+    }
+    if (p0.upP || p1.upP) {
+      this.pauseCursor = (this.pauseCursor + PAUSE_ITEMS.length - 1) % PAUSE_ITEMS.length;
+      g.sfx.cursor();
+    }
+    if (p0.downP || p1.downP) {
+      this.pauseCursor = (this.pauseCursor + 1) % PAUSE_ITEMS.length;
+      g.sfx.cursor();
+    }
+    let decide = g.input.confirmPressed;
+    for (const t of taps) {
+      PAUSE_ITEMS.forEach((r, i) => {
+        if (inRect(t.x, t.y, r)) {
+          if (this.pauseCursor === i) decide = true;
+          else {
+            this.pauseCursor = i;
+            g.sfx.cursor();
+          }
+        }
+      });
+    }
+    if (!decide) return;
+    g.sfx.confirm();
+    switch (this.pauseCursor) {
+      case 0:
+        this.paused = false; // さいかい
+        break;
+      case 1:
+        this.pauseView = 'moves'; // わざひょう
+        break;
+      case 2:
+        this.enter(g); // さいしょから(マッチをまるごとリセット)
+        break;
+      default:
+        g.input.touchUIEnabled = false;
+        g.goto('title');
+    }
+  }
+
   /** ゲームを1フレームぶん進める(オンラインでは両者で同じ計算になる) */
   private stepSim(g: GameCtx, pad0: PadState, pad1: PadState): void {
     this.frame++;
@@ -206,6 +322,13 @@ export class BattleScene implements Scene, World {
 
     this.phaseT++;
     if (this.shakeMag > 0) this.shakeMag = Math.max(0, this.shakeMag - 0.4);
+    // コンボ表示のタイマー(時間がたつとコンボが切れる)
+    for (const c of this.combos) {
+      if (c.t > 0) {
+        c.t--;
+        if (c.t === 0) c.n = 0;
+      }
+    }
 
     const [f0, f1] = this.fighters;
     const locked = this.phase !== 'fight';
@@ -337,20 +460,41 @@ export class BattleScene implements Scene, World {
   }
 
   /** ヒットかガードかを判定してダメージ処理する(飛び道具もここを通る) */
-  private applyHit(fromX: number, _fromSide: number, hit: HitInfo, defender: Fighter): void {
+  private applyHit(fromX: number, fromSide: number, hit: HitInfo, defender: Fighter): void {
     const guard = defender.isGuarding(fromX);
     if (guard.ok) {
       defender.takeBlock(hit, fromX, guard.low, this);
       this.hitstop(3);
       return;
     }
+    // コンボ判定: のけぞり中の相手にもう1発当てたら連続ヒット
+    const wasStunned = defender.state === 'hitstun' || defender.state === 'launched';
     defender.takeHit(hit, fromX, this);
-    // 打撃音とエフェクト
-    if (hit.sfx === 'punch') this.sfx.punchHit();
-    else if (hit.sfx === 'kick') this.sfx.kickHit();
-    else this.sfx.specialHit();
-    this.hitstop(hit.sfx === 'special' ? 9 : 6);
-    if (hit.heavy) this.shake(hit.sfx === 'special' ? 7 : 4);
+    const combo = this.combos[fromSide];
+    combo.n = wasStunned ? combo.n + 1 : 1;
+    combo.t = 80;
+
+    // 技の強さに応じたヒット演出(弱: パンチ / 強: キック / 必殺技)
+    const iy = defender.y - 84 * defender.cfg.bodyScale;
+    if (hit.sfx === 'punch') {
+      this.sfx.punchHit();
+      this.hitstop(5);
+    } else if (hit.sfx === 'kick') {
+      this.sfx.kickHit();
+      this.hitstop(7);
+      this.shake(4);
+      this.rings.push({ x: defender.x, y: iy, r: 8, max: 36, life: 13, color: '#ffb04e' });
+    } else {
+      // 必殺技: いちばん強い音・光・ゆれ
+      const spColor = this.fighters[fromSide === 0 ? 0 : 1].activeSp.color;
+      this.sfx.specialHit();
+      this.hitstop(10);
+      this.shake(8);
+      this.rings.push({ x: defender.x, y: iy, r: 10, max: 72, life: 18, color: spColor });
+      this.rings.push({ x: defender.x, y: iy, r: 4, max: 42, life: 12, color: '#ffffff' });
+      this.addSpark(defender.x, iy, spColor, true);
+      if (!REDUCED_MOTION) this.flashT = 5; // 強い点滅は設定に応じてオフ
+    }
   }
 
   /** 飛び道具の移動と当たり判定 */
@@ -438,6 +582,15 @@ export class BattleScene implements Scene, World {
       ctx.fillStyle = s.color;
       ctx.fillRect(s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
     }
+    // ヒットリング(強攻撃・必殺技のひろがる輪)
+    for (const r of this.rings) {
+      ctx.globalAlpha = Math.max(0, r.life / 16);
+      ctx.strokeStyle = r.color;
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
     ctx.globalAlpha = 1;
 
     // かけごえの吹き出し
@@ -470,6 +623,12 @@ export class BattleScene implements Scene, World {
 
     ctx.restore(); // シェイクここまで
 
+    // 必殺技ヒットの画面フラッシュ(reduced-motion時は出さない)
+    if (this.flashT > 0) {
+      ctx.fillStyle = `rgba(255,255,255,${0.09 * this.flashT})`;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    }
+
     this.drawHUD(g, ctx);
     g.input.drawTouchUI(ctx);
     this.drawOverlay(ctx);
@@ -478,6 +637,43 @@ export class BattleScene implements Scene, World {
     if (g.mode === 'online' && this.stallT > 30) {
       outlineText(ctx, 'つうしんちゅう...', VIEW_W / 2, 130, 22, '#8fd0ff');
     }
+
+    if (this.paused) this.drawPause(g, ctx);
+  }
+
+  /** ポーズ画面(メニュー / わざひょう) */
+  private drawPause(g: GameCtx, ctx: CanvasRenderingContext2D): void {
+    ctx.fillStyle = this.pauseView === 'moves' ? 'rgba(8, 10, 24, 0.92)' : 'rgba(8, 10, 24, 0.8)';
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    if (this.pauseView === 'menu') {
+      outlineText(ctx, 'ポーズ', VIEW_W / 2, 120, 46, '#ffd23c');
+      PAUSE_LABELS.forEach((label, i) => {
+        drawMenuItem(ctx, PAUSE_ITEMS[i], label, this.pauseCursor === i, this.frame);
+      });
+      outlineText(ctx, 'W/S↑↓:えらぶ  Enter/J:けってい  Esc:とじる', VIEW_W / 2, 490, 15, '#9f9fc0');
+      return;
+    }
+    // わざひょう(データはcharacters.tsの設定から表示)
+    outlineText(ctx, 'わざひょう', VIEW_W / 2, 64, 34, '#ffd23c');
+    const drawMoves = (f: Fighter, lx: number, kx: number, showKeys: boolean): void => {
+      outlineText(ctx, f.cfg.name, lx + 150, 112, 22, f.cfg.colors.accent);
+      const p2 = f.side === 1;
+      const rows: { label: string; keys: string[]; sep: string }[] = [
+        { label: 'パンチ(はやい)', keys: [p2 ? '1' : 'J'], sep: ' ' },
+        { label: 'キック(つよい)', keys: [p2 ? '2' : 'K'], sep: ' ' },
+        { label: 'ダッシュ', keys: p2 ? ['→', '→'] : ['D', 'D'], sep: ' ' },
+        { label: `① ${f.cfg.special.name}`, keys: [p2 ? '3' : 'L'], sep: ' ' },
+        { label: `② ${f.cfg.special2.name}`, keys: p2 ? ['↓', '3'] : ['S', 'L'], sep: '+' },
+      ];
+      rows.forEach((row, i) => {
+        const y = 160 + i * 56;
+        outlineText(ctx, row.label, lx, y, 15, '#fff', 'left');
+        if (showKeys) drawKeycaps(ctx, kx, y, row.keys, 13, row.sep);
+      });
+    };
+    drawMoves(this.fighters[0], 60, 280, true);
+    drawMoves(this.fighters[1], 520, 760, g.mode === 'vs'); // CPUのぶんはキー表示なし
+    outlineText(ctx, 'Enter/キック か タップで もどる', VIEW_W / 2, 500, 15, '#9f9fc0');
   }
 
   /** HPバー・タイマー・必殺ゲージなどのUI */
@@ -529,7 +725,9 @@ export class BattleScene implements Scene, World {
       ctx.fillStyle = '#101020';
       ctx.fillRect(x, gy, gw, 14);
       const full = f.gauge >= GAUGE_MAX;
-      ctx.fillStyle = full ? (this.frame % 20 < 10 ? '#fff' : f.cfg.special.color) : f.cfg.special.color;
+      // 点滅は「視差効果を減らす」設定のときはしない
+      const blinkOn = !REDUCED_MOTION && this.frame % 20 < 10;
+      ctx.fillStyle = full ? (blinkOn ? '#fff' : f.cfg.special.color) : f.cfg.special.color;
       ctx.fillRect(x, gy, gw * (f.gauge / GAUGE_MAX), 14);
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 2;
@@ -544,6 +742,14 @@ export class BattleScene implements Scene, World {
 
     // ラウンド数表示
     outlineText(ctx, `ラウンド ${this.roundNo}`, VIEW_W / 2, 74, 15, '#cfcfe8');
+
+    // コンボ表示(2ヒット以上でポップ)
+    this.combos.forEach((c, i) => {
+      if (c.n < 2) return;
+      const pop = Math.max(0, c.t - 72) * 2; // 出た瞬間だけ大きくなる
+      const x = i === 0 ? 120 : VIEW_W - 120;
+      outlineText(ctx, `${c.n} HIT!`, x, 132, 28 + Math.min(12, c.n * 2) + pop, c.n >= 4 ? '#ff9d3c' : '#ffd23c');
+    });
     void g;
   }
 

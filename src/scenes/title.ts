@@ -7,21 +7,24 @@
 import { GAME_TITLE, CHARACTERS } from '../characters';
 import { VIEW_W, VIEW_H, type GameCtx, type Scene } from '../game';
 import { drawRobot } from '../robot';
+import { loadSave } from '../storage';
 import { drawMenuItem, inRect, outlineText, type MenuRect } from './ui';
 
-const ITEMS: MenuRect[] = [
-  { x: VIEW_W / 2 - 190, y: 288, w: 380, h: 48 },
-  { x: VIEW_W / 2 - 190, y: 346, w: 380, h: 48 },
-  { x: VIEW_W / 2 - 190, y: 404, w: 380, h: 48 },
-  { x: VIEW_W / 2 - 190, y: 462, w: 380, h: 48 },
-];
+const ITEMS: MenuRect[] = [0, 1, 2, 3, 4].map((i) => ({
+  x: VIEW_W / 2 - 190,
+  y: 252 + i * 56,
+  w: 380,
+  h: 46,
+}));
 
 export class TitleScene implements Scene {
   private cursor = 0;
   private frame = 0;
+  private tutorialDone = false;
 
   enter(): void {
     this.cursor = 0;
+    this.tutorialDone = !!loadSave().tutorialDone;
   }
 
   update(g: GameCtx): void {
@@ -63,6 +66,9 @@ export class TitleScene implements Scene {
     } else if (i === 2) {
       g.mode = 'online';
       g.goto('online'); // オンライン対戦ロビーへ
+    } else if (i === 3) {
+      g.mode = 'cpu';
+      g.goto('tutorial'); // チュートリアル(れんしゅう)
     } else {
       g.goto('howto'); // そうさせつめい
     }
@@ -104,8 +110,12 @@ export class TitleScene implements Scene {
       this.cursor === 1, this.frame, g.isTouch,
     );
     drawMenuItem(ctx, ITEMS[2], 'オンラインたいせん', this.cursor === 2, this.frame);
-    drawMenuItem(ctx, ITEMS[3], 'そうさせつめい', this.cursor === 3, this.frame);
+    drawMenuItem(ctx, ITEMS[3], 'チュートリアル (れんしゅう)', this.cursor === 3, this.frame);
+    if (this.tutorialDone) {
+      outlineText(ctx, '✅', ITEMS[3].x + ITEMS[3].w - 24, ITEMS[3].y + ITEMS[3].h / 2, 18, '#7fe97f');
+    }
+    drawMenuItem(ctx, ITEMS[4], 'そうさせつめい', this.cursor === 4, this.frame);
 
-    outlineText(ctx, g.isTouch ? 'タップでえらんでね' : 'W/S↑↓:えらぶ  J/Enter:けってい', VIEW_W / 2, 527, 14, '#9f9fc0');
+    outlineText(ctx, g.isTouch ? 'タップでえらんでね' : 'W/S↑↓:えらぶ  J/Enter:けってい', VIEW_W / 2, 530, 14, '#9f9fc0');
   }
 }

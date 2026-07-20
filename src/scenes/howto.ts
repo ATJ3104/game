@@ -7,7 +7,21 @@
 import { VIEW_W, VIEW_H, type GameCtx, type Scene } from '../game';
 import { CHARACTERS } from '../characters';
 import { drawRobot } from '../robot';
-import { FONT, outlineText } from './ui';
+import { FONT, drawKeycaps, inRect, outlineText, type MenuRect } from './ui';
+
+// キー一覧のデータ(ここを書きかえれば表示が変わる)
+const KEY_ROWS: { label: string; p1: string[]; p2: string[]; sep?: string }[] = [
+  { label: 'いどう', p1: ['A', 'D'], p2: ['←', '→'] },
+  { label: 'ダッシュ', p1: ['D', 'D'], p2: ['→', '→'] },
+  { label: 'ジャンプ', p1: ['スペース'], p2: ['↑'] },
+  { label: 'しゃがみ', p1: ['S'], p2: ['↓'] },
+  { label: 'パンチ(はやい)', p1: ['J'], p2: ['1'] },
+  { label: 'キック(つよい)', p1: ['K'], p2: ['2'] },
+  { label: 'ひっさつ① / ②', p1: ['L'], p2: ['3'] },
+];
+
+// 「チュートリアルをはじめる」ボタン
+const TUT_BTN: MenuRect = { x: 40, y: 416, w: 400, h: 46 };
 
 export class HowToScene implements Scene {
   private frame = 0;
@@ -20,10 +34,22 @@ export class HowToScene implements Scene {
     this.frame++;
     const p0 = g.input.getPad(0);
     const p1 = g.input.getPad(1);
-    const back =
-      g.input.confirmPressed || p0.punchP || p0.kickP || p1.punchP || p1.kickP ||
-      g.input.takeTaps().length > 0;
-    if (back && this.frame > 15) {
+    const taps = g.input.takeTaps();
+    // チュートリアルへ(Lキー or ボタンをタップ)
+    let toTutorial = p0.specialP || p1.specialP;
+    let back = false;
+    for (const t of taps) {
+      if (inRect(t.x, t.y, TUT_BTN)) toTutorial = true;
+      else back = true;
+    }
+    if (this.frame <= 15) return; // 開いた直後の誤操作よけ
+    if (toTutorial) {
+      g.sfx.confirm();
+      g.mode = 'cpu';
+      g.goto('tutorial');
+      return;
+    }
+    if (g.input.confirmPressed || p0.punchP || p0.kickP || p1.punchP || p1.kickP || back) {
       g.sfx.cancel();
       g.goto('title');
     }
@@ -47,29 +73,20 @@ export class HowToScene implements Scene {
     ctx.strokeRect(lx, 74, 400, 330);
     outlineText(ctx, '🎮 キーボード', lx + 200, 100, 20, '#8fd0ff');
 
-    const rows: [string, string, string][] = [
-      ['', '1P', '2P'],
-      ['いどう', 'A / D', '← / →'],
-      ['ジャンプ', 'スペース', '↑'],
-      ['しゃがみ', 'S', '↓'],
-      ['パンチ(はやい)', 'J', '1'],
-      ['キック(つよい)', 'K', '2'],
-      ['ひっさつわざ', 'L', '3'],
-    ];
-    rows.forEach((r, i) => {
-      const y = 136 + i * 38;
-      const isHead = i === 0;
-      const color = isHead ? '#9f9fc0' : '#ffffff';
-      outlineText(ctx, r[0], lx + 20, y, 17, color, 'left');
-      outlineText(ctx, r[1], lx + 235, y, isHead ? 15 : 18, isHead ? '#8fd0ff' : '#ffd23c');
-      outlineText(ctx, r[2], lx + 340, y, isHead ? 15 : 18, isHead ? '#ff9db0' : '#ffd23c');
-      if (!isHead) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-        ctx.beginPath();
-        ctx.moveTo(lx + 14, y + 19);
-        ctx.lineTo(lx + 386, y + 19);
-        ctx.stroke();
-      }
+    // ヘッダー行
+    outlineText(ctx, '1P', lx + 220, 126, 15, '#8fd0ff');
+    outlineText(ctx, '2P', lx + 330, 126, 15, '#ff9db0');
+    // キーキャップ風のキー一覧(データはKEY_ROWS)
+    KEY_ROWS.forEach((r, i) => {
+      const y = 160 + i * 36;
+      outlineText(ctx, r.label, lx + 18, y, 15, '#ffffff', 'left');
+      drawKeycaps(ctx, lx + 178, y, r.p1, 12, r.sep ?? ' ');
+      drawKeycaps(ctx, lx + 305, y, r.p2, 12, r.sep ?? ' ');
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.beginPath();
+      ctx.moveTo(lx + 14, y + 18);
+      ctx.lineTo(lx + 386, y + 18);
+      ctx.stroke();
     });
 
     // ---- 右パネル: ガード・必殺技・スマホ ----
@@ -111,10 +128,18 @@ export class HowToScene implements Scene {
     drawRobot(ctx, CHARACTERS[7], 'punch', this.frame, (this.frame % 40) / 40, -1);
     ctx.restore();
 
+    // チュートリアルへのボタン
+    ctx.fillStyle = 'rgba(255,210,60,0.92)';
+    ctx.fillRect(TUT_BTN.x, TUT_BTN.y, TUT_BTN.w, TUT_BTN.h);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(TUT_BTN.x, TUT_BTN.y, TUT_BTN.w, TUT_BTN.h);
+    outlineText(ctx, '▶ チュートリアルで れんしゅう! (L)', TUT_BTN.x + TUT_BTN.w / 2, TUT_BTN.y + TUT_BTN.h / 2, 19, '#222');
+
     // もどる案内(点滅)
     if (this.frame % 60 < 40) {
       ctx.font = `bold 18px ${FONT}`;
-      outlineText(ctx, 'こうげきキー か タップで もどる', VIEW_W / 2, 470, 18, '#ffffff');
+      outlineText(ctx, 'J/Enter か タップで もどる', 700, 440, 16, '#ffffff');
     }
     void g;
   }

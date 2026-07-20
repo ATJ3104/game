@@ -4,6 +4,7 @@
 
 import { VIEW_W, VIEW_H, type GameCtx, type Scene } from '../game';
 import { LEVEL_NAMES } from '../ai';
+import { loadSave, patchSave } from '../storage';
 import { drawMenuItem, inRect, outlineText, type MenuRect } from './ui';
 
 const DESC = ['はじめてでも かてる!', 'ちょうどいい つよさ', 'かてたら すごい!'];
@@ -16,21 +17,23 @@ const ITEMS: MenuRect[] = [0, 1, 2].map((i) => ({
 }));
 
 export class DifficultyScene implements Scene {
-  private cursor = 1; // まんなか(ふつう)から始める
+  private cursor = 1; // まんなか(NORMAL)から始める
   private frame = 0;
 
   enter(): void {
-    this.cursor = 1;
+    // 前回えらんだ強さをおぼえている
+    this.cursor = loadSave().difficulty ?? 1;
   }
 
   update(g: GameCtx): void {
     this.frame++;
     const p = g.input.getPad(0);
-    if (p.upP) {
+    const p1 = g.input.getPad(1); // 矢印キーでも操作できる
+    if (p.upP || p1.upP) {
       this.cursor = (this.cursor + 2) % 3;
       g.sfx.cursor();
     }
-    if (p.downP) {
+    if (p.downP || p1.downP) {
       this.cursor = (this.cursor + 1) % 3;
       g.sfx.cursor();
     }
@@ -45,12 +48,13 @@ export class DifficultyScene implements Scene {
         }
       });
     }
-    if (g.input.confirmPressed || p.kickP) this.decide(g);
+    if (g.input.confirmPressed || p.kickP || p1.kickP) this.decide(g);
   }
 
   private decide(g: GameCtx): void {
     g.sfx.confirm();
     g.difficulty = this.cursor as 0 | 1 | 2;
+    patchSave({ difficulty: g.difficulty }); // 次回のために保存
     g.goto('select');
   }
 
