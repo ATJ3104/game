@@ -35,11 +35,18 @@ export class SelectScene implements Scene {
   private cursor = 0;
   private phase: 0 | 1 = 0; // 0=1Pがえらび中 1=2Pがえらび中
   private frame = 0;
+  // オンライン対戦用
+  private myPick: string | null = null; // 自分がえらんだキャラid
+  private remotePick: string | null = null; // 相手がえらんだキャラid
+  private remoteCursor = 0;
 
   enter(g: GameCtx): void {
     this.cursor = 0;
     this.phase = 0;
-    g.stageIndex = Math.floor(Math.random() * STAGE_NAMES.length); // ステージはランダム
+    this.myPick = null;
+    this.remotePick = null;
+    this.remoteCursor = 0;
+    g.stageIndex = Math.floor(Math.random() * STAGE_NAMES.length); // ステージはランダム(オンラインは部屋主のを使う)
   }
 
   private moveCursor(g: GameCtx, dx: number, dy: number): void {
@@ -53,6 +60,10 @@ export class SelectScene implements Scene {
 
   update(g: GameCtx): void {
     this.frame++;
+    if (g.mode === 'online') {
+      this.updateOnline(g);
+      return;
+    }
     // えらぶ人のパッド(1Pのあとは2P)
     const pad = g.input.getPad(this.phase === 0 ? 0 : 1);
     if (pad.leftP) this.moveCursor(g, -1, 0);
@@ -93,6 +104,68 @@ export class SelectScene implements Scene {
     }
   }
 
+  /** オンライン対戦: 自分のカーソルを送り、両者がえらんだらVSへ */
+  private updateOnline(g: GameCtx): void {
+    const net = g.net;
+    if (!net || net.closed) {
+      net?.close();
+      g.net = null;
+      g.goto('title');
+      return;
+    }
+    // 相手からのメッセージ
+    for (const m of net.takeCtrl()) {
+      if (m.t === 'cursor') this.remoteCursor = m.i;
+      else if (m.t === 'pick') {
+        this.remotePick = m.id;
+        if (net.side === 1) g.stageIndex = m.stage; // ステージは部屋主にあわせる
+      } else if (m.t === 'quit') {
+        net.close();
+        g.net = null;
+        g.goto('title');
+        return;
+      }
+    }
+    // 自分の操作(まだえらんでいないあいだだけ)
+    if (!this.myPick) {
+      const pad = g.input.getPad(0);
+      const before = this.cursor;
+      if (pad.leftP) this.moveCursor(g, -1, 0);
+      if (pad.rightP) this.moveCursor(g, 1, 0);
+      if (pad.upP) this.moveCursor(g, 0, -1);
+      if (pad.downP) this.moveCursor(g, 0, 1);
+      let decide = pad.punchP || pad.kickP || g.input.confirmPressed;
+      for (const t of g.input.takeTaps()) {
+        CHARACTERS.forEach((_, i) => {
+          if (inRect(t.x, t.y, thumbRect(i))) {
+            if (this.cursor === i) decide = true;
+            else {
+              this.cursor = i;
+              g.sfx.cursor();
+            }
+          }
+        });
+        if (inRect(t.x, t.y, OK_BTN)) decide = true;
+      }
+      if (this.cursor !== before) net.send({ t: 'cursor', i: this.cursor });
+      if (decide) {
+        this.myPick = CHARACTERS[this.cursor].id;
+        net.send({ t: 'pick', id: this.myPick, stage: g.stageIndex });
+        g.sfx.confirm();
+      }
+    } else {
+      g.input.takeTaps(); // えらび終わったらタップはすてる
+    }
+    // 両者そろったらVSへ(部屋主=1P・入った人=2P)
+    if (this.myPick && this.remotePick) {
+      const mine = CHARACTERS.find((c) => c.id === this.myPick) ?? CHARACTERS[0];
+      const theirs = CHARACTERS.find((c) => c.id === this.remotePick) ?? CHARACTERS[1];
+      g.p1 = net.side === 0 ? mine : theirs;
+      g.p2 = net.side === 0 ? theirs : mine;
+      g.goto('vs');
+    }
+  }
+
   draw(g: GameCtx, ctx: CanvasRenderingContext2D): void {
     const grad = ctx.createLinearGradient(0, 0, 0, VIEW_H);
     grad.addColorStop(0, '#181828');
@@ -101,8 +174,16 @@ export class SelectScene implements Scene {
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     outlineText(ctx, 'キャラクターをえらんでね', VIEW_W / 2, 52, 34, '#ffd23c');
-    const who = this.phase === 0 ? (g.mode === 'vs' ? '1Pのばん!' : 'すきなキャラをえらぼう') : '2Pのばん!';
-    outlineText(ctx, who, VIEW_W / 2, 92, 20, this.phase === 0 ? '#8fd0ff' : '#ff9db0');
+    const online = g.mode === 'online';
+    const myColor = online ? (g.net?.side === 0 ? '#8fd0ff' : '#ff9db0') : this.phase === 0 ? '#8fd0ff' : '#ff9db0';
+    const who = online
+      ? this.myPick
+        ? 'あいてを まっています...'
+        : 'すきなキャラをえらぼう!'
+      : this.phase === 0
+        ? g.mode === 'vs' ? '1Pのばん!' : 'すきなキャラをえらぼう'
+        : '2Pのばん!';
+    outlineText(ctx, who, 300, 92, 20, myColor);
 
     const sel = CHARACTERS[this.cursor];
 
@@ -116,9 +197,7 @@ export class SelectScene implements Scene {
       // わく(選択中は光る)
       const isSel = i === this.cursor;
       ctx.lineWidth = isSel ? 5 : 2;
-      ctx.strokeStyle = isSel
-        ? (this.phase === 0 ? '#8fd0ff' : '#ff9db0')
-        : '#44445c';
+      ctx.strokeStyle = isSel ? myColor : '#44445c';
       if (isSel) {
         ctx.save();
         ctx.shadowColor = ctx.strokeStyle;
@@ -128,8 +207,16 @@ export class SelectScene implements Scene {
       } else {
         ctx.strokeRect(r.x, r.y, r.w, r.h);
       }
-      // 1Pがえらんだキャラに印をつける(2P選択中)
-      if (this.phase === 1 && g.p1 === c) {
+      // オンライン: あいてのカーソルも表示する
+      if (online && i === this.remoteCursor) {
+        const otherColor = g.net?.side === 0 ? '#ff9db0' : '#8fd0ff';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = otherColor;
+        ctx.strokeRect(r.x + 5, r.y + 5, r.w - 10, r.h - 10);
+        outlineText(ctx, 'あいて', r.x + r.w - 26, r.y + 14, 13, otherColor);
+      }
+      // 1Pがえらんだキャラに印をつける(同じPCの2P選択中)
+      if (!online && this.phase === 1 && g.p1 === c) {
         outlineText(ctx, '1P', r.x + 18, r.y + 14, 16, '#8fd0ff');
       }
     });

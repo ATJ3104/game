@@ -83,6 +83,8 @@ export class Input {
   // メニュー用: このフレームに「決定」が押されたか
   confirmPressed = false;
   private confirmQueued = false;
+  // あいことば入力用: 押された数字キーなどの記録
+  private typed: string[] = [];
 
   constructor(canvas: HTMLCanvasElement, private toInternal: (cx: number, cy: number) => { x: number; y: number }) {
     window.addEventListener('keydown', (e) => {
@@ -91,6 +93,10 @@ export class Input {
         this.held.add(e.code);
         this.justDown.add(e.code); // すぐ離されても1フレームは「押した」ことにする
         if (e.code === 'Enter' || e.code === 'Space') this.confirmQueued = true;
+        // あいことば入力用(数字・けす・もどる)
+        if (/^[0-9]$/.test(e.key) || e.key === 'Backspace' || e.key === 'Escape') {
+          this.typed.push(e.key);
+        }
       }
     });
     window.addEventListener('keyup', (e) => {
@@ -180,6 +186,13 @@ export class Input {
   takeTaps(): { x: number; y: number }[] {
     const t = this.tapQueue;
     this.tapQueue = [];
+    return t;
+  }
+
+  /** あいことば入力用: 押された数字キー等を取り出す */
+  takeTyped(): string[] {
+    const t = this.typed;
+    this.typed = [];
     return t;
   }
 

@@ -12,7 +12,8 @@ import {
 import { CpuBrain } from '../ai';
 import { drawRobot } from '../robot';
 import { drawStage, FLOOR_Y } from '../stage';
-import { emptyPad } from '../input';
+import type { PadState } from '../input';
+import { INPUT_DELAY, encodePad, decodePad } from '../net';
 import { FONT, outlineText } from './ui';
 
 const ROUND_TIME = 99;
@@ -46,6 +47,10 @@ export class BattleScene implements Scene, World {
   private slowCounter = 0;
   private roundWinnerName = '';
   private koByTimeup = false;
+  // オンライン対戦(ロックステップ)用
+  private simFrame = 0; // 何フレーム目まで進んだか
+  private stallT = 0; // 相手の入力まちが続いているフレーム数
+  private matchOver = false;
 
   enter(g: GameCtx): void {
     this.sfx = g.sfx;
@@ -54,8 +59,12 @@ export class BattleScene implements Scene, World {
     this.projectiles = [];
     this.sparks = [];
     this.roundNo = 1;
+    this.simFrame = 0;
+    this.stallT = 0;
+    this.matchOver = false;
+    if (g.mode === 'online' && g.net) g.net.newBattle(); // 入力バッファをリセット
     this.startRound();
-    g.input.touchUIEnabled = g.isTouch && g.mode === 'cpu';
+    g.input.touchUIEnabled = g.isTouch && g.mode !== 'vs';
   }
 
   private startRound(): void {
@@ -99,11 +108,9 @@ export class BattleScene implements Scene, World {
 
   // ---- 更新 ----
   update(g: GameCtx): void {
-    this.frame++;
+    // パーティクルは見た目だけなので同期に関係なく毎回動かす
     g.input.takeTaps(); // バトル中のタップは仮想パッドが処理する
     g.input.specialReady = this.fighters[0].gauge >= GAUGE_MAX;
-
-    // パーティクルはヒットストップ中でも動かす(見た目が気持ちいい)
     this.sparks = this.sparks.filter((s) => {
       s.x += s.vx;
       s.y += s.vy;
@@ -111,6 +118,77 @@ export class BattleScene implements Scene, World {
       s.life--;
       return s.life > 0;
     });
+
+    if (g.mode === 'online') {
+      this.updateOnline(g);
+      return;
+    }
+
+    // オフライン: そのまま1フレーム進める(2PはキーボードかCPU)
+    const locked = this.phase !== 'fight';
+    const pad0 = g.input.getPad(0);
+    const pad1 = this.brain && !locked
+      ? this.brain.update(this.fighters[1], this.fighters[0])
+      : g.input.getPad(1);
+    this.stepSim(g, pad0, pad1);
+  }
+
+  /**
+   * オンライン対戦: ロックステップ同期
+   * 自分の入力を少し先のフレームに予約して送り、
+   * おたがいの入力がそろったフレームだけシミュレーションを進める。
+   * 同じ入力で同じ計算をするので、2人の画面はずれない。
+   */
+  private updateOnline(g: GameCtx): void {
+    const net = g.net;
+    if (!net || net.closed) {
+      // 通信が切れた → タイトルへもどる
+      net?.close();
+      g.net = null;
+      g.input.touchUIEnabled = false;
+      g.goto('title');
+      return;
+    }
+    for (const m of net.takeCtrl()) {
+      if (m.t === 'quit') {
+        net.close();
+        g.net = null;
+        g.input.touchUIEnabled = false;
+        g.goto('title');
+        return;
+      }
+      // rematch などはリザルト画面で処理する
+    }
+    // 1) 自分の入力を先のフレームに予約して送る(1tickに最大2フレームぶん)
+    const target = this.simFrame + INPUT_DELAY;
+    let sent = 0;
+    while (net.lastScheduled < target && sent < 2) {
+      net.scheduleLocal(net.lastScheduled + 1, encodePad(g.input.getPad(0)));
+      sent++;
+    }
+    // 2) 両方の入力がそろったフレームだけ進める(最大3=おくれたら追いつく)
+    let steps = 0;
+    let advanced = false;
+    while (steps < 3 && !this.matchOver) {
+      const f = this.simFrame;
+      const lb = net.localInput(f);
+      const rb = net.remoteInput(f);
+      if (lb === undefined || rb === undefined) break; // 相手の入力まち
+      const lp = f > 0 ? net.localInput(f - 1) ?? 0 : 0;
+      const rp = f > 0 ? net.remoteInput(f - 1) ?? 0 : 0;
+      const myPad = decodePad(lb, lp);
+      const foePad = decodePad(rb, rp);
+      this.stepSim(g, net.side === 0 ? myPad : foePad, net.side === 0 ? foePad : myPad);
+      this.simFrame++;
+      steps++;
+      advanced = true;
+    }
+    this.stallT = advanced ? 0 : this.stallT + 1;
+  }
+
+  /** ゲームを1フレームぶん進める(オンラインでは両者で同じ計算になる) */
+  private stepSim(g: GameCtx, pad0: PadState, pad1: PadState): void {
+    this.frame++;
 
     if (this.hitstopN > 0) {
       // ヒットストップ: 両者を数フレーム止めて打撃感を出す
@@ -131,10 +209,6 @@ export class BattleScene implements Scene, World {
 
     const [f0, f1] = this.fighters;
     const locked = this.phase !== 'fight';
-
-    // 入力(2PはキーボードかCPU)
-    const pad0 = g.input.getPad(0);
-    const pad1 = this.brain && !locked ? this.brain.update(f1, f0) : g.input.getPad(1);
 
     f0.update(pad0, f1, this, locked);
     f1.update(pad1, f0, this, locked);
@@ -190,6 +264,7 @@ export class BattleScene implements Scene, World {
     }
     if (this.phase === 'matchEnd' && this.phaseT >= 40) {
       g.input.touchUIEnabled = false;
+      this.matchOver = true;
       g.goto('result');
     }
   }
@@ -397,6 +472,11 @@ export class BattleScene implements Scene, World {
     this.drawHUD(g, ctx);
     g.input.drawTouchUI(ctx);
     this.drawOverlay(ctx);
+
+    // オンラインで相手の入力を待っているときの表示
+    if (g.mode === 'online' && this.stallT > 30) {
+      outlineText(ctx, 'つうしんちゅう...', VIEW_W / 2, 130, 22, '#8fd0ff');
+    }
   }
 
   /** HPバー・タイマー・必殺ゲージなどのUI */
@@ -444,7 +524,7 @@ export class BattleScene implements Scene, World {
     // 必殺ゲージ(画面下)
     const gw = 300;
     const gy = VIEW_H - 26;
-    const drawGauge = (f: Fighter, x: number): void => {
+    const drawGauge = (f: Fighter, x: number, hint: string): void => {
       ctx.fillStyle = '#101020';
       ctx.fillRect(x, gy, gw, 14);
       const full = f.gauge >= GAUGE_MAX;
@@ -454,11 +534,12 @@ export class BattleScene implements Scene, World {
       ctx.lineWidth = 2;
       ctx.strokeRect(x, gy, gw, 14);
       if (full) {
-        outlineText(ctx, `ひっさつOK! ${f.cfg.special.name}`, x + gw / 2, gy - 12, 15, '#ffd23c');
+        // どのボタンで出すかも表示する(そうさに迷わないように)
+        outlineText(ctx, `ひっさつOK! ${f.cfg.special.name}${hint}`, x + gw / 2, gy - 12, 15, '#ffd23c');
       }
     };
-    drawGauge(f0, 30);
-    drawGauge(f1, VIEW_W - 30 - gw);
+    drawGauge(f0, 30, g.isTouch ? ' [必ボタン]' : ' [Lキー]');
+    drawGauge(f1, VIEW_W - 30 - gw, g.mode === 'vs' ? ' [3キー]' : '');
 
     // ラウンド数表示
     outlineText(ctx, `ラウンド ${this.roundNo}`, VIEW_W / 2, 74, 15, '#cfcfe8');

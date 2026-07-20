@@ -245,8 +245,11 @@ function limb(
 
 /** 頭部装飾(headGear)を描く。ここでキャラの個性を出す */
 function drawHeadGear(ctx: CanvasRenderingContext2D, cfg: RobotConfig, hs: number, t: number, flash: boolean): void {
-  const c2 = flash ? '#fff' : cfg.colors.secondary;
-  const ac = flash ? '#fff' : cfg.colors.accent;
+  // 髪・飾りの色: look.gear があればそれを使う(黒髪・金髪などを再現)
+  const gearDefault = ['ponytail', 'dreads'].includes(cfg.headGear) ? cfg.colors.secondary : cfg.colors.accent;
+  const gc = flash ? '#fff' : cfg.look?.gear ?? gearDefault;
+  const c2 = gc;
+  const ac = gc;
   switch (cfg.headGear) {
     case 'mohawk': // モヒカン(ガンテツ)
       box(ctx, -3, -hs - 13, 7, 14, ac);
@@ -320,8 +323,17 @@ export function drawRobot(
   const s = cfg.bodyScale;
   const flash = !!opts.flash;
 
-  const cPri = flash ? '#ffffff' : cfg.colors.primary;
-  const cSec = flash ? '#ffffff' : cfg.colors.secondary;
+  // パーツごとの色を決める。look で上書きがあればそれを使い、
+  // なければ colors の基本マッピング(胴体・脚=primary、うで=secondary)
+  const look = cfg.look ?? {};
+  const pick = (over: string | undefined, fallback: string): string =>
+    flash ? '#ffffff' : over ?? fallback;
+  const cTorso = pick(look.torso, cfg.colors.primary);
+  const cLegs = pick(look.legs, cfg.colors.primary);
+  const cArms = pick(look.arms, cfg.colors.secondary);
+  const cFists = pick(look.fists, cfg.colors.skin);
+  const cFeet = pick(look.feet, cfg.colors.secondary);
+  const cBelt = pick(look.belt, cfg.colors.accent);
   const cSkin = flash ? '#ffffff' : cfg.colors.skin;
   const cAcc = flash ? '#ffffff' : cfg.colors.accent;
   const dark = 0.62; // 奥側パーツの暗さ
@@ -360,9 +372,9 @@ export function drawRobot(
     limb(
       ctx, side * 6, shY - hipY, a1, a2,
       G.uarm, G.farm, G.armW,
-      side === 1 ? cSec : shade(cSec, f),
-      side === 1 ? cSec : shade(cSec, f),
-      side === 1 ? cSkin : shade(cSkin, f),
+      side === 1 ? cArms : shade(cArms, f),
+      side === 1 ? cArms : shade(cArms, f),
+      side === 1 ? cFists : shade(cFists, f),
     );
     ctx.restore();
   };
@@ -371,19 +383,21 @@ export function drawRobot(
   armLayer(-1);
 
   // 脚(奥・手前)
-  limb(ctx, -5, hipY, pose.lhip, pose.lknee, G.thigh, G.shin, G.legW, shade(cPri, dark), shade(cPri, dark), shade(cSec, dark));
-  limb(ctx, 5, hipY, pose.rhip, pose.rknee, G.thigh, G.shin, G.legW, cPri, cPri, cSec);
+  limb(ctx, -5, hipY, pose.lhip, pose.lknee, G.thigh, G.shin, G.legW, shade(cLegs, dark), shade(cLegs, dark), shade(cFeet, dark));
+  limb(ctx, 5, hipY, pose.rhip, pose.rknee, G.thigh, G.shin, G.legW, cLegs, cLegs, cFeet);
 
   // 胴体+頭
   ctx.save();
   ctx.translate(0, hipY);
   ctx.rotate(pose.lean);
-  box(ctx, -G.torsoW / 2, -th, G.torsoW, th + 4, cPri);
+  box(ctx, -G.torsoW / 2, -th, G.torsoW, th + 4, cTorso);
   // 胸のライト(アクセント色)
   ctx.fillStyle = cAcc;
   ctx.fillRect(-4, -th + 12, 9, 9);
   ctx.strokeStyle = '#15151c';
   ctx.strokeRect(-4, -th + 12, 9, 9);
+  // ベルト(腰まわりの差し色。衣装っぽさを出す)
+  box(ctx, -G.torsoW / 2 - 1, -8, G.torsoW + 2, 8, cBelt);
 
   // 頭(首のかたむきつき)
   ctx.save();
@@ -391,6 +405,10 @@ export function drawRobot(
   ctx.rotate(pose.head);
   const hs = G.headS;
   box(ctx, -hs / 2, -hs, hs, hs, cSkin);
+  // 口もとのマスク(忍者など): 顔の下半分をおおう
+  if (look.faceMask) {
+    box(ctx, -hs / 2 + 1, -hs * 0.44, hs - 2, hs * 0.44 - 1, flash ? '#ffffff' : look.faceMask);
+  }
   // 目(アクセント色で光る)。バイザーのキャラは drawHeadGear 側で覆う
   if (cfg.headGear !== 'techvisor') {
     ctx.save();

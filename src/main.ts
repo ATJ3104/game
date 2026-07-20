@@ -12,6 +12,8 @@ import { Input } from './input';
 import { Sfx } from './audio';
 import { VIEW_W, VIEW_H, type GameCtx, type Scene, type SceneName } from './game';
 import { TitleScene } from './scenes/title';
+import { HowToScene } from './scenes/howto';
+import { OnlineScene } from './scenes/online';
 import { DifficultyScene } from './scenes/difficulty';
 import { SelectScene } from './scenes/select';
 import { VsScene } from './scenes/vs';
@@ -65,6 +67,8 @@ window.addEventListener('touchstart', unlock);
 // ---- シーンの登録 ----
 const scenes: Record<SceneName, Scene> = {
   title: new TitleScene(),
+  howto: new HowToScene(),
+  online: new OnlineScene(),
   difficulty: new DifficultyScene(),
   select: new SelectScene(),
   vs: new VsScene(),
@@ -87,6 +91,7 @@ const game: GameCtx = {
   isTouch,
   mode: 'cpu',
   difficulty: 1,
+  net: null,
   p1: CHARACTERS[0],
   p2: CHARACTERS[1],
   winnerSide: 0,

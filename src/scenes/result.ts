@@ -14,6 +14,7 @@ const ITEMS: MenuRect[] = [0, 1, 2].map((i) => ({
   h: 56,
 }));
 const LABELS = ['もういちど たたかう', 'キャラをえらびなおす', 'タイトルへもどる'];
+const LABELS_ONLINE = ['もういちど たたかう', 'キャラをえらびなおす', 'たいせんをやめる'];
 
 export class ResultScene implements Scene {
   private cursor = 0;
@@ -26,6 +27,34 @@ export class ResultScene implements Scene {
 
   update(g: GameCtx): void {
     this.frame++;
+    // オンライン: 相手のメッセージと切断を見る
+    if (g.mode === 'online') {
+      const net = g.net;
+      if (!net || net.closed) {
+        net?.close();
+        g.net = null;
+        g.goto('title');
+        return;
+      }
+      for (const m of net.takeCtrl()) {
+        if (m.t === 'rematch') {
+          g.sfx.confirm();
+          g.goto('vs');
+          return;
+        }
+        if (m.t === 'reselect') {
+          g.sfx.confirm();
+          g.goto('select');
+          return;
+        }
+        if (m.t === 'quit') {
+          net.close();
+          g.net = null;
+          g.goto('title');
+          return;
+        }
+      }
+    }
     const p0 = g.input.getPad(0);
     const p1 = g.input.getPad(1);
     if (p0.upP || p1.upP) {
@@ -52,6 +81,22 @@ export class ResultScene implements Scene {
 
   private decide(g: GameCtx): void {
     g.sfx.confirm();
+    if (g.mode === 'online' && g.net) {
+      // 相手にも同じ画面へ進んでもらう
+      if (this.cursor === 0) {
+        g.net.send({ t: 'rematch' });
+        g.goto('vs');
+      } else if (this.cursor === 1) {
+        g.net.send({ t: 'reselect' });
+        g.goto('select');
+      } else {
+        g.net.send({ t: 'quit' });
+        g.net.close();
+        g.net = null;
+        g.goto('title');
+      }
+      return;
+    }
     if (this.cursor === 0) g.goto('vs'); // 同じ組み合わせでもう1回
     else if (this.cursor === 1) g.goto('select');
     else g.goto('title');
@@ -94,7 +139,8 @@ export class ResultScene implements Scene {
     ctx.restore();
 
     outlineText(ctx, 'つぎはどうする?', 745, 210, 24, '#fff');
-    LABELS.forEach((label, i) => {
+    const labels = g.mode === 'online' ? LABELS_ONLINE : LABELS;
+    labels.forEach((label, i) => {
       drawMenuItem(ctx, ITEMS[i], label, this.cursor === i, this.frame);
     });
   }

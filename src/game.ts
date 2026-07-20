@@ -7,12 +7,13 @@
 import type { Input } from './input';
 import type { Sfx } from './audio';
 import type { RobotConfig } from './characters';
+import type { NetSession } from './net';
 
 // 内部解像度(この大きさで描いて、画面サイズに合わせて拡大縮小する)
 export const VIEW_W = 960;
 export const VIEW_H = 540;
 
-export type SceneName = 'title' | 'difficulty' | 'select' | 'vs' | 'battle' | 'result';
+export type SceneName = 'title' | 'howto' | 'online' | 'difficulty' | 'select' | 'vs' | 'battle' | 'result';
 
 export interface Scene {
   /** シーンが表示されたときに1回呼ばれる */
@@ -28,8 +29,9 @@ export interface GameCtx {
   sfx: Sfx;
   images: Map<string, HTMLImageElement>; // 読み込み済みポートレート画像(パスがキー)
   isTouch: boolean; // タッチ端末かどうか
-  mode: 'cpu' | 'vs'; // 1人プレイ or 2人プレイ
+  mode: 'cpu' | 'vs' | 'online'; // 1人プレイ / 同じPCで2人 / オンライン対戦
   difficulty: 0 | 1 | 2; // CPUの強さ(よわい/ふつう/つよい)
+  net: NetSession | null; // オンライン対戦の接続(オフラインならnull)
   p1: RobotConfig;
   p2: RobotConfig;
   winnerSide: 0 | 1; // 直前のバトルの勝者

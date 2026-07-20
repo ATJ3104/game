@@ -10,8 +10,10 @@ import { drawRobot } from '../robot';
 import { drawMenuItem, inRect, outlineText, type MenuRect } from './ui';
 
 const ITEMS: MenuRect[] = [
-  { x: VIEW_W / 2 - 190, y: 330, w: 380, h: 56 },
-  { x: VIEW_W / 2 - 190, y: 402, w: 380, h: 56 },
+  { x: VIEW_W / 2 - 190, y: 288, w: 380, h: 48 },
+  { x: VIEW_W / 2 - 190, y: 346, w: 380, h: 48 },
+  { x: VIEW_W / 2 - 190, y: 404, w: 380, h: 48 },
+  { x: VIEW_W / 2 - 190, y: 462, w: 380, h: 48 },
 ];
 
 export class TitleScene implements Scene {
@@ -26,10 +28,12 @@ export class TitleScene implements Scene {
     this.frame++;
     const p0 = g.input.getPad(0);
     const p1 = g.input.getPad(1);
-    const up = p0.upP || p1.upP;
-    const down = p0.downP || p1.downP;
-    if (up || down) {
-      this.cursor = 1 - this.cursor;
+    if (p0.upP || p1.upP) {
+      this.cursor = (this.cursor + ITEMS.length - 1) % ITEMS.length;
+      g.sfx.cursor();
+    }
+    if (p0.downP || p1.downP) {
+      this.cursor = (this.cursor + 1) % ITEMS.length;
       g.sfx.cursor();
     }
     // タップでの選択
@@ -48,10 +52,20 @@ export class TitleScene implements Scene {
   }
 
   private decide(g: GameCtx, i: number): void {
-    if (i === 1 && g.isTouch) return; // スマホでは2P対戦は選べない
+    if (i === 1 && g.isTouch) return; // スマホでは同じPCの2P対戦は選べない
     g.sfx.confirm();
-    g.mode = i === 0 ? 'cpu' : 'vs';
-    g.goto(i === 0 ? 'difficulty' : 'select');
+    if (i === 0) {
+      g.mode = 'cpu';
+      g.goto('difficulty');
+    } else if (i === 1) {
+      g.mode = 'vs';
+      g.goto('select');
+    } else if (i === 2) {
+      g.mode = 'online';
+      g.goto('online'); // オンライン対戦ロビーへ
+    } else {
+      g.goto('howto'); // そうさせつめい
+    }
   }
 
   draw(g: GameCtx, ctx: CanvasRenderingContext2D): void {
@@ -78,7 +92,7 @@ export class TitleScene implements Scene {
     ctx.restore();
 
     // タイトルロゴ(重ね文字で立体風)
-    const ty = 150 + Math.sin(this.frame * 0.04) * 4;
+    const ty = 140 + Math.sin(this.frame * 0.04) * 4;
     outlineText(ctx, GAME_TITLE, VIEW_W / 2 + 5, ty + 6, 84, '#7a2020');
     outlineText(ctx, GAME_TITLE, VIEW_W / 2, ty, 84, '#ffd23c');
     outlineText(ctx, '— ブロックロボ かくとうゲーム —', VIEW_W / 2, ty + 70, 20, '#cfcfe8');
@@ -86,10 +100,12 @@ export class TitleScene implements Scene {
     drawMenuItem(ctx, ITEMS[0], 'ひとりであそぶ (VS CPU)', this.cursor === 0, this.frame);
     drawMenuItem(
       ctx, ITEMS[1],
-      g.isTouch ? '2Pたいせんは PCでプレイしてね' : 'ふたりであそぶ (2Pたいせん)',
+      g.isTouch ? '同じPCの2Pたいせんは PCでプレイしてね' : 'ふたりであそぶ (同じPCで2P)',
       this.cursor === 1, this.frame, g.isTouch,
     );
+    drawMenuItem(ctx, ITEMS[2], 'オンラインたいせん', this.cursor === 2, this.frame);
+    drawMenuItem(ctx, ITEMS[3], 'そうさせつめい', this.cursor === 3, this.frame);
 
-    outlineText(ctx, g.isTouch ? 'タップでえらんでね' : 'W/S↑↓:えらぶ  J/Enter:けってい', VIEW_W / 2, 505, 16, '#9f9fc0');
+    outlineText(ctx, g.isTouch ? 'タップでえらんでね' : 'W/S↑↓:えらぶ  J/Enter:けってい', VIEW_W / 2, 527, 14, '#9f9fc0');
   }
 }

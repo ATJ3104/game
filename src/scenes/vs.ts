@@ -18,6 +18,28 @@ export class VsScene implements Scene {
   update(g: GameCtx): void {
     this.t++;
     g.input.takeTaps(); // タップはためない
+    if (g.mode === 'online') {
+      const net = g.net;
+      if (!net || net.closed) {
+        net?.close();
+        g.net = null;
+        g.goto('title');
+        return;
+      }
+      for (const m of net.takeCtrl()) {
+        if (m.t === 'quit') {
+          net.close();
+          g.net = null;
+          g.goto('title');
+          return;
+        }
+        if (m.t === 'reselect') {
+          // 相手がえらびなおしをおした(同時押しのときは「えらびなおし」優先)
+          g.goto('select');
+          return;
+        }
+      }
+    }
     if (this.t >= DURATION) g.goto('battle');
   }
 
