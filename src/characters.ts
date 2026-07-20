@@ -7,7 +7,7 @@
 // ゲームの キャラが かわるよ! (プログラムの ほかの ばしょは
 // さわらなくて OK)
 //
-// 例) name: 'ガンテツ' → name: 'サイキョウマル' にすると
+// 例) name: 'イワタ' → name: 'サイキョウマル' にすると
 //     ゲームの中の なまえも かわる!
 // ================================================================
 
@@ -76,7 +76,7 @@ export const CHARACTERS: RobotConfig[] = [
   {
     // ムエタイスタイルのパワーファイター
     id: 'c01',
-    name: 'ガンテツ',
+    name: 'イワタ',
     typeLabel: 'パワー',
     portrait: 'assets/characters/c01_muaythai.webp',
     thumb: 'assets/characters/c01_muaythai_thumb.webp',
@@ -91,7 +91,7 @@ export const CHARACTERS: RobotConfig[] = [
   {
     // 忍者スタイルのスピードファイター
     id: 'c02',
-    name: 'シノビィ',
+    name: 'モリ↓',
     typeLabel: 'スピード',
     portrait: 'assets/characters/c02_ninja.webp',
     thumb: 'assets/characters/c02_ninja_thumb.webp',
@@ -106,7 +106,7 @@ export const CHARACTERS: RobotConfig[] = [
   {
     // 覆面レスラースタイルのパワーファイター
     id: 'c03',
-    name: 'マスクスター',
+    name: 'ママゴン',
     typeLabel: 'パワー',
     portrait: 'assets/characters/c03_luchador.webp',
     thumb: 'assets/characters/c03_luchador_thumb.webp',
@@ -121,7 +121,7 @@ export const CHARACTERS: RobotConfig[] = [
   {
     // ボクサースタイルのバランスファイター
     id: 'c04',
-    name: 'ブルービット',
+    name: 'ヒカル',
     typeLabel: 'バランス',
     portrait: 'assets/characters/c04_boxer.webp',
     thumb: 'assets/characters/c04_boxer_thumb.webp',
@@ -136,7 +136,7 @@ export const CHARACTERS: RobotConfig[] = [
   {
     // 雷スタイルのスピードファイター
     id: 'c05',
-    name: 'ボルトン',
+    name: 'スカイ',
     typeLabel: 'スピード',
     portrait: 'assets/characters/c05_thunder.webp',
     thumb: 'assets/characters/c05_thunder_thumb.webp',
@@ -151,7 +151,7 @@ export const CHARACTERS: RobotConfig[] = [
   {
     // 僧侶スタイルの防御ファイター
     id: 'c06',
-    name: 'ゼンマル',
+    name: 'パピー',
     typeLabel: '防御',
     portrait: 'assets/characters/c06_monk.webp',
     thumb: 'assets/characters/c06_monk_thumb.webp',
@@ -166,7 +166,7 @@ export const CHARACTERS: RobotConfig[] = [
   {
     // カポエイラスタイルのスピードファイター
     id: 'c07',
-    name: 'リズミー',
+    name: 'オトハ',
     typeLabel: 'スピード',
     portrait: 'assets/characters/c07_capoeira.webp',
     thumb: 'assets/characters/c07_capoeira_thumb.webp',
@@ -181,7 +181,7 @@ export const CHARACTERS: RobotConfig[] = [
   {
     // 主人公スタイルのバランスファイター
     id: 'c08',
-    name: 'ブレイズ',
+    name: 'シュウマ',
     typeLabel: 'バランス',
     portrait: 'assets/characters/c08_hero.webp',
     thumb: 'assets/characters/c08_hero_thumb.webp',

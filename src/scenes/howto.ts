@@ -50,7 +50,7 @@ export class HowToScene implements Scene {
     const rows: [string, string, string][] = [
       ['', '1P', '2P'],
       ['いどう', 'A / D', '← / →'],
-      ['ジャンプ', 'W', '↑'],
+      ['ジャンプ', 'スペース', '↑'],
       ['しゃがみ', 'S', '↓'],
       ['パンチ(はやい)', 'J', '1'],
       ['キック(つよい)', 'K', '2'],

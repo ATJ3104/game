@@ -37,11 +37,11 @@ type PadKey = 'left' | 'right' | 'up' | 'down' | 'punch' | 'kick' | 'special';
 const PAD_KEYS: PadKey[] = ['left', 'right', 'up', 'down', 'punch', 'kick', 'special'];
 
 // キー割り当て
-// 1P: A/D=移動 W=ジャンプ S=しゃがみ J=パンチ K=キック L=必殺技
+// 1P: A/D=移動 スペース=ジャンプ(Wでも可) S=しゃがみ J=パンチ K=キック L=必殺技
 // 2P: ←→=移動 ↑=ジャンプ ↓=しゃがみ 1=パンチ 2=キック 3=必殺技
 const KEYMAP: Record<PadKey, string[]>[] = [
   {
-    left: ['KeyA'], right: ['KeyD'], up: ['KeyW'], down: ['KeyS'],
+    left: ['KeyA'], right: ['KeyD'], up: ['Space', 'KeyW'], down: ['KeyS'],
     punch: ['KeyJ'], kick: ['KeyK'], special: ['KeyL'],
   },
   {
@@ -92,7 +92,7 @@ export class Input {
       if (!e.repeat) {
         this.held.add(e.code);
         this.justDown.add(e.code); // すぐ離されても1フレームは「押した」ことにする
-        if (e.code === 'Enter' || e.code === 'Space') this.confirmQueued = true;
+        if (e.code === 'Enter') this.confirmQueued = true; // スペースはジャンプ専用
         // あいことば入力用(数字・けす・もどる)
         if (/^[0-9]$/.test(e.key) || e.key === 'Backspace' || e.key === 'Escape') {
           this.typed.push(e.key);
