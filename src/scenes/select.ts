@@ -236,8 +236,9 @@ export class SelectScene implements Scene {
 
     outlineText(ctx, sel.name, px + pw / 2, 100, 32, sel.colors.accent);
     outlineText(ctx, `タイプ: ${sel.typeLabel}`, infoX, 140, 19, '#fff', 'left');
-    outlineText(ctx, 'ひっさつわざ', infoX, 180, 15, '#9f9fc0', 'left');
-    outlineText(ctx, sel.special.name, infoX, 208, 18, sel.special.color, 'left');
+    outlineText(ctx, 'ひっさつわざ', infoX, 172, 14, '#9f9fc0', 'left');
+    outlineText(ctx, `① ${sel.special.name}`, infoX, 196, 15, sel.special.color, 'left');
+    outlineText(ctx, `② ${sel.special2.name}`, infoX, 220, 15, sel.special2.color, 'left');
     // かんたんなつよさ表示
     const stats = sel.stats;
     const bars: [string, number][] = [

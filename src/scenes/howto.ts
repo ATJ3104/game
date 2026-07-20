@@ -79,29 +79,31 @@ export class HowToScene implements Scene {
     ctx.strokeStyle = '#4a5a80';
     ctx.strokeRect(rx, 74, 450, 330);
 
-    outlineText(ctx, '🛡 ガード', rx + 20, 102, 19, '#8fd0ff', 'left');
-    outlineText(ctx, 'あいてと はんたいの方向キーを おしっぱなしでガード!', rx + 24, 130, 15, '#fff', 'left');
-    outlineText(ctx, '(しゃがみながらだと しゃがみガード)', rx + 24, 154, 14, '#9f9fc0', 'left');
+    outlineText(ctx, '🛡 ガード', rx + 20, 96, 17, '#8fd0ff', 'left');
+    outlineText(ctx, 'あいてと はんたいの方向キーを おしっぱなし(↓でしゃがみガード)', rx + 24, 120, 13, '#fff', 'left');
 
-    outlineText(ctx, '⚡ ひっさつわざの出しかた', rx + 20, 196, 19, '#ffd23c', 'left');
-    outlineText(ctx, '① 画面下のゲージを まんタンにする', rx + 24, 224, 15, '#fff', 'left');
-    outlineText(ctx, '   (時間がたつ・こうげきを当てると たまるよ)', rx + 24, 246, 14, '#9f9fc0', 'left');
-    outlineText(ctx, '② ひっさつボタンを おす! (1P: L / 2P: 3)', rx + 24, 272, 15, '#fff', 'left');
+    outlineText(ctx, '💨 ダッシュ', rx + 20, 150, 17, '#8fd0ff', 'left');
+    outlineText(ctx, 'おなじ方向キーを 2回すばやくおす! (→→ や ←←)', rx + 24, 174, 13, '#fff', 'left');
+
+    outlineText(ctx, '⚡ ひっさつわざ(1キャラ2つある!)', rx + 20, 206, 17, '#ffd23c', 'left');
+    outlineText(ctx, 'ゲージまんタンで発動(時間がたつ・こうげきを当てるとたまる)', rx + 24, 230, 13, '#9f9fc0', 'left');
+    outlineText(ctx, 'わざ①: ひっさつボタン (1P: L / 2P: 3)', rx + 24, 254, 14, '#fff', 'left');
+    outlineText(ctx, 'わざ②: しゃがみながら ひっさつボタン (↓+L)', rx + 24, 278, 14, '#fff', 'left');
     // ゲージのイメージ(たまっていく → 点滅)
     const gw = 260;
     const fill = (this.frame % 180) / 140;
     const full = fill >= 1;
     ctx.fillStyle = '#101020';
-    ctx.fillRect(rx + 40, 292, gw, 14);
+    ctx.fillRect(rx + 40, 294, gw, 12);
     ctx.fillStyle = full && this.frame % 20 < 10 ? '#fff' : '#ffd23c';
-    ctx.fillRect(rx + 40, 292, gw * Math.min(1, fill), 14);
+    ctx.fillRect(rx + 40, 294, gw * Math.min(1, fill), 12);
     ctx.strokeStyle = '#fff';
-    ctx.strokeRect(rx + 40, 292, gw, 14);
-    if (full) outlineText(ctx, 'ひっさつOK!', rx + 40 + gw + 60, 299, 14, '#ffd23c');
+    ctx.strokeRect(rx + 40, 294, gw, 12);
+    if (full) outlineText(ctx, 'ひっさつOK!', rx + 40 + gw + 60, 300, 13, '#ffd23c');
 
-    outlineText(ctx, '📱 スマホ(よこもち)', rx + 20, 340, 19, '#8fd0ff', 'left');
-    outlineText(ctx, '左の十字パッドで いどう、右の P / K / 必 ボタン', rx + 24, 368, 15, '#fff', 'left');
-    outlineText(ctx, '(スマホは CPUせん・オンラインたいせんであそべるよ)', rx + 24, 390, 14, '#9f9fc0', 'left');
+    outlineText(ctx, '📱 スマホ(よこもち)', rx + 20, 336, 17, '#8fd0ff', 'left');
+    outlineText(ctx, '左の十字パッドで いどう、右の P / K / 必 ボタン', rx + 24, 360, 13, '#fff', 'left');
+    outlineText(ctx, '(スマホは CPUせん・オンラインたいせんであそべるよ)', rx + 24, 382, 12, '#9f9fc0', 'left');
 
     // デモロボ(パンチしつづける)
     ctx.save();

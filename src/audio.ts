@@ -63,6 +63,7 @@ export class Sfx {
   confirm(): void { this.tone(600, 1200, 0.12, 'square', 0.15); }
   cancel(): void { this.tone(500, 250, 0.1, 'square', 0.12); }
   jump(): void { this.tone(280, 660, 0.14, 'square', 0.12); }
+  dash(): void { this.noise(0.12, 0.16, 2200); this.tone(420, 900, 0.1, 'square', 0.07); } // シュッという風切り音
   whiff(): void { this.noise(0.05, 0.08, 1600); } // 空振りのヒュッ
   punchHit(): void { this.noise(0.08, 0.25, 1000); this.tone(220, 120, 0.08, 'square', 0.2); }
   kickHit(): void { this.noise(0.11, 0.3, 650); this.tone(170, 70, 0.13, 'square', 0.25); }

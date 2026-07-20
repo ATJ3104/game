@@ -59,14 +59,18 @@ export interface RobotConfig {
     jumpPower: number; // ジャンプ力(1.0がふつう)
     attackPower: number; // こうげき力の倍率 0.9〜1.15
   };
-  special: {
-    type: 'projectile' | 'uppercut' | 'dash' | 'spin'; // わざのタイプ
-    name: string; // ひっさつわざの なまえ
-    shout: string; // かけごえ(画面にふきだしで出る)
-    color: string; // わざのエフェクトの色
-    power: number; // 同じタイプの中での威力調整(1.0がふつう)
-    speed: number; // 同じタイプの中でのはやさ調整(1.0がふつう)
-  };
+  special: SpecialConfig; // ひっさつわざ①(ひっさつボタンで発動)
+  special2: SpecialConfig; // ひっさつわざ②(しゃがみながら ひっさつボタン)
+}
+
+/** ひっさつわざ1つ分の設定 */
+export interface SpecialConfig {
+  type: 'projectile' | 'uppercut' | 'dash' | 'spin'; // わざのタイプ
+  name: string; // ひっさつわざの なまえ
+  shout: string; // かけごえ(画面にふきだしで出る)
+  color: string; // わざのエフェクトの色
+  power: number; // 同じタイプの中での威力調整(1.0がふつう)
+  speed: number; // 同じタイプの中でのはやさ調整(1.0がふつう)
 }
 
 // ----------------------------------------------------------------
@@ -87,6 +91,7 @@ export const CHARACTERS: RobotConfig[] = [
     bodyScale: 1.15,
     stats: { hp: 1080, walkSpeed: 0.85, jumpPower: 0.95, attackPower: 1.15 }, // HP高・鈍足・一撃が重い
     special: { type: 'dash', name: 'グランドニー', shout: 'ドガーン!', color: '#E8B84B', power: 1.25, speed: 0.85 },
+    special2: { type: 'uppercut', name: 'ライジングエルボー', shout: 'せいやっ!', color: '#E8B84B', power: 1.15, speed: 0.95 },
   },
   {
     // 忍者スタイルのスピードファイター
@@ -102,6 +107,7 @@ export const CHARACTERS: RobotConfig[] = [
     bodyScale: 0.9,
     stats: { hp: 920, walkSpeed: 1.25, jumpPower: 1.1, attackPower: 0.95 }, // 最速・HP低め
     special: { type: 'dash', name: 'シャドウスラッシュ', shout: 'しっぷう!', color: '#B08FE0', power: 0.9, speed: 1.3 },
+    special2: { type: 'projectile', name: 'シュリケンショット', shout: 'とうっ!', color: '#B08FE0', power: 0.9, speed: 1.4 },
   },
   {
     // 覆面レスラースタイルのパワーファイター
@@ -117,6 +123,7 @@ export const CHARACTERS: RobotConfig[] = [
     bodyScale: 1.15,
     stats: { hp: 1100, walkSpeed: 0.9, jumpPower: 1.15, attackPower: 1.1 }, // HP最高・ジャンプ強い
     special: { type: 'spin', name: 'スパイラルスター', shout: 'トルネードー!', color: '#D9A62E', power: 1.15, speed: 0.9 },
+    special2: { type: 'dash', name: 'フライングタックル', shout: 'ドッカーン!', color: '#D9A62E', power: 1.2, speed: 0.95 },
   },
   {
     // ボクサースタイルのバランスファイター
@@ -132,6 +139,7 @@ export const CHARACTERS: RobotConfig[] = [
     bodyScale: 1.0,
     stats: { hp: 1000, walkSpeed: 1.0, jumpPower: 1.0, attackPower: 1.0 }, // 対空が得意
     special: { type: 'uppercut', name: 'ロケットアッパー', shout: 'うちあげろ!', color: '#7FE9F5', power: 1.0, speed: 1.1 },
+    special2: { type: 'dash', name: 'ソニックストレート', shout: 'ビュン!', color: '#7FE9F5', power: 1.0, speed: 1.2 },
   },
   {
     // 雷スタイルのスピードファイター
@@ -147,6 +155,7 @@ export const CHARACTERS: RobotConfig[] = [
     bodyScale: 0.95,
     stats: { hp: 900, walkSpeed: 1.15, jumpPower: 1.05, attackPower: 1.15 }, // 攻撃力高・HP低(ガラスキャノン)
     special: { type: 'projectile', name: 'サンダーショット', shout: 'ビリビリだぜ!', color: '#FFE97A', power: 1.15, speed: 1.25 },
+    special2: { type: 'uppercut', name: 'イナズマアッパー', shout: 'ビリビリッ!', color: '#FFE97A', power: 1.1, speed: 1.05 },
   },
   {
     // 僧侶スタイルの防御ファイター
@@ -162,6 +171,7 @@ export const CHARACTERS: RobotConfig[] = [
     bodyScale: 1.0,
     stats: { hp: 1060, walkSpeed: 0.95, jumpPower: 0.95, attackPower: 1.0 }, // HP高め・堅実
     special: { type: 'projectile', name: 'ゼンビーム', shout: 'かーつ!', color: '#D97B2E', power: 1.0, speed: 0.85 },
+    special2: { type: 'spin', name: 'ゼンゼンスピン', shout: 'むむむ!', color: '#D97B2E', power: 1.0, speed: 0.95 },
   },
   {
     // カポエイラスタイルのスピードファイター
@@ -177,6 +187,7 @@ export const CHARACTERS: RobotConfig[] = [
     bodyScale: 0.9,
     stats: { hp: 930, walkSpeed: 1.2, jumpPower: 1.2, attackPower: 0.95 }, // 機動力・ジャンプ最強
     special: { type: 'spin', name: 'リズムサイクロン', shout: 'まわるよー!', color: '#35B5A0', power: 0.9, speed: 1.2 },
+    special2: { type: 'uppercut', name: 'リズムフリップ', shout: 'イェーイ!', color: '#35B5A0', power: 0.95, speed: 1.15 },
   },
   {
     // 主人公スタイルのバランスファイター
@@ -192,5 +203,6 @@ export const CHARACTERS: RobotConfig[] = [
     bodyScale: 1.0,
     stats: { hp: 1000, walkSpeed: 1.05, jumpPower: 1.05, attackPower: 1.05 }, // 全て平均の主人公型
     special: { type: 'uppercut', name: 'ライジングブレイズ', shout: 'いくぞー!', color: '#F2F2F2', power: 1.1, speed: 1.0 },
+    special2: { type: 'projectile', name: 'ブレイズショット', shout: 'はっしゃ!', color: '#F2F2F2', power: 1.05, speed: 1.1 },
   },
 ];

@@ -16,7 +16,7 @@ export type AnimName =
   | 'sp_projectile' | 'sp_uppercut' | 'sp_dash' | 'sp_spin';
 
 /** ポーズ = 各関節の角度セット(ラジアン)。0=まっすぐ下、+が前方向 */
-interface Pose {
+export interface Pose {
   torsoY: number; // 体全体の上下ゆれ
   lean: number;   // 胴体の前かがみ(+が前)
   head: number;   // 首のかたむき
@@ -37,11 +37,12 @@ const BASE: Pose = {
 };
 
 // パーツの寸法(bodyScaleで全体を拡大縮小する)
+// 頭を小さく・手足を長くして、約6頭身のスタイルいい体型にしている
 const G = {
-  thigh: 25, shin: 24, legW: 13,
-  torsoW: 36, torsoH: 42,
-  headS: 25,
-  uarm: 20, farm: 18, armW: 10,
+  thigh: 30, shin: 29, legW: 12,
+  torsoW: 34, torsoH: 46,
+  headS: 20,
+  uarm: 24, farm: 22, armW: 9,
 };
 
 const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
@@ -65,7 +66,9 @@ function kf(p: number, frames: [number, Partial<Pose>][]): Pose {
     const [t0, a] = frames[i];
     const [t1, b] = frames[i + 1];
     if (p >= t0 && p <= t1) {
-      return lerpPose(mergePose(a), mergePose(b), (p - t0) / Math.max(0.0001, t1 - t0));
+      const raw = (p - t0) / Math.max(0.0001, t1 - t0);
+      const eased = raw * raw * (3 - 2 * raw); // スムーズステップでなめらかに加減速
+      return lerpPose(mergePose(a), mergePose(b), eased);
     }
   }
   return mergePose(frames[frames.length - 1][1]);
@@ -350,6 +353,12 @@ function drawHeadGear(ctx: CanvasRenderingContext2D, cfg: RobotConfig, hs: numbe
 export interface DrawRobotOpts {
   flash?: boolean; // ダメージ点滅(真っ白にする)
   alpha?: number;
+  /**
+   * ポーズブレンド用の入れもの。同じオブジェクトを渡しつづけると、
+   * 前のフレームのポーズと混ぜてポーズの切りかわりがなめらかになる。
+   * (見た目だけの処理なので、オンライン対戦の同期には影響しない)
+   */
+  blend?: { pose: Pose | null };
 }
 
 /**
@@ -365,7 +374,12 @@ export function drawRobot(
   facing: 1 | -1,
   opts: DrawRobotOpts = {},
 ): void {
-  const pose = getPose(anim, t, progress);
+  let pose = getPose(anim, t, progress);
+  // ポーズの切りかわりを数フレームかけてまぜる(カクつき防止)
+  if (opts.blend) {
+    if (opts.blend.pose) pose = lerpPose(opts.blend.pose, pose, 0.45);
+    opts.blend.pose = pose;
+  }
   const s = cfg.bodyScale;
   const flash = !!opts.flash;
 

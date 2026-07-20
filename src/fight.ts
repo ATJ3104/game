@@ -5,10 +5,10 @@
 // 当たり判定は「矩形hitbox(攻撃) vs 矩形hurtbox(くらい)」の単純方式。
 // ================================================================
 
-import type { RobotConfig } from './characters';
+import type { RobotConfig, SpecialConfig } from './characters';
 import type { PadState } from './input';
 import type { Sfx } from './audio';
-import type { AnimName } from './robot';
+import type { AnimName, Pose } from './robot';
 import { FLOOR_Y } from './stage';
 
 export const STAGE_LEFT = 45;
@@ -48,12 +48,13 @@ interface AttackSpec {
 }
 
 // 通常技テーブル(全キャラ共通。attackPowerとbodyScaleでキャラ差が出る)
+// 判定の高さは6頭身リグ(肩 約-97px・全高 約125px)に合わせてある
 const ATTACKS: Record<string, AttackSpec> = {
-  standP: { dmg: 55, startup: 4, active: 4, recovery: 9, hb: { x: 20, y: -105, w: 54, h: 22 }, kb: 3, hitstun: 14, blockstun: 10, anim: 'punch', sfx: 'punch' },
-  standK: { dmg: 82, startup: 9, active: 5, recovery: 16, hb: { x: 22, y: -92, w: 66, h: 26 }, kb: 5, hitstun: 19, blockstun: 13, anim: 'kick', sfx: 'kick' },
-  crouchP: { dmg: 45, startup: 4, active: 4, recovery: 8, hb: { x: 18, y: -60, w: 52, h: 20 }, kb: 2.5, hitstun: 12, blockstun: 9, anim: 'crouchPunch', sfx: 'punch' },
-  crouchK: { dmg: 72, startup: 8, active: 5, recovery: 18, hb: { x: 18, y: -22, w: 70, h: 20 }, kb: 4, hitstun: 20, blockstun: 13, anim: 'crouchKick', sfx: 'kick', sweep: true },
-  jumpK: { dmg: 78, startup: 6, active: 14, recovery: 4, hb: { x: 10, y: -72, w: 58, h: 36 }, kb: 4, hitstun: 17, blockstun: 12, anim: 'jumpKick', sfx: 'kick' },
+  standP: { dmg: 55, startup: 4, active: 4, recovery: 9, hb: { x: 20, y: -108, w: 58, h: 24 }, kb: 3, hitstun: 14, blockstun: 10, anim: 'punch', sfx: 'punch' },
+  standK: { dmg: 82, startup: 9, active: 5, recovery: 16, hb: { x: 22, y: -96, w: 72, h: 26 }, kb: 5, hitstun: 19, blockstun: 13, anim: 'kick', sfx: 'kick' },
+  crouchP: { dmg: 45, startup: 4, active: 4, recovery: 8, hb: { x: 18, y: -64, w: 56, h: 20 }, kb: 2.5, hitstun: 12, blockstun: 9, anim: 'crouchPunch', sfx: 'punch' },
+  crouchK: { dmg: 72, startup: 8, active: 5, recovery: 18, hb: { x: 18, y: -22, w: 76, h: 20 }, kb: 4, hitstun: 20, blockstun: 13, anim: 'crouchKick', sfx: 'kick', sweep: true },
+  jumpK: { dmg: 78, startup: 6, active: 14, recovery: 4, hb: { x: 10, y: -76, w: 62, h: 38 }, kb: 4, hitstun: 17, blockstun: 12, anim: 'jumpKick', sfx: 'kick' },
 };
 
 /** ヒット時の情報(通常技・必殺技・飛び道具で共通のかたち) */
@@ -92,10 +93,14 @@ export interface World {
 }
 
 export type FState =
-  | 'idle' | 'walk' | 'crouch' | 'jump'
+  | 'idle' | 'walk' | 'crouch' | 'jump' | 'dash'
   | 'attack' | 'special'
   | 'hitstun' | 'blockstun' | 'launched' | 'knockdown' | 'getup'
   | 'ko' | 'win';
+
+const DASH_WINDOW = 14; // DD入力の受付フレーム(この間に同じ方向をもう1回)
+const DASH_TIME = 13; // ダッシュの長さ
+const DASH_SPEED = 8.6;
 
 export class Fighter {
   cfg: RobotConfig;
@@ -123,6 +128,12 @@ export class Fighter {
   shout: { text: string; timer: number } | null = null;
   lastPad: PadState | null = null;
   crouchingAttack = false; // しゃがみ技中(くらい判定を低くする)
+  activeSp: SpecialConfig; // いま出しているひっさつわざ(①か②)
+  /** 見た目専用: ポーズブレンドの入れもの(同期には影響しない) */
+  poseBlend: { pose: Pose | null } = { pose: null };
+  private dashBufDir: -1 | 0 | 1 = 0; // DD入力用: 前回おした方向
+  private dashBufT = 99; // 前回おしてからのフレーム数
+  private dashDir: -1 | 1 = 1; // ダッシュしている方向
 
   constructor(cfg: RobotConfig, side: 0 | 1, x: number) {
     this.cfg = cfg;
@@ -131,6 +142,7 @@ export class Fighter {
     this.facing = side === 0 ? 1 : -1;
     this.maxHp = cfg.stats.hp;
     this.hp = cfg.stats.hp;
+    this.activeSp = cfg.special;
   }
 
   /** ラウンド開始時のリセット */
@@ -164,7 +176,7 @@ export class Fighter {
   hurtbox(): Rect {
     const s = this.cfg.bodyScale;
     const w = 46 * s;
-    const h = (this.crouching ? 80 : 118) * s;
+    const h = (this.crouching ? 84 : 124) * s;
     if (this.state === 'knockdown' || this.state === 'ko') {
       return { x: this.x - 40 * s, y: this.y - 26 * s, w: 80 * s, h: 26 * s };
     }
@@ -197,15 +209,26 @@ export class Fighter {
     world.sfx.jump();
   }
 
-  private startSpecial(world: World): void {
+  private startSpecial(world: World, sp: SpecialConfig): void {
+    this.activeSp = sp;
     this.gauge = 0;
     this.hasHit = false;
     this.spinHits = 0;
     this.crouchingAttack = false;
     this.vx = 0;
     this.setState('special');
-    this.shout = { text: this.cfg.special.shout, timer: 55 };
+    this.shout = { text: sp.shout, timer: 55 };
     world.sfx.special();
+  }
+
+  /** DD(同じ方向2回)ダッシュを始める */
+  private startDash(dir: -1 | 1, world: World): void {
+    this.dashDir = dir;
+    this.vx = dir * DASH_SPEED * this.cfg.stats.walkSpeed;
+    this.dashBufDir = 0;
+    this.dashBufT = 99;
+    this.setState('dash');
+    world.sfx.dash();
   }
 
   /** 1フレーム分の更新。padは自分の入力、foeは相手 */
@@ -220,6 +243,7 @@ export class Fighter {
       this.shout.timer--;
       if (this.shout.timer <= 0) this.shout = null;
     }
+    this.dashBufT++; // DD入力の受付時間をすすめる
 
     // 向きの自動更新(行動中でなければ相手の方を向く)
     if (['idle', 'walk', 'crouch'].includes(this.state)) {
@@ -230,7 +254,17 @@ export class Fighter {
       case 'idle':
       case 'walk': {
         this.crouchingAttack = false;
-        if (pad.specialP && this.gauge >= GAUGE_MAX) { this.startSpecial(world); break; }
+        // DD(同じ方向を2回すばやく)でダッシュ
+        const tapDir = pad.rightP ? 1 : pad.leftP ? -1 : 0;
+        if (tapDir !== 0) {
+          if (tapDir === this.dashBufDir && this.dashBufT <= DASH_WINDOW) {
+            this.startDash(tapDir as -1 | 1, world);
+            break;
+          }
+          this.dashBufDir = tapDir as -1 | 1;
+          this.dashBufT = 0;
+        }
+        if (pad.specialP && this.gauge >= GAUGE_MAX) { this.startSpecial(world, this.cfg.special); break; }
         if (pad.punchP) { this.startAttack('standP'); world.sfx.whiff(); break; }
         if (pad.kickP) { this.startAttack('standK'); world.sfx.whiff(); break; }
         if (pad.up) { this.startJump(pad, world); break; }
@@ -245,10 +279,20 @@ export class Fighter {
         }
         break;
       }
+      case 'dash': {
+        // ダッシュ中: だんだん減速して終わる
+        this.vx = this.dashDir * DASH_SPEED * this.cfg.stats.walkSpeed * (1 - this.timer / (DASH_TIME + 4));
+        if (this.timer >= DASH_TIME) {
+          this.vx = 0;
+          this.setState('idle');
+        }
+        break;
+      }
       case 'crouch': {
         this.vx = 0;
         if (!pad.down) { this.setState('idle'); break; }
-        if (pad.specialP && this.gauge >= GAUGE_MAX) { this.startSpecial(world); break; }
+        // しゃがみ+ひっさつボタン = ひっさつわざ②!
+        if (pad.specialP && this.gauge >= GAUGE_MAX) { this.startSpecial(world, this.cfg.special2); break; }
         if (pad.punchP) { this.startAttack('crouchP'); world.sfx.whiff(); break; }
         if (pad.kickP) { this.startAttack('crouchK'); world.sfx.whiff(); break; }
         break;
@@ -331,7 +375,7 @@ export class Fighter {
 
   /** 必殺技4アーキタイプの動き */
   private updateSpecial(world: World): void {
-    const sp = this.cfg.special;
+    const sp = this.activeSp;
     const t = this.timer;
     const speed = sp.speed;
     switch (sp.type) {
@@ -342,8 +386,8 @@ export class Fighter {
           const s = this.cfg.bodyScale;
           const big = speed < 1; // 遅いタイプは弾を大きくして差別化
           world.spawnProjectile({
-            x: this.x + this.facing * 40 * s,
-            y: this.y - 68 * s,
+            x: this.x + this.facing * 42 * s,
+            y: this.y - 82 * s,
             vx: this.facing * 5.6 * speed,
             w: big ? 46 : 30,
             h: big ? 34 : 22,
@@ -433,7 +477,7 @@ export class Fighter {
     }
 
     if (this.state === 'special') {
-      const sp = this.cfg.special;
+      const sp = this.activeSp;
       // 多段のspinはrehitTimerでhasHitが定期的に解除される
       if (this.hasHit) return null;
       const t = this.timer;
@@ -441,7 +485,7 @@ export class Fighter {
         case 'uppercut':
           if (t >= 4 && t < 22 && !this.onGround) {
             return {
-              rect: mk({ x: -6, y: -130, w: 58, h: 110 }),
+              rect: mk({ x: -6, y: -142, w: 58, h: 122 }),
               dmg: Math.round(170 * sp.power * ap),
               kb: 5,
               hitstun: 30,
@@ -455,7 +499,7 @@ export class Fighter {
         case 'dash':
           if (t >= 9 && t < 24) {
             return {
-              rect: mk({ x: 6, y: -100, w: 66, h: 80 }),
+              rect: mk({ x: 6, y: -106, w: 70, h: 86 }),
               dmg: Math.round(175 * sp.power * ap),
               kb: 9,
               hitstun: 26,
@@ -470,7 +514,7 @@ export class Fighter {
           const activeLen = Math.round(42 * sp.speed);
           if (t >= 6 && t < 6 + activeLen && this.spinHits < 4) {
             return {
-              rect: mk({ x: -30, y: -110, w: 110, h: 95 }),
+              rect: mk({ x: -30, y: -118, w: 110, h: 100 }),
               dmg: Math.round(52 * sp.power * ap),
               kb: 2.5,
               hitstun: 16,
@@ -492,7 +536,7 @@ export class Fighter {
   /** 攻撃が当たった直後に呼ぶ(多段技の管理) */
   onHitLanded(): void {
     this.hasHit = true;
-    if (this.state === 'special' && this.cfg.special.type === 'spin') {
+    if (this.state === 'special' && this.activeSp.type === 'spin') {
       this.spinHits++;
       this.rehitTimer = 9; // 9フレーム後に次の段
     }
@@ -554,6 +598,9 @@ export class Fighter {
       case 'idle': return { anim: 'idle', t: this.animT, progress: 0 };
       case 'walk': return { anim: 'walk', t: this.animT, progress: 0 };
       case 'crouch': return { anim: 'crouch', t: this.animT, progress: 0 };
+      case 'dash':
+        // 前ダッシュは突進ポーズ、バックダッシュはガードっぽいのけぞり
+        return { anim: this.dashDir === this.facing ? 'sp_dash' : 'guard', t: this.animT, progress: 0 };
       case 'jump': {
         if (this.attack) {
           const a = this.attack;
@@ -567,7 +614,7 @@ export class Fighter {
         return { anim: a.anim, t: this.animT, progress: this.timer / (a.startup + a.active + a.recovery) };
       }
       case 'special': {
-        const sp = this.cfg.special;
+        const sp = this.activeSp;
         const anims: Record<string, AnimName> = {
           projectile: 'sp_projectile', uppercut: 'sp_uppercut', dash: 'sp_dash', spin: 'sp_spin',
         };

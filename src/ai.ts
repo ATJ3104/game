@@ -34,6 +34,7 @@ export class CpuBrain {
   private reactT = -1; // 相手の攻撃への反応カウントダウン
   private guardHold = 0;
   private guardLow = false;
+  private spLow = false; // 必殺技②(しゃがみ版)を使うか
   private L: LevelCfg;
 
   constructor(level: 0 | 1 | 2) {
@@ -131,6 +132,7 @@ export class CpuBrain {
         this.planNew = true;
         this.planAge = 0;
         this.planT = L.decide + Math.floor(Math.random() * 12);
+        if (this.plan === 'special') this.spLow = Math.random() < 0.5; // ①と②を半々で使う
       } else {
         this.planT = 6; // 動けない間はちょっと待つ
       }
@@ -182,7 +184,13 @@ export class CpuBrain {
         break;
       case 'special':
         pad.special = true;
-        pad.specialP = isNew;
+        if (this.spLow) {
+          // しゃがんでから押すと必殺技②になる
+          pad.down = true;
+          pad.specialP = this.planAge === 4;
+        } else {
+          pad.specialP = isNew;
+        }
         break;
       case 'wait':
         break;

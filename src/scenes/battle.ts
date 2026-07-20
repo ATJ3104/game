@@ -414,6 +414,7 @@ export class BattleScene implements Scene, World {
       drawRobot(ctx, f.cfg, a.anim, a.t, a.progress, f.facing, {
         flash,
         alpha: blink ? 0.4 : 1,
+        blend: f.poseBlend, // ポーズの切りかわりをなめらかにする
       });
       ctx.restore();
     }
@@ -443,7 +444,7 @@ export class BattleScene implements Scene, World {
     for (const f of this.fighters) {
       if (!f.shout) continue;
       const bx = f.x;
-      const by = f.y - 150 * f.cfg.bodyScale;
+      const by = f.y - 158 * f.cfg.bodyScale;
       ctx.font = `bold 20px ${FONT}`;
       const w = ctx.measureText(f.shout.text).width + 24;
       ctx.fillStyle = 'rgba(255,255,255,0.95)';
@@ -535,11 +536,11 @@ export class BattleScene implements Scene, World {
       ctx.strokeRect(x, gy, gw, 14);
       if (full) {
         // どのボタンで出すかも表示する(そうさに迷わないように)
-        outlineText(ctx, `ひっさつOK! ${f.cfg.special.name}${hint}`, x + gw / 2, gy - 12, 15, '#ffd23c');
+        outlineText(ctx, `ひっさつOK! ①${f.cfg.special.name} ②${f.cfg.special2.name}${hint}`, x + gw / 2, gy - 12, 12, '#ffd23c');
       }
     };
-    drawGauge(f0, 30, g.isTouch ? ' [必ボタン]' : ' [Lキー]');
-    drawGauge(f1, VIEW_W - 30 - gw, g.mode === 'vs' ? ' [3キー]' : '');
+    drawGauge(f0, 30, g.isTouch ? ' [①必/②↓+必]' : ' [①L/②↓+L]');
+    drawGauge(f1, VIEW_W - 30 - gw, g.mode === 'vs' ? ' [①3/②↓+3]' : '');
 
     // ラウンド数表示
     outlineText(ctx, `ラウンド ${this.roundNo}`, VIEW_W / 2, 74, 15, '#cfcfe8');
