@@ -139,6 +139,12 @@ export function drawMenuItem(
     const wob = Math.sin(frame * 0.15) * 4;
     outlineText(ctx, '▶', r.x - 22 + wob, r.y + r.h / 2, 24, '#ffd23c');
   }
-  outlineText(ctx, label, r.x + r.w / 2, r.y + r.h / 2, Math.min(26, r.h - 14), selected ? '#222' : '#fff');
+  // 文字がわくからはみ出さないように、長い文字は自動で小さくする
+  let size = Math.min(26, r.h - 14);
+  ctx.font = `bold ${size}px ${FONT}`;
+  const tw = ctx.measureText(label).width;
+  const maxW = r.w - 28;
+  if (tw > maxW) size = Math.max(11, Math.floor((size * maxW) / tw));
+  outlineText(ctx, label, r.x + r.w / 2, r.y + r.h / 2, size, selected ? '#222' : '#fff');
   ctx.restore();
 }
