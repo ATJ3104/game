@@ -36,6 +36,8 @@ function fitCanvas(): void {
   canvas.style.height = `${Math.floor(VIEW_H * scale)}px`;
 }
 window.addEventListener('resize', fitCanvas);
+// スマホでURLバーが出入りしたときにも合わせなおす
+window.visualViewport?.addEventListener('resize', fitCanvas);
 fitCanvas();
 
 // スマホたて持ちのときは「よこもちにしてね」を出す
@@ -49,11 +51,16 @@ window.addEventListener('orientationchange', checkOrientation);
 checkOrientation();
 
 // ---- 画面上の座標 → ゲーム内部の座標に変換 ----
-function toInternal(cx: number, cy: number): { x: number; y: number } {
+// pageX/pageY(ドキュメント基準)で計算する。clientX基準だとスマホの
+// ピンチズームやゴムひもスクロールで視覚ビューポートがずれたときに
+// タップ位置がずれてしまうため。
+function toInternal(px: number, py: number): { x: number; y: number } {
   const rect = canvas.getBoundingClientRect();
+  const left = rect.left + window.scrollX;
+  const top = rect.top + window.scrollY;
   return {
-    x: ((cx - rect.left) / rect.width) * VIEW_W,
-    y: ((cy - rect.top) / rect.height) * VIEW_H,
+    x: ((px - left) / rect.width) * VIEW_W,
+    y: ((py - top) / rect.height) * VIEW_H,
   };
 }
 

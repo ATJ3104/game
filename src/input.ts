@@ -58,12 +58,14 @@ const GAME_KEYS = new Set<string>([
 ]);
 
 // タッチ仮想パッドの配置(内部解像度960x540での座標)
-const DPAD = { x: 118, y: 425, r: 78, dead: 16 };
+// ボタンの当たり判定円が画面のはしからはみ出さない位置にする
+// (はみ出すと、はしのタップがOSのジェスチャーにとられて反応しない)
+const DPAD = { x: 118, y: 420, r: 78, dead: 16 };
 const BTN_R = 44; // 半径44px → 画面上でじゅうぶん大きい(64px以上)
 const BUTTONS: { key: PadKey; x: number; y: number; label: string }[] = [
-  { key: 'punch', x: 748, y: 468, label: 'P' },
-  { key: 'kick', x: 838, y: 420, label: 'K' },
-  { key: 'special', x: 900, y: 495, label: '必' },
+  { key: 'punch', x: 742, y: 452, label: 'P' },
+  { key: 'kick', x: 836, y: 402, label: 'K' },
+  { key: 'special', x: 888, y: 474, label: '必' },
 ];
 
 export class Input {
@@ -74,6 +76,7 @@ export class Input {
 
   // タッチ関係
   private touches = new Map<number, { x: number; y: number }>();
+  private touchJust: { x: number; y: number }[] = []; // 一瞬のタップも1フレームは押した扱いにする
   private tapQueue: { x: number; y: number }[] = [];
   /** バトル中だけ true にすると仮想パッドが反応・表示される */
   touchUIEnabled = false;
@@ -113,15 +116,16 @@ export class Input {
     canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
       for (const t of Array.from(e.changedTouches)) {
-        const p = this.toInternal(t.clientX, t.clientY);
+        const p = this.toInternal(t.pageX, t.pageY);
         this.touches.set(t.identifier, p);
+        this.touchJust.push(p); // すぐ指をはなしても1フレームは反応させる
         this.tapQueue.push(p);
       }
     }, opts);
     canvas.addEventListener('touchmove', (e) => {
       e.preventDefault();
       for (const t of Array.from(e.changedTouches)) {
-        const p = this.toInternal(t.clientX, t.clientY);
+        const p = this.toInternal(t.pageX, t.pageY);
         this.touches.set(t.identifier, p);
       }
     }, opts);
@@ -134,15 +138,17 @@ export class Input {
 
     // マウスクリックもタップとして扱う(PCでのメニュー操作用)
     canvas.addEventListener('mousedown', (e) => {
-      this.tapQueue.push(this.toInternal(e.clientX, e.clientY));
+      this.tapQueue.push(this.toInternal(e.pageX, e.pageY));
     });
   }
 
   /** タッチ仮想パッドから現在の入力を計算する(1P専用) */
   private touchPad(): Partial<Record<PadKey, boolean>> {
     const out: Partial<Record<PadKey, boolean>> = {};
+    const points = [...this.touches.values(), ...this.touchJust];
+    this.touchJust = []; // ジャストタッチは1フレームで使いきり
     if (!this.touchUIEnabled) return out;
-    for (const { x, y } of this.touches.values()) {
+    for (const { x, y } of points) {
       // 左半分 → 十字パッド
       if (x < 480) {
         const dx = x - DPAD.x;
