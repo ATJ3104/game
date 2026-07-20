@@ -10,7 +10,7 @@
 import { CHARACTERS, GAME_TITLE } from './characters';
 import { Input } from './input';
 import { Sfx } from './audio';
-import { VIEW_W, VIEW_H, type GameCtx, type Scene, type SceneName } from './game';
+import { TITLE_LOGO_SRC, VIEW_W, VIEW_H, type GameCtx, type Scene, type SceneName } from './game';
 import { TitleScene } from './scenes/title';
 import { HowToScene } from './scenes/howto';
 import { TutorialScene } from './scenes/tutorial';
@@ -121,7 +121,7 @@ function loadImage(src: string): Promise<[string, HTMLImageElement]> {
 }
 
 async function loadAssets(): Promise<void> {
-  const paths = CHARACTERS.flatMap((c) => [c.portrait, c.thumb]);
+  const paths = [...CHARACTERS.flatMap((c) => [c.portrait, c.thumb]), TITLE_LOGO_SRC];
   const results = await Promise.all(paths.map(loadImage));
   for (const [src, img] of results) game.images.set(src, img);
 }

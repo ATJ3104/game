@@ -13,6 +13,9 @@ import type { NetSession } from './net';
 export const VIEW_W = 960;
 export const VIEW_H = 540;
 
+// タイトルロゴ画像(タイトル画面で使う)
+export const TITLE_LOGO_SRC = 'assets/title_logo.webp';
+
 export type SceneName = 'title' | 'howto' | 'tutorial' | 'online' | 'difficulty' | 'select' | 'vs' | 'battle' | 'result';
 
 export interface Scene {
