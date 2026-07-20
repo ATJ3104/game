@@ -1,6 +1,6 @@
 // ================================================================
 // そうさせつめい画面
-// キーボード操作(1P/2P)・ガード・必殺技の出し方・スマホ操作を
+// キーボード操作・ガード・必殺技の出し方・スマホ操作を
 // 1画面にまとめて表示する。
 // ================================================================
 
@@ -10,14 +10,14 @@ import { drawRobot } from '../robot';
 import { FONT, drawKeycaps, inRect, outlineText, type MenuRect } from './ui';
 
 // キー一覧のデータ(ここを書きかえれば表示が変わる)
-const KEY_ROWS: { label: string; p1: string[]; p2: string[]; sep?: string }[] = [
-  { label: 'いどう', p1: ['A', 'D'], p2: ['←', '→'] },
-  { label: 'ダッシュ', p1: ['D', 'D'], p2: ['→', '→'] },
-  { label: 'ジャンプ', p1: ['スペース'], p2: ['↑'] },
-  { label: 'しゃがみ', p1: ['S'], p2: ['↓'] },
-  { label: 'パンチ(はやい)', p1: ['J'], p2: ['1'] },
-  { label: 'キック(つよい)', p1: ['K'], p2: ['2'] },
-  { label: 'ひっさつ① / ②', p1: ['L'], p2: ['3'] },
+const KEY_ROWS: { label: string; keys: string[]; sep?: string }[] = [
+  { label: 'いどう', keys: ['A', 'D'], sep: '/' },
+  { label: 'ダッシュ', keys: ['D', 'D'] },
+  { label: 'ジャンプ', keys: ['スペース'] },
+  { label: 'しゃがみ', keys: ['S'] },
+  { label: 'パンチ(はやい)', keys: ['J'] },
+  { label: 'キック(つよい)', keys: ['K'] },
+  { label: 'ひっさつ① / ②', keys: ['L'] },
 ];
 
 // 「チュートリアルをはじめる」ボタン
@@ -73,15 +73,11 @@ export class HowToScene implements Scene {
     ctx.strokeRect(lx, 74, 400, 330);
     outlineText(ctx, '🎮 キーボード', lx + 200, 100, 20, '#8fd0ff');
 
-    // ヘッダー行
-    outlineText(ctx, '1P', lx + 220, 126, 15, '#8fd0ff');
-    outlineText(ctx, '2P', lx + 330, 126, 15, '#ff9db0');
     // キーキャップ風のキー一覧(データはKEY_ROWS)
     KEY_ROWS.forEach((r, i) => {
-      const y = 160 + i * 36;
-      outlineText(ctx, r.label, lx + 18, y, 15, '#ffffff', 'left');
-      drawKeycaps(ctx, lx + 178, y, r.p1, 12, r.sep ?? ' ');
-      drawKeycaps(ctx, lx + 305, y, r.p2, 12, r.sep ?? ' ');
+      const y = 146 + i * 37;
+      outlineText(ctx, r.label, lx + 18, y, 16, '#ffffff', 'left');
+      drawKeycaps(ctx, lx + 230, y, r.keys, 14, r.sep ?? ' ');
       ctx.strokeStyle = 'rgba(255,255,255,0.1)';
       ctx.beginPath();
       ctx.moveTo(lx + 14, y + 18);
@@ -104,7 +100,7 @@ export class HowToScene implements Scene {
 
     outlineText(ctx, '⚡ ひっさつわざ(1キャラ2つある!)', rx + 20, 206, 17, '#ffd23c', 'left');
     outlineText(ctx, 'ゲージまんタンで発動(時間がたつ・こうげきを当てるとたまる)', rx + 24, 230, 13, '#9f9fc0', 'left');
-    outlineText(ctx, 'わざ①: ひっさつボタン (1P: L / 2P: 3)', rx + 24, 254, 14, '#fff', 'left');
+    outlineText(ctx, 'わざ①: ひっさつボタン (L)', rx + 24, 254, 14, '#fff', 'left');
     outlineText(ctx, 'わざ②: しゃがみながら ひっさつボタン (↓+L)', rx + 24, 278, 14, '#fff', 'left');
     // ゲージのイメージ(たまっていく → 点滅)
     const gw = 260;

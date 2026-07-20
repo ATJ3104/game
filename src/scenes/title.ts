@@ -1,7 +1,6 @@
 // ================================================================
 // タイトル画面
-// ロゴ(テキスト装飾)+「ひとりで/ふたりで」のモード選択。
-// スマホでは2P対戦は「PCでプレイしてね」表示にする。
+// ロゴ画像+モード選択(CPU戦 / オンライン / チュートリアル / 説明)。
 // ================================================================
 
 import { GAME_TITLE, CHARACTERS } from '../characters';
@@ -41,11 +40,11 @@ function buildLogoCache(img: HTMLImageElement): HTMLCanvasElement {
   return c;
 }
 
-const ITEMS: MenuRect[] = [0, 1, 2, 3, 4].map((i) => ({
+const ITEMS: MenuRect[] = [0, 1, 2, 3].map((i) => ({
   x: VIEW_W / 2 - 190,
-  y: 346 + i * 37,
+  y: 350 + i * 45,
   w: 380,
-  h: 33,
+  h: 38,
 }));
 
 export class TitleScene implements Scene {
@@ -87,18 +86,14 @@ export class TitleScene implements Scene {
   }
 
   private decide(g: GameCtx, i: number): void {
-    if (i === 1 && g.isTouch) return; // スマホでは同じPCの2P対戦は選べない
     g.sfx.confirm();
     if (i === 0) {
       g.mode = 'cpu';
       g.goto('difficulty');
     } else if (i === 1) {
-      g.mode = 'vs';
-      g.goto('select');
-    } else if (i === 2) {
       g.mode = 'online';
       g.goto('online'); // オンライン対戦ロビーへ
-    } else if (i === 3) {
+    } else if (i === 2) {
       g.mode = 'cpu';
       g.goto('tutorial'); // チュートリアル(れんしゅう)
     } else {
@@ -146,17 +141,12 @@ export class TitleScene implements Scene {
     }
 
     drawMenuItem(ctx, ITEMS[0], 'ひとりであそぶ (VS CPU)', this.cursor === 0, this.frame);
-    drawMenuItem(
-      ctx, ITEMS[1],
-      g.isTouch ? '同じPCの2Pたいせんは PCでプレイしてね' : 'ふたりであそぶ (同じPCで2P)',
-      this.cursor === 1, this.frame, g.isTouch,
-    );
-    drawMenuItem(ctx, ITEMS[2], 'オンラインたいせん', this.cursor === 2, this.frame);
-    drawMenuItem(ctx, ITEMS[3], 'チュートリアル (れんしゅう)', this.cursor === 3, this.frame);
+    drawMenuItem(ctx, ITEMS[1], 'オンラインたいせん', this.cursor === 1, this.frame);
+    drawMenuItem(ctx, ITEMS[2], 'チュートリアル (れんしゅう)', this.cursor === 2, this.frame);
     if (this.tutorialDone) {
-      outlineText(ctx, '✅', ITEMS[3].x + ITEMS[3].w - 24, ITEMS[3].y + ITEMS[3].h / 2, 18, '#7fe97f');
+      outlineText(ctx, '✅', ITEMS[2].x + ITEMS[2].w - 24, ITEMS[2].y + ITEMS[2].h / 2, 18, '#7fe97f');
     }
-    drawMenuItem(ctx, ITEMS[4], 'そうさせつめい', this.cursor === 4, this.frame);
+    drawMenuItem(ctx, ITEMS[3], 'そうさせつめい', this.cursor === 3, this.frame);
 
     outlineText(ctx, g.isTouch ? 'タップでえらんでね' : 'W/S↑↓:えらぶ  J/Enter:けってい', VIEW_W / 2, 536, 12, '#9f9fc0');
   }
