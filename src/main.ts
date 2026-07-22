@@ -10,6 +10,7 @@
 import { CHARACTERS, GAME_TITLE } from './characters';
 import { Input } from './input';
 import { Sfx } from './audio';
+import { Music } from './music';
 import { TITLE_LOGO_SRC, VIEW_W, VIEW_H, type GameCtx, type Scene, type SceneName } from './game';
 import { TitleScene } from './scenes/title';
 import { HowToScene } from './scenes/howto';
@@ -66,6 +67,12 @@ function toInternal(px: number, py: number): { x: number; y: number } {
 
 const input = new Input(canvas, toInternal);
 const sfx = new Sfx();
+const music = new Music(sfx);
+
+// Mキーで BGM の ON/OFF
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'KeyM') music.toggleMute();
+});
 
 // スマホの自動再生制限対策: 最初のユーザー操作で音をONにする
 const unlock = (): void => sfx.unlock();
@@ -97,6 +104,7 @@ const debugHandle: Record<string, unknown> = {};
 const game: GameCtx = {
   input,
   sfx,
+  music,
   images: new Map(),
   isTouch,
   mode: 'cpu',
@@ -110,10 +118,13 @@ const game: GameCtx = {
     currentScene = scenes[name];
     currentSceneName = name;
     debugHandle.sceneName = name;
+    // シーンに合わせてBGMを切りかえる(バトル系は戦闘曲、それ以外はメニュー曲)
+    music.play(name === 'battle' || name === 'tutorial' ? 'battle' : 'menu');
     currentScene.enter(game);
   },
 };
 debugHandle.game = game;
+debugHandle.music = music;
 debugHandle.scenes = scenes;
 debugHandle.sceneName = currentSceneName;
 

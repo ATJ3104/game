@@ -6,6 +6,7 @@
 
 import type { Input } from './input';
 import type { Sfx } from './audio';
+import type { Music } from './music';
 import type { RobotConfig } from './characters';
 import type { NetSession } from './net';
 
@@ -30,6 +31,7 @@ export interface Scene {
 export interface GameCtx {
   input: Input;
   sfx: Sfx;
+  music: Music; // BGM(シーンに合わせて main.ts が切りかえる)
   images: Map<string, HTMLImageElement>; // 読み込み済みポートレート画像(パスがキー)
   isTouch: boolean; // タッチ端末かどうか
   mode: 'cpu' | 'vs' | 'online'; // 1人プレイ / 同じPCで2人 / オンライン対戦

@@ -10,6 +10,16 @@ export class Sfx {
   private ac: AudioContext | null = null;
   private noiseBuf: AudioBuffer | null = null;
 
+  /** BGM側から使う: 再生できる状態のAudioContextを返す */
+  getCtx(): AudioContext | null {
+    return this.ac && this.ac.state === 'running' ? this.ac : null;
+  }
+
+  /** BGM側から使う: ノイズ素材(ハイハット等の合成用) */
+  getNoise(): AudioBuffer | null {
+    return this.noiseBuf;
+  }
+
   /** 最初のユーザー操作で呼ぶ(スマホの自動再生制限対策) */
   unlock(): void {
     if (!this.ac) {
