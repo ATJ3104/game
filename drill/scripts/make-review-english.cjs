@@ -55,7 +55,7 @@ body { background: var(--paper); color: var(--ink); font-family: var(--font-ja);
 .wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
 h1 { font-size: 26px; margin: 0; text-wrap: balance; }
 .lead { color: var(--muted); max-width: 65ch; margin: 8px 0 0; }
-nav { display: flex; flex-wrap: wrap; gap: 6px; position: sticky; top: env(safe-area-inset-top, 0px); background: var(--paper); padding-block: 8px; border-bottom: 1px solid var(--line); z-index: 5; }
+nav { display: flex; flex-wrap: wrap; gap: 6px; padding-block: 8px; border-bottom: 1px solid var(--line); }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
 nav a { color: var(--ink); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px; font-family: var(--font-en); font-variant-numeric: tabular-nums; font-size: 13px; }
 nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
