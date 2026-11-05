@@ -1,6 +1,6 @@
 {
   "grade": 6,
-  "reviewed": false,
+  "reviewed": true,
   "note": "学年別漢字配当表（6年）。並びは配当表の順（音読みの50音順）。書式は grade1.json と同じ。",
   "kanji": [
     { "kanji": "胃", "on": ["イ"], "kun": [], "examples": [
