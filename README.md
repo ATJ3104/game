@@ -86,3 +86,9 @@ npx wrangler pages deploy dist --project-name=robo-fighter
 │   └── scenes/        # タイトル / 説明 / オンラインロビー / 難易度 / キャラ選択 / VS / バトル / リザルト
 └── docs/              # 元の仕様書とキャラ設計シート
 ```
+
+---
+
+## まいにちドリル（別アプリ）
+
+`drill/` フォルダには、家庭用の子ども向け学習アプリ「まいにちドリル」が入っています（Next.js + Cloudflare Workers/D1）。このゲームとは独立しています。くわしくは [drill/README.md](drill/README.md) を見てください。
