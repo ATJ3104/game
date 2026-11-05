@@ -52,8 +52,11 @@ export function validateKanjiFile(file: KanjiFile): ValidationResult {
       const ea = `${at} 例${j + 1}「${ex.word}」`;
       if (!ex.word.includes(entry.kanji)) errors.push(`${ea}: 熟語にこの漢字が入っていません`);
       if (!HIRAGANA_RE.test(ex.reading)) errors.push(`${ea}: 読み「${ex.reading}」はひらがなで`);
+      const allowed = new Set(ex.allowUnlearned ?? []);
       for (const ch of kanjiIn(ex.word)) {
-        if (!learned.has(ch)) errors.push(`${ea}: 「${ch}」はこのレベル（${level.code}）までに習わない漢字`);
+        if (learned.has(ch)) continue;
+        if (allowed.has(ch)) warnings.push(`${ea}: 「${ch}」はまだ習わない漢字（例外として許可）`);
+        else errors.push(`${ea}: 「${ch}」はこのレベル（${level.code}）までに習わない漢字`);
       }
       // 例文
       const parsed = parseSentence(ex.sentence, ex.reading);

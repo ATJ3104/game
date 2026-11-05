@@ -47,3 +47,15 @@ describe("検証そのものが機能していること（わざと壊したデ�
     expect(broken((f) => (f.kanji[1]!.examples[0]!.kanjiWrong = ["左", "古", "石"]))).toMatch(/「古」は1年までの漢字ではありません/);
   });
 });
+
+describe("まだ習わない漢字の例外", () => {
+  it("allowUnlearned に書いた字だけ、エラーでなく注意になる", () => {
+    const f = structuredClone(KANJI_FILES[1]!);
+    f.kanji[0]!.examples[0]!.word = "一年";
+    f.kanji[0]!.examples[0]!.sentence = "[[一年]]";
+    f.kanji[0]!.examples[0]!.allowUnlearned = ["年"];
+    const r = validateKanjiFile(f);
+    expect(r.errors.join("\n")).not.toMatch(/「年」/);
+    expect(r.warnings.join("\n")).toMatch(/「年」はまだ習わない漢字（例外として許可）/);
+  });
+});

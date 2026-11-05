@@ -1,6 +1,7 @@
 // 国語の教材データ（content/ の JSON）の読み込み
 import grade1 from "@content/kanji/grade1.json";
 import grade2 from "@content/kanji/grade2.json";
+import grade3 from "@content/kanji/grade3.json";
 import kanaWords from "@content/kana/words.json";
 
 export interface KanjiExample {
@@ -9,6 +10,11 @@ export interface KanjiExample {
   sentence: string;
   readWrong: string[];
   kanjiWrong: string[];
+  /**
+   * そのレベルではまだ習わないが、どうしても使う漢字（例：「昭」は「昭和」でしか使わない）。
+   * 検証ではエラーにせず注意として出す
+   */
+  allowUnlearned?: string[];
 }
 
 export interface KanjiEntry {
@@ -42,6 +48,7 @@ export const GRADE_SIZES: Record<number, number> = { 1: 80, 2: 160, 3: 200, 4: 2
 export const KANJI_FILES: Partial<Record<number, KanjiFile>> = {
   1: grade1 as KanjiFile,
   2: grade2 as KanjiFile,
+  3: grade3 as KanjiFile,
 };
 
 export const KANA_WORDS = kanaWords as KanaWordsFile;

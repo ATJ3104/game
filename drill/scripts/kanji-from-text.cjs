@@ -3,7 +3,7 @@
 //
 // 書式（# で始まる行と空行は無視）
 //   K 漢字|音読み,音読み|訓読み,訓読み
-//   E 熟語|読み|例文|読みのまちがい,,|漢字のまちがい,,
+//   E 熟語|読み|例文|読みのまちがい,,|漢字のまちがい,,[|まだ習わないが使う漢字,,]
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -42,7 +42,7 @@ for (const file of inputs) {
         if (f.length !== 3) throw new Error(`${at}: K 行は3項目`);
         kanji.push({ kanji: f[0].trim(), on: list(f[1]), kun: list(f[2]), examples: [] });
       } else if (tag === "E") {
-        if (f.length !== 5) throw new Error(`${at}: E 行は5項目`);
+        if (f.length !== 5 && f.length !== 6) throw new Error(`${at}: E 行は5項目（例外の漢字を書くときは6項目）`);
         const cur = kanji[kanji.length - 1];
         if (!cur) throw new Error(`${at}: E 行の前に K 行が必要`);
         cur.examples.push({
@@ -51,6 +51,7 @@ for (const file of inputs) {
           sentence: f[2].trim(),
           readWrong: list(f[3]),
           kanjiWrong: list(f[4]),
+          ...(f[5] ? { allowUnlearned: list(f[5]) } : {}),
         });
       } else throw new Error(`${at}: 行の先頭は K か E`);
     });
