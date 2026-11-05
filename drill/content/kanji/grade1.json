@@ -1,6 +1,6 @@
 {
   "grade": 1,
-  "reviewed": false,
+  "reviewed": true,
   "note": "学年別漢字配当表（1年・80字）。並びは配当表の順（音読みの50音順）。sentence の書式: {漢字|よみ} はふりがな付きの漢字、[[ ]] は問題の部分。readWrong は読みの選択肢のまちがい、kanjiWrong は漢字を選ぶ問題のまちがい（各3つ）。",
   "kanji": [
     { "kanji": "一", "on": ["イチ", "イツ"], "kun": ["ひと", "ひと.つ"], "examples": [
