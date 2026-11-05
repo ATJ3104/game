@@ -58,4 +58,23 @@ jobs:
 
       - name: ビルドとデプロイ
         if: steps.secrets.outputs.ready == 'true'
-        run: npm run deploy
+        run: npm run deploy 2>&1 | tee deploy.log
+
+      - name: 動作確認（デプロイしたページが開けるか）
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          URL=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | tail -1)
+          if [ -z "$URL" ]; then echo "::error::デプロイ先の URL が見つかりません"; exit 1; fi
+          echo "デプロイ先: $URL"
+          echo "### デプロイ先: $URL" >> "$GITHUB_STEP_SUMMARY"
+          for path in /welcome /parent/login /pair /manifest.webmanifest /sw.js /icons/icon-192.png; do
+            for i in 1 2 3 4 5; do
+              code=$(curl -s -o /dev/null -w "%{http_code}" "$URL$path") && [ "$code" = "200" ] && break
+              sleep 5
+            done
+            echo "$path -> $code"
+            if [ "$code" != "200" ]; then echo "::error::$path が $code を返しました"; exit 1; fi
+          done
+          # 未ログインで親の画面を開くと、ログイン画面に回されること
+          curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" "$URL/parent" | tee r.txt
+          grep -q "/parent/login" r.txt || { echo "::error::/parent がログイン画面に回されません"; exit 1; }
