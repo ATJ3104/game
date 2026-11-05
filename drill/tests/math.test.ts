@@ -492,3 +492,23 @@ describe("採点", () => {
     expect(parseAnswerInput(null)).toBeNull();
   });
 });
+
+import { mistakeCategory, mistakeStats } from "@/domain/math/categories";
+
+describe("よく間違える問題の種類", () => {
+  it("レベルと演算で分類し、間違いの割合が高い順", () => {
+    const rng = seededRng(3);
+    const add = generateQuestion("M01", rng);
+    const kuku = generateQuestion("M09", rng);
+    expect(mistakeCategory(add)).toBe("M01 たし算");
+    expect(mistakeCategory(kuku)).toMatch(/^M09 \d の段$|^M09 \dの段$/);
+    const stats = mistakeStats([
+      ...Array.from({ length: 4 }, (_, i) => ({ q: add, isCorrect: i > 0, text: "a" })),
+      ...Array.from({ length: 4 }, (_, i) => ({ q: kuku, isCorrect: i > 1, text: "k" })),
+    ]);
+    expect(stats.map((s) => [s.category, s.wrong, s.total])).toEqual([
+      [mistakeCategory(kuku), 2, 4],
+      ["M01 たし算", 1, 4],
+    ]);
+  });
+});

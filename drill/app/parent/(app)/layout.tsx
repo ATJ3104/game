@@ -17,7 +17,7 @@ export default async function ParentLayout({ children }: { children: React.React
   return (
     <div className="mx-auto min-h-dvh max-w-2xl bg-white pb-24">
       <header className="flex items-center justify-between border-b px-4 py-3">
-        <span className="font-bold">まいにちドリル（おうちの人）</span>
+        <span className="font-bold">おうちの人</span>
         <form action={logoutAction}>
           <button className="min-h-12 px-2 text-sm text-gray-500 underline">{parent.name}・ログアウト</button>
         </form>

@@ -1,8 +1,109 @@
+import Link from "next/link";
 import { requireParentPage } from "@/server/auth";
+import { getDB } from "@/server/db";
+import { getFamilySettings, listChildren } from "@/server/repo";
+import { dayState, finalizeMonths, loadRecords, monthSummary, streakOf, todayProgress } from "@/server/summary";
+import { studyDateOf, yearMonthOf } from "@/domain/dates";
+import { getMathLevel } from "@/domain/math/levels";
 
 export const dynamic = "force-dynamic";
 
+const STATE_LABEL = {
+  not_started: { text: "未着手", cls: "bg-gray-100 text-gray-700" },
+  in_progress: { text: "途中", cls: "bg-sky-100 text-sky-800" },
+  achieved: { text: "達成", cls: "bg-amber-100 text-amber-800" },
+} as const;
+
+const RESULT_LABEL = {
+  achieved: "達成",
+  failed: "達成ならず",
+  in_progress: "継続中",
+  not_applicable: "—",
+} as const;
+
 export default async function ParentDashboard() {
   const { parent } = await requireParentPage();
-  return <h1 className="text-xl font-bold">ようこそ、{parent.name} さん</h1>;
+  const db = await getDB();
+  const settings = await getFamilySettings(db, parent.family_id);
+  const today = studyDateOf(new Date(), settings.dayBoundaryHour);
+  const children = await listChildren(db, parent.family_id);
+
+  const cards = await Promise.all(
+    children.map(async (c) => {
+      const [rec, progress, level] = await Promise.all([
+        loadRecords(db, c.id),
+        todayProgress(db, c, today),
+        db
+          .prepare("SELECT level_code FROM child_levels WHERE child_id = ? AND subject = 'math'")
+          .bind(c.id)
+          .first<{ level_code: string }>(),
+      ]);
+      await finalizeMonths(db, c, settings, rec, today);
+      const month = monthSummary(c, settings, rec, yearMonthOf(today), today);
+      return {
+        child: c,
+        state: dayState(progress, rec.completed.has(today)),
+        progress,
+        month,
+        streak: streakOf(c, settings, rec, today),
+        level: level?.level_code ?? "—",
+      };
+    }),
+  );
+
+  return (
+    <div className="space-y-4">
+      <h1 className="text-xl font-bold">きょうの様子（{today}）</h1>
+      {cards.length === 0 && (
+        <p className="rounded-2xl bg-amber-50 p-4">
+          まだ子どもが登録されていません。<Link href="/parent/settings" className="font-bold underline">設定</Link>から登録してください。
+        </p>
+      )}
+      {cards.map(({ child, state, progress, month, streak, level }) => {
+        const st = STATE_LABEL[state];
+        const math = progress.find((p) => p.subject === "math");
+        return (
+          <Link
+            key={child.id}
+            href={`/parent/children/${child.id}`}
+            className="block rounded-2xl border p-4 active:bg-gray-50"
+            data-testid={`child-card-${child.name}`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-bold">
+                {child.name}
+                <span className="ml-2 text-sm font-normal text-gray-500">小{child.grade}</span>
+              </span>
+              <span className={`rounded-full px-3 py-1 text-sm font-bold ${st.cls}`} data-testid="day-state">
+                {st.text}
+              </span>
+            </div>
+            <div className="mt-3 grid grid-cols-4 gap-2 text-center text-xs text-gray-600">
+              <div>
+                <div className="text-base font-bold text-gray-900">
+                  {math ? `${Math.floor(math.activeSeconds / 60)}/${Math.round(math.targetSeconds / 60)}分` : "—"}
+                </div>
+                算数
+              </div>
+              <div>
+                <div className="text-base font-bold text-gray-900" title={getMathLevel(level)?.name}>
+                  {level}
+                </div>
+                レベル
+              </div>
+              <div>
+                <div className="text-base font-bold text-gray-900">{month.ticketsLeft}枚</div>
+                お休み券
+              </div>
+              <div>
+                <div className="text-base font-bold text-gray-900">{streak}日</div>
+                連続
+              </div>
+            </div>
+            <div className="mt-2 text-right text-xs text-gray-500">今月：{RESULT_LABEL[month.result]}</div>
+          </Link>
+        );
+      })}
+    </div>
+  );
 }
