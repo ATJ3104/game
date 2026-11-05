@@ -3,6 +3,7 @@ import { GRADE_SIZES, KANJI_FILES, type KanaWordsFile, type KanjiFile } from "./
 import { HIRAGANA_RE, KATAKANA_RE, isKanji, kanjiIn, parseSentence } from "./richText";
 import { JAPANESE_LEVELS, learnedKanjiThrough, partOfIndex } from "./levels";
 import { SEION } from "./kana";
+import { HAITOU } from "./haitou";
 
 export interface ValidationResult {
   errors: string[];
@@ -13,7 +14,7 @@ const KUN_RE = /^[ぁ-ゖー]+(\.[ぁ-ゖー]+)?$/;
 
 function allKanjiUpToGrade(grade: number): Set<string> {
   const set = new Set<string>();
-  for (let g = 1; g <= grade; g++) for (const k of KANJI_FILES[g]?.kanji ?? []) set.add(k.kanji);
+  for (let g = 1; g <= grade; g++) for (const ch of HAITOU[g] ?? []) set.add(ch);
   return set;
 }
 
@@ -23,6 +24,12 @@ export function validateKanjiFile(file: KanjiFile): ValidationResult {
   const g = file.grade;
   if (file.kanji.length !== GRADE_SIZES[g]) {
     errors.push(`${g}年: 字数が ${file.kanji.length}（配当表は ${GRADE_SIZES[g]}字）`);
+  }
+  // 配当表と同じ字・同じ並びか
+  const official = HAITOU[g] ?? [];
+  const firstDiff = file.kanji.findIndex((k, i) => k.kanji !== official[i]);
+  if (firstDiff >= 0) {
+    errors.push(`${g}年: ${firstDiff + 1}番目が「${file.kanji[firstDiff]!.kanji}」（配当表の並びでは「${official[firstDiff] ?? "なし"}」）`);
   }
   const seen = new Set<string>();
   // 他の学年との重複

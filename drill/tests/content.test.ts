@@ -6,6 +6,10 @@ import { validateKanaWords, validateKanjiFile } from "@/domain/japanese/validate
 describe("教材データの検証", () => {
   for (const [grade, file] of Object.entries(KANJI_FILES)) {
     if (!file) continue;
+    if (file.kanji.length === 0) {
+      it.skip(`漢字 ${grade}年（作成中）`, () => {});
+      continue;
+    }
     it(`漢字 ${grade}年（${file.reviewed ? "確認済み" : "未確認"}）`, () => {
       const r = validateKanjiFile(file);
       if (r.warnings.length) console.warn(`[${grade}年 注意]\n` + r.warnings.join("\n"));
@@ -28,6 +32,7 @@ describe("検証そのものが機能していること（わざと壊したデ�
   it("字数・重複", () => {
     expect(broken((f) => f.kanji.pop())).toMatch(/字数が 79/);
     expect(broken((f) => (f.kanji[1]!.kanji = "一"))).toMatch(/重複/);
+    expect(broken((f) => ([f.kanji[0], f.kanji[1]] = [f.kanji[1]!, f.kanji[0]!]))).toMatch(/1番目が「右」（配当表の並びでは「一」）/);
   });
   it("正解が選択肢に入っている・数が違う・重複", () => {
     expect(broken((f) => (f.kanji[0]!.examples[0]!.readWrong = ["ひとつ", "a", "b"]))).toMatch(/正解「ひとつ」/);

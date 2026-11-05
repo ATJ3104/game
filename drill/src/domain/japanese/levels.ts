@@ -1,5 +1,6 @@
 // 国語のレベル表（K01・K02 ＝ かな、K10〜K61 ＝ 学年別漢字を約20字ずつ）
 import { GRADE_SIZES, KANA_WORDS, KANJI_FILES, type KanjiEntry } from "./content";
+import { HAITOU } from "./haitou";
 
 export interface JapaneseLevel {
   code: string;
@@ -49,8 +50,8 @@ function build(): JapaneseLevel[] {
         grade,
         part,
         parts,
-        hasContent: !!file,
-        reviewed: !!file?.reviewed,
+        hasContent: !!file && file.kanji.length > 0,
+        reviewed: !!file?.reviewed && file.kanji.length > 0,
       });
     }
   }
@@ -75,18 +76,14 @@ export function kanjiOfLevel(level: JapaneseLevel): KanjiEntry[] {
 export function learnedKanjiThrough(level: JapaneseLevel): Set<string> {
   const set = new Set<string>();
   if (level.kind !== "kanji" || !level.grade) return set;
+  // 配当表どおりに数える（教材データがまだない学年があっても判定できるように）
   for (let g = 1; g <= level.grade; g++) {
-    const file = KANJI_FILES[g];
-    if (!file) continue;
-    file.kanji.forEach((k, i) => {
-      if (g < level.grade! || partOfIndex(g, i) <= level.part!) set.add(k.kanji);
+    HAITOU[g]!.forEach((ch, i) => {
+      if (g < level.grade! || partOfIndex(g, i) <= level.part!) set.add(ch);
     });
   }
   return set;
 }
 
 /** 漢字 → 学年 */
-export function gradeOfKanji(ch: string): number | undefined {
-  for (const [g, f] of Object.entries(KANJI_FILES)) if (f?.kanji.some((k) => k.kanji === ch)) return Number(g);
-  return undefined;
-}
+export { haitouGrade as gradeOfKanji } from "./haitou";

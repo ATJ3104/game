@@ -2,6 +2,9 @@
 import grade1 from "@content/kanji/grade1.json";
 import grade2 from "@content/kanji/grade2.json";
 import grade3 from "@content/kanji/grade3.json";
+import grade4 from "@content/kanji/grade4.json";
+import grade5 from "@content/kanji/grade5.json";
+import grade6 from "@content/kanji/grade6.json";
 import kanaWords from "@content/kana/words.json";
 
 export interface KanjiExample {
@@ -49,6 +52,9 @@ export const KANJI_FILES: Partial<Record<number, KanjiFile>> = {
   1: grade1 as KanjiFile,
   2: grade2 as KanjiFile,
   3: grade3 as KanjiFile,
+  4: grade4 as KanjiFile,
+  5: grade5 as KanjiFile,
+  6: grade6 as KanjiFile,
 };
 
 export const KANA_WORDS = kanaWords as KanaWordsFile;
