@@ -8,6 +8,7 @@ const NAV = [
   { href: "/parent", label: "ホーム" },
   { href: "/parent/special-days", label: "特別休み" },
   { href: "/parent/results", label: "月の結果" },
+  { href: "/parent/print", label: "プリント" },
   { href: "/parent/settings", label: "設定" },
 ];
 
@@ -24,7 +25,7 @@ export default async function ParentLayout({ children }: { children: React.React
       </header>
       <main className="p-4">{children}</main>
       <nav className="fixed inset-x-0 bottom-0 border-t bg-white pb-[env(safe-area-inset-bottom)]">
-        <ul className="mx-auto grid max-w-2xl grid-cols-4">
+        <ul className="mx-auto grid max-w-2xl grid-cols-5">
           {NAV.map((n) => (
             <li key={n.href}>
               <Link href={n.href} className="flex min-h-14 items-center justify-center text-sm font-bold text-gray-700">

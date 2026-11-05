@@ -34,3 +34,63 @@ body {
   .confetti, .pop { animation: none; }
   .confetti { display: none; }
 }
+
+/* ---------- プリント（A4） ---------- */
+.print-root { background: #e5e7eb; min-height: 100dvh; padding-bottom: 24px; color: #111; }
+.sheet {
+  background: #fff; width: 210mm; min-height: 297mm; margin: 16px auto; padding: 12mm 14mm;
+  box-shadow: 0 1px 6px rgb(0 0 0 / 0.15); box-sizing: border-box;
+  font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+@media screen and (max-width: 220mm) {
+  .sheet { width: 100%; min-height: 0; padding: 6mm 4mm; }
+}
+.sheet-header { display: grid; grid-template-columns: 1fr auto; gap: 4mm 6mm; align-items: end; border-bottom: 0.6mm solid #111; padding-bottom: 3mm; position: relative; }
+.sheet-title { font-size: 17pt; font-weight: 700; display: flex; align-items: center; gap: 3mm; white-space: nowrap; }
+.answer-badge { font-size: 11pt; color: #dc2626; border: 0.5mm solid #dc2626; border-radius: 2mm; padding: 0 2mm; white-space: nowrap; }
+.sheet-sub { font-size: 10pt; color: #444; }
+.sheet-meta { border-collapse: collapse; font-size: 10pt; }
+.sheet-meta th { font-weight: 400; color: #444; padding: 1mm 2mm; text-align: right; white-space: nowrap; }
+.sheet-meta td { border-bottom: 0.3mm solid #666; min-width: 24mm; padding: 1mm 2mm; white-space: nowrap; }
+.sheet-meta .w-name { min-width: 32mm; font-weight: 700; }
+.sheet-no { position: absolute; right: 0; top: -6mm; font-size: 8pt; color: #888; }
+.sheet-howto { font-size: 12pt; margin: 4mm 0 0; }
+.item-no { color: #555; font-size: 10pt; min-width: 9mm; display: inline-block; }
+
+.math-list { list-style: none; padding: 0; margin: 5mm 0 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 10mm; }
+.math-item { display: flex; align-items: center; gap: 2mm; break-inside: avoid; height: var(--row, 18mm); }
+.math-q { display: flex; flex-direction: column; }
+.math-q > div { justify-content: flex-start; }
+.math-prompt { font-size: 9pt; color: #444; }
+.math-ans { display: inline-flex; align-items: center; gap: 1.5mm; }
+.amari { font-size: 10pt; }
+.blank { display: inline-flex; align-items: center; justify-content: center; min-width: 22mm; height: calc(var(--row, 18mm) * 0.72); max-height: 11mm; padding: 0 1.5mm; border: 0.3mm solid #999; border-radius: 1.5mm; white-space: nowrap; }
+.blank.small { min-width: 12mm; }
+.blank.wide { min-width: 30mm; max-height: 15mm; }
+.blank.filled { color: #dc2626; font-weight: 700; font-size: 0.8em; }
+
+.kanji-list { list-style: none; padding: 0; margin: 2mm 0 0; display: flex; flex-direction: column; }
+.kanji-item { display: flex; align-items: flex-end; gap: 2mm; break-inside: avoid; line-height: 2.4; height: var(--row, 20mm); }
+.kanji-sentence rt { font-size: 0.45em; }
+.write-target { ruby-position: over; }
+.write-rt { font-size: 0.5em !important; letter-spacing: 0.05em; }
+.write-box {
+  display: inline-flex; align-items: center; justify-content: center; vertical-align: bottom;
+  width: 1.9em; height: 1.9em; margin: 0 0.5mm; border: 0.4mm solid #333; box-sizing: border-box;
+  background-image:
+    linear-gradient(to right, transparent calc(50% - 0.15mm), #bbb calc(50% - 0.15mm), #bbb calc(50% + 0.15mm), transparent calc(50% + 0.15mm)),
+    linear-gradient(to bottom, transparent calc(50% - 0.15mm), #bbb calc(50% - 0.15mm), #bbb calc(50% + 0.15mm), transparent calc(50% + 0.15mm));
+  font-family: "Klee One", "Hiragino Mincho ProN", "Yu Mincho", serif; font-weight: 600; font-size: 1.15em; line-height: 1;
+}
+.write-box.filled { color: #dc2626; }
+.write-kana { vertical-align: bottom; }
+
+@media print {
+  @page { size: A4; margin: 0; }
+  html, body, .print-root { background: #fff !important; }
+  .no-print { display: none !important; }
+  .sheet { margin: 0; box-shadow: none; width: 210mm; min-height: 297mm; break-after: page; }
+  .sheet:last-child { break-after: auto; }
+  .print-root { padding: 0; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
