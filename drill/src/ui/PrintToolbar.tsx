@@ -17,7 +17,7 @@ export function PrintToolbar({ remakeHref }: { remakeHref: string }) {
       <a href="/parent/print" className="flex min-h-12 items-center px-2 text-sm text-gray-500 underline">
         もどる
       </a>
-      <span className="text-xs text-gray-500">2ページ目は答えです。印刷の画面で「PDF に保存」もできます。</span>
+      <span className="text-xs text-gray-500">問題のあとに答えのページが続きます。印刷の画面で「PDF に保存」もできます。</span>
     </div>
   );
 }

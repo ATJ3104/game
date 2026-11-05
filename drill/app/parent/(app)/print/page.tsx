@@ -46,7 +46,7 @@ export default async function PrintPage() {
     <div className="space-y-6">
       <h1 className="text-xl font-bold">プリント</h1>
       <p className="text-sm text-gray-600">
-        紙に書いて練習するプリントを作ります。A4 で印刷するか、印刷の画面で「PDF に保存」を選んでください。2枚目は答えのページです。プリントは毎日の「達成」には数えません。
+        紙に書いて練習するプリントを作ります。A4 で印刷するか、印刷の画面で「PDF に保存」を選んでください。問題のページのあとに、答えのページが続きます。プリントは毎日の「達成」には数えません。
       </p>
 
       <section className="space-y-4 rounded-2xl border p-4">
