@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg: #fffaf0;
+  --color-ink: #1f2937;
+}
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  overscroll-behavior-y: none;
+}
