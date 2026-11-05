@@ -6,9 +6,10 @@ import { requireParentAction } from "@/server/auth";
 import { hashSecret, newId, randomDigits, sha256Hex } from "@/server/crypto";
 import { getChildOfFamily, getFamilySettings } from "@/server/repo";
 import { studyDateOf } from "@/domain/dates";
-import { getMathLevel } from "@/domain/math/levels";
+import { availableLevels } from "@/domain/levels";
+import { levelOptions } from "@/server/contentPolicy";
 import { isValidEmail, isValidPassword } from "@/domain/access";
-import { parseSettings, SUBJECTS, type Subject } from "@/domain/settings";
+import { parseSettings, type Subject } from "@/domain/settings";
 
 export interface FormState {
   error?: string;
@@ -28,17 +29,25 @@ function int(fd: FormData, key: string, min: number, max: number): number | null
 }
 
 const FURIGANA = ["none", "furigana", "hiragana"];
+const LEVEL_SUBJECTS: Subject[] = ["math", "japanese"];
+
+function isSelectable(subject: Subject, code: string): boolean {
+  return availableLevels(subject, levelOptions()).some((l) => l.code === code);
+}
 
 export async function addChildAction(_prev: FormState, fd: FormData): Promise<FormState> {
   const { parent } = await requireParentAction();
   const name = str(fd, "name");
   const grade = int(fd, "grade", 1, 6);
   const minutes = int(fd, "minutes_math", 1, 120);
+  const minutesJa = int(fd, "minutes_japanese", 1, 120) ?? 10;
   const level = str(fd, "level_math");
+  const levelJa = str(fd, "level_japanese");
   if (!name || name.length > 20) return { error: "名前を入力してください（20文字まで）" };
   if (grade === null) return { error: "学年を選んでください" };
   if (minutes === null) return { error: "算数の時間は1〜120分で入力してください" };
-  if (!getMathLevel(level)) return { error: "算数の初期レベルを選んでください" };
+  if (!isSelectable("math", level)) return { error: "算数の初期レベルを選んでください" };
+  if (levelJa && levelJa !== "none" && !isSelectable("japanese", levelJa)) return { error: "国語の初期レベルを選んでください" };
   const db = await getDB();
   const count = await db
     .prepare("SELECT COUNT(*) AS n FROM children WHERE family_id = ?")
@@ -51,8 +60,8 @@ export async function addChildAction(_prev: FormState, fd: FormData): Promise<Fo
   await db.batch([
     db
       .prepare(
-        `INSERT INTO children (id, family_id, name, grade, furigana_mode, minutes_math, start_date, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO children (id, family_id, name, grade, furigana_mode, minutes_math, minutes_japanese, start_date, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         childId,
@@ -61,6 +70,7 @@ export async function addChildAction(_prev: FormState, fd: FormData): Promise<Fo
         grade,
         grade <= 1 ? "hiragana" : "none",
         minutes,
+        minutesJa,
         studyDateOf(now, settings.dayBoundaryHour),
         now.toISOString(),
       ),
@@ -72,6 +82,18 @@ export async function addChildAction(_prev: FormState, fd: FormData): Promise<Fo
         "INSERT INTO level_history (id, child_id, subject, from_level, to_level, reason, created_at) VALUES (?, ?, 'math', NULL, ?, 'initial', ?)",
       )
       .bind(newId(), childId, level, now.toISOString()),
+    ...(levelJa && levelJa !== "none"
+      ? [
+          db
+            .prepare("INSERT INTO child_levels (child_id, subject, level_code, updated_at) VALUES (?, 'japanese', ?, ?)")
+            .bind(childId, levelJa, now.toISOString()),
+          db
+            .prepare(
+              "INSERT INTO level_history (id, child_id, subject, from_level, to_level, reason, created_at) VALUES (?, ?, 'japanese', NULL, ?, 'initial', ?)",
+            )
+            .bind(newId(), childId, levelJa, now.toISOString()),
+        ]
+      : []),
   ]);
   revalidatePath("/parent", "layout");
   return { ok: `${name} さんを登録しました` };
@@ -85,18 +107,20 @@ export async function updateChildAction(_prev: FormState, fd: FormData): Promise
   const name = str(fd, "name");
   const grade = int(fd, "grade", 1, 6);
   const minutes = int(fd, "minutes_math", 1, 120);
+  const minutesJa = int(fd, "minutes_japanese", 1, 120);
   const allowance = int(fd, "allowance_amount", 0, 1_000_000);
   const furigana = str(fd, "furigana_mode");
   if (!name || name.length > 20) return { error: "名前を入力してください（20文字まで）" };
   if (grade === null) return { error: "学年を選んでください" };
   if (minutes === null) return { error: "算数の時間は1〜120分で入力してください" };
+  if (minutesJa === null) return { error: "国語の時間は1〜120分で入力してください" };
   if (allowance === null) return { error: "お小遣いの金額を正しく入力してください" };
   if (!FURIGANA.includes(furigana)) return { error: "ふりがな設定を選んでください" };
   await db
     .prepare(
-      "UPDATE children SET name = ?, grade = ?, minutes_math = ?, allowance_amount = ?, furigana_mode = ? WHERE id = ?",
+      "UPDATE children SET name = ?, grade = ?, minutes_math = ?, minutes_japanese = ?, allowance_amount = ?, furigana_mode = ? WHERE id = ?",
     )
-    .bind(name, grade, minutes, allowance, furigana, child.id)
+    .bind(name, grade, minutes, minutesJa, allowance, furigana, child.id)
     .run();
   revalidatePath("/parent", "layout");
   return { ok: "保存しました" };
@@ -108,13 +132,21 @@ export async function setLevelAction(_prev: FormState, fd: FormData): Promise<Fo
   const child = await getChildOfFamily(db, parent.family_id, str(fd, "child_id"));
   if (!child) return { error: "子どもが見つかりません" };
   const subject = str(fd, "subject") as Subject;
-  if (!SUBJECTS.includes(subject) || subject !== "math") return { error: "この教科はまだ使えません" };
+  if (!LEVEL_SUBJECTS.includes(subject)) return { error: "この教科はまだ使えません" };
   const level = str(fd, "level_code");
-  if (!getMathLevel(level)) return { error: "レベルを選んでください" };
   const cur = await db
     .prepare("SELECT level_code FROM child_levels WHERE child_id = ? AND subject = ?")
     .bind(child.id, subject)
     .first<{ level_code: string }>();
+  // 国語は「やらない」にもできる（算数は必須）
+  if (level === "none") {
+    if (subject === "math") return { error: "算数は「やらない」にできません" };
+    if (!cur) return { ok: "変更はありません" };
+    await db.prepare("DELETE FROM child_levels WHERE child_id = ? AND subject = ?").bind(child.id, subject).run();
+    revalidatePath("/parent", "layout");
+    return { ok: "国語をメニューから外しました" };
+  }
+  if (!isSelectable(subject, level)) return { error: "レベルを選んでください" };
   if (cur?.level_code === level) return { ok: "変更はありません" };
   const now = new Date().toISOString();
   await db.batch([
@@ -126,9 +158,9 @@ export async function setLevelAction(_prev: FormState, fd: FormData): Promise<Fo
       .bind(child.id, subject, level, now),
     db
       .prepare(
-        "INSERT INTO level_history (id, child_id, subject, from_level, to_level, reason, created_at) VALUES (?, ?, ?, ?, ?, 'manual', ?)",
+        "INSERT INTO level_history (id, child_id, subject, from_level, to_level, reason, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
       )
-      .bind(newId(), child.id, subject, cur?.level_code ?? null, level, now),
+      .bind(newId(), child.id, subject, cur?.level_code ?? null, level, cur ? "manual" : "initial", now),
   ]);
   revalidatePath("/parent", "layout");
   return { ok: `レベルを ${level} にしました` };

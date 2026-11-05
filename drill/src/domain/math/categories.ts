@@ -2,8 +2,11 @@ import type { MathQuestion } from "./question";
 
 const OP_NAME: Record<string, string> = { "+": "たし算", "−": "ひき算", "×": "かけ算", "÷": "わり算" };
 
-/** 「よく間違える問題の種類」の分類（レベル＋演算） */
+const JA_TYPE: Record<string, string> = { read: "読み", write: "漢字えらび", listen: "聞き取り", picture: "文字と絵" };
+
+/** 「よく間違える問題の種類」の分類（算数：レベル＋演算、国語：レベル＋出題の形） */
 export function mistakeCategory(q: MathQuestion): string {
+  if (q.level.startsWith("K")) return `${q.level} ${JA_TYPE[String(q.meta.type)] ?? ""}`.trim();
   if (q.level === "M23") return `${q.level} ${q.meta.type === "reduce" ? "約分" : "通分"}`;
   if (q.level === "M29") return `${q.level} 計算の順序`;
   if (typeof q.meta.dan === "number") return `${q.level} ${q.meta.dan}の段`;

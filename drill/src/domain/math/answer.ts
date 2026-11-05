@@ -6,7 +6,8 @@ export type AnswerInput =
   | { kind: "int"; value: string }
   | { kind: "decimal"; value: string }
   | { kind: "fraction"; whole?: string; num?: string; den?: string }
-  | { kind: "qr"; q: string; r: string };
+  | { kind: "qr"; q: string; r: string }
+  | { kind: "choice"; index: number };
 
 export type Feedback =
   | "reduce" // 値は合っているが約分していない（reduced のレベルでは ×）
@@ -60,6 +61,11 @@ export function isSimplestForm(p: { whole: number; num: number | null; den: numb
 export function grade(q: MathQuestion, input: AnswerInput): GradeResult {
   if (input.kind !== q.kind) return { correct: false, invalid: true };
   switch (input.kind) {
+    case "choice": {
+      const n = q.choices?.length ?? 0;
+      if (!Number.isInteger(input.index) || input.index < 0 || input.index >= n) return { correct: false, invalid: true };
+      return { correct: input.index === q.answerChoice };
+    }
     case "int": {
       const v = parseInt10(input.value);
       if (v === null) return { correct: false, invalid: true };
@@ -93,6 +99,7 @@ export function grade(q: MathQuestion, input: AnswerInput): GradeResult {
 
 /** 正しい答えの表示用テキスト（間違えたときに見せる） */
 export function answerText(q: MathQuestion): string {
+  if (q.kind === "choice") return q.choices?.[q.answerChoice ?? -1] ?? "";
   if (q.kind === "qr") return q.qr!.r === 0 ? `${q.qr!.q}` : `${q.qr!.q} あまり ${q.qr!.r}`;
   const v = q.value!;
   if (q.kind === "int") return String(v.n);
@@ -106,8 +113,10 @@ export function answerText(q: MathQuestion): string {
 }
 
 /** 入力をそのまま記録用の文字列に */
-export function inputText(input: AnswerInput): string {
+export function inputText(input: AnswerInput, q?: MathQuestion): string {
   switch (input.kind) {
+    case "choice":
+      return q?.choices?.[input.index] ?? String(input.index);
     case "int":
     case "decimal":
       return input.value;
@@ -138,6 +147,10 @@ export function parseAnswerInput(raw: unknown): AnswerInput | null {
     }
     case "fraction":
       return { kind: "fraction", whole: s(o.whole), num: s(o.num), den: s(o.den) };
+    case "choice":
+      return typeof o.index === "number" && Number.isInteger(o.index) && o.index >= 0 && o.index < 10
+        ? { kind: "choice", index: o.index }
+        : null;
     default:
       return null;
   }

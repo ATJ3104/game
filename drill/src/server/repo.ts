@@ -1,5 +1,6 @@
 import type { ChildRow } from "./auth";
-import { parseSettings, type FamilySettings, type Subject } from "@/domain/settings";
+import { parseSettings, SUBJECTS, type FamilySettings, type Subject } from "@/domain/settings";
+import { IMPLEMENTED_SUBJECTS } from "@/domain/levels";
 
 export async function getFamilySettings(db: D1Database, familyId: string): Promise<FamilySettings> {
   const row = await db
@@ -37,4 +38,14 @@ export function minutesFor(child: ChildRow, subject: Subject): number {
   if (subject === "math") return child.minutes_math;
   if (subject === "japanese") return child.minutes_japanese;
   return child.minutes_english;
+}
+
+/** その子の学習する教科（親がレベルを設定した教科。算数 → 国語 → 英語の順） */
+export async function childSubjects(db: D1Database, childId: string): Promise<Subject[]> {
+  const res = await db
+    .prepare("SELECT subject, level_code FROM child_levels WHERE child_id = ?")
+    .bind(childId)
+    .all<{ subject: Subject; level_code: string }>();
+  const set = new Set(res.results.map((r) => r.subject));
+  return SUBJECTS.filter((s) => set.has(s) && IMPLEMENTED_SUBJECTS.includes(s));
 }

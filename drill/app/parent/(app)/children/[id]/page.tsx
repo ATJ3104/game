@@ -5,7 +5,8 @@ import { getDB } from "@/server/db";
 import { getChildOfFamily, getFamilySettings } from "@/server/repo";
 import { loadRecords, monthLabel, monthSummary, streakOf } from "@/server/summary";
 import { addDays, addMonths, studyDateOf, yearMonthOf } from "@/domain/dates";
-import { getMathLevel } from "@/domain/math/levels";
+import { getLevel } from "@/domain/levels";
+import { SUBJECT_LABEL, type Subject } from "@/domain/settings";
 import { mistakeStats } from "@/domain/math/categories";
 import type { MathQuestion } from "@/domain/math/question";
 import { MonthCalendar } from "@/ui/MonthCalendar";
@@ -36,10 +37,10 @@ export default async function ChildDetailPage({
     loadRecords(db, child.id),
     db
       .prepare(
-        "SELECT from_level, to_level, reason, created_at FROM level_history WHERE child_id = ? AND subject = 'math' ORDER BY created_at DESC LIMIT 30",
+        "SELECT subject, from_level, to_level, reason, created_at FROM level_history WHERE child_id = ? ORDER BY created_at DESC LIMIT 40",
       )
       .bind(child.id)
-      .all<{ from_level: string | null; to_level: string; reason: keyof typeof REASON; created_at: string }>(),
+      .all<{ subject: Subject; from_level: string | null; to_level: string; reason: keyof typeof REASON; created_at: string }>(),
     db
       .prepare(
         `SELECT study_date, SUM(active_seconds) AS sec, MAX(eval_total) AS total, MAX(eval_correct) AS correct
@@ -56,16 +57,22 @@ export default async function ChildDetailPage({
       .bind(child.id, since)
       .all<{ question_json: string; is_correct: number; answer: string }>(),
     db
-      .prepare("SELECT level_code FROM child_levels WHERE child_id = ? AND subject = 'math'")
+      .prepare("SELECT subject, level_code FROM child_levels WHERE child_id = ?")
       .bind(child.id)
-      .first<{ level_code: string }>(),
+      .all<{ subject: Subject; level_code: string }>(),
   ]);
   const month = monthSummary(child, settings, rec, ym, today);
   const mistakes = mistakeStats(
     attempts.results.map((a) => {
       const q = (JSON.parse(a.question_json) as { q: MathQuestion }).q;
-      const text = q.tokens.map((t) => (t.t === "f" ? `${t.n}/${t.d}` : t.v)).join(" ");
-      return { q, isCorrect: a.is_correct === 1, text: `${text} ${a.answer}（×）` };
+      const text = q.rich
+        ? `${q.rich.map((s) => (s.t === "text" ? s.v : s.t === "ruby" ? s.base : `［${s.v}］`)).join("")} → ${a.answer}`
+        : q.bigText
+          ? `${q.bigText} → ${a.answer}`
+          : q.speak
+            ? `「${q.speak}」 → ${a.answer}`
+            : q.tokens.map((t) => (t.t === "f" ? `${t.n}/${t.d}` : t.v)).join(" ") + ` ${a.answer}`;
+      return { q, isCorrect: a.is_correct === 1, text: `${text}（×）` };
     }),
   ).slice(0, 6);
 
@@ -78,8 +85,10 @@ export default async function ChildDetailPage({
         </Link>
       </div>
       <p className="text-sm text-gray-600">
-        算数 {level?.level_code}（{getMathLevel(level?.level_code ?? "")?.name}）・連続 {streakOf(child, settings, rec, today)}日・これまでの達成{" "}
-        {rec.completed.size}日
+        {level.results
+          .map((l) => `${SUBJECT_LABEL[l.subject]} ${l.level_code}（${getLevel(l.subject, l.level_code)?.name ?? ""}）`)
+          .join("・")}
+        ・連続 {streakOf(child, settings, rec, today)}日・これまでの達成 {rec.completed.size}日
       </p>
 
       <section className="rounded-2xl border p-4">
@@ -138,7 +147,7 @@ export default async function ChildDetailPage({
             <li key={i}>
               {new Date(h.created_at).toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })}
               {h.from_level && h.from_level !== h.to_level ? `${h.from_level} → ` : ""}
-              {h.to_level}（{REASON[h.reason] ?? h.reason}）
+              {SUBJECT_LABEL[h.subject]} {h.to_level}（{REASON[h.reason] ?? h.reason}）
             </li>
           ))}
         </ul>

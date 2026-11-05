@@ -1,11 +1,11 @@
 // 学習の流れ（サーバー側）。問題と答えはサーバーだけが持ち、採点もサーバーで行う。
 import type { ChildRow } from "./auth";
 import { newId } from "./crypto";
-import { getChildLevel, getFamilySettings, minutesFor } from "./repo";
+import { childSubjects, getChildLevel, getFamilySettings, minutesFor } from "./repo";
+import { levelOptions } from "./contentPolicy";
 import { studyDateOf } from "@/domain/dates";
-import { ENABLED_SUBJECTS, type FamilySettings, type Subject } from "@/domain/settings";
-import { generateQuestion } from "@/domain/math/generators";
-import { getMathLevel, nextMathLevel, prevMathLevel } from "@/domain/math/levels";
+import { type FamilySettings, type Subject } from "@/domain/settings";
+import { generateFor, getLevel, nextLevel, prevLevel } from "@/domain/levels";
 import { questionKey, toPublic, type MathQuestion, type PublicQuestion } from "@/domain/math/question";
 import { mathRandomRng } from "@/domain/math/rng";
 import { answerText, grade, inputText, type AnswerInput, type Feedback } from "@/domain/math/answer";
@@ -39,6 +39,7 @@ export interface SessionRow {
   current_shown_at: string | null;
   current_retry_of: string | null;
   last_report_at: string | null;
+  can_speak: number;
   started_at: string;
   completed_at: string | null;
 }
@@ -135,11 +136,12 @@ async function newQuestion(db: D1Database, s: SessionRow, settings: FamilySettin
     .bind(s.id)
     .first<{ question_json: string }>();
   const lastKey = last ? questionKey((JSON.parse(last.question_json) as StoredQuestion).q) : null;
-  const prev = prevMathLevel(s.level_code);
+  const prev = prevLevel(s.subject, s.level_code, levelOptions());
   const fromPrev = pickFromPrevLevel(s.is_review_mix === 1, prev !== null, settings.reviewMixRatio, Math.random());
   const level = fromPrev && prev ? prev : s.level_code;
-  let q = generateQuestion(level, mathRandomRng);
-  for (let i = 0; i < 5 && questionKey(q) === lastKey; i++) q = generateQuestion(level, mathRandomRng);
+  const gen = () => generateFor(s.subject, level, mathRandomRng, { canSpeak: s.can_speak === 1 });
+  let q = gen();
+  for (let i = 0; i < 5 && questionKey(q) === lastKey; i++) q = gen();
   return { q, fromPrev };
 }
 
@@ -187,7 +189,7 @@ async function toState(
     subject: s.subject,
     status: s.status,
     levelCode: s.level_code,
-    levelName: getMathLevel(s.level_code)?.name ?? s.level_code,
+    levelName: getLevel(s.subject, s.level_code)?.name ?? s.level_code,
     activeSeconds: Math.floor(s.active_seconds),
     targetSeconds: s.target_seconds,
     idleSeconds: settings.idleSeconds,
@@ -210,8 +212,13 @@ async function getSession(db: D1Database, childId: string, sessionId: string): P
 }
 
 /** 今日のその教科の学習を始める（すでにあれば続きから） */
-export async function startOrResume(db: D1Database, child: ChildRow, subject: Subject): Promise<StudyState> {
-  if (!ENABLED_SUBJECTS.includes(subject)) throw new StudyError("invalid", "この教科はまだありません");
+export async function startOrResume(
+  db: D1Database,
+  child: ChildRow,
+  subject: Subject,
+  opts: { canSpeak?: boolean } = {},
+): Promise<StudyState> {
+  if (!(await childSubjects(db, child.id)).includes(subject)) throw new StudyError("invalid", "この きょうかは まだ ありません");
   const settings = await loadSettings(db, child);
   const now = new Date();
   const today = todayFor(settings, now);
@@ -222,8 +229,10 @@ export async function startOrResume(db: D1Database, child: ChildRow, subject: Su
     .first<SessionRow>();
 
   if (!s) {
-    const level = (await getChildLevel(db, child.id, subject)) ?? "M01";
-    const review = shouldReviewMix(await recentEvals(db, child.id, subject, level), settings) && prevMathLevel(level) !== null;
+    const level = (await getChildLevel(db, child.id, subject))!;
+    const review =
+      shouldReviewMix(await recentEvals(db, child.id, subject, level), settings) &&
+      prevLevel(subject, level, levelOptions()) !== null;
     const id = newId();
     const stmts = [
       db
@@ -258,6 +267,13 @@ export async function startOrResume(db: D1Database, child: ChildRow, subject: Su
       .bind(child.id, today, subject)
       .first<SessionRow>();
     if (!s) throw new StudyError("not_found");
+  }
+
+  // 読み上げが使えるかは端末ごとに違うので、開くたびに更新する
+  const canSpeak = opts.canSpeak ? 1 : 0;
+  if (s.can_speak !== canSpeak) {
+    await db.prepare("UPDATE sessions SET can_speak = ? WHERE id = ?").bind(canSpeak, s.id).run();
+    s = { ...s, can_speak: canSpeak };
   }
 
   if (s.status !== "done" && !s.current_question_json) {
@@ -337,7 +353,7 @@ export async function submitAnswer(
       newId(),
       s.id,
       s.current_question_json,
-      inputText(p.input),
+      inputText(p.input, stored.q),
       result.correct ? 1 : 0,
       responseMs,
       isGuess(responseMs, settings.guessThresholdMs[s.subject]) ? 1 : 0,
@@ -381,7 +397,7 @@ export async function submitAnswer(
     correct: result.correct,
     feedback: result.feedback,
     correctAnswer: answerText(stored.q),
-    yourAnswer: inputText(p.input),
+    yourAnswer: inputText(p.input, stored.q),
     state: await toState(db, updated, settings, { promotedTo }),
   };
 }
@@ -421,7 +437,8 @@ async function completeSession(
     .bind(child.id, s.study_date)
     .all<{ subject: Subject }>();
   const doneSet = new Set(done.results.map((r) => r.subject));
-  if (ENABLED_SUBJECTS.every((sub) => doneSet.has(sub))) {
+  const subjects = await childSubjects(db, child.id);
+  if (subjects.length > 0 && subjects.every((sub) => doneSet.has(sub))) {
     await db
       .prepare("INSERT INTO daily_completion (child_id, study_date, completed_at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING")
       .bind(child.id, s.study_date, iso)
@@ -431,8 +448,8 @@ async function completeSession(
   // 進級判定（親が途中でレベルを変えていたら判定しない）
   const current = await getChildLevel(db, child.id, s.subject);
   if (current !== s.level_code) return null;
-  const level = getMathLevel(s.level_code);
-  const next = nextMathLevel(s.level_code);
+  const level = getLevel(s.subject, s.level_code);
+  const next = nextLevel(s.subject, s.level_code, levelOptions());
   if (!level || !next) return null;
   const evals = await recentEvals(db, child.id, s.subject, s.level_code);
   if (!shouldPromote(evals, level.targetMs, settings)) return null;

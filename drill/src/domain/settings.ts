@@ -2,8 +2,6 @@
 
 export type Subject = "math" | "japanese" | "english";
 export const SUBJECTS: readonly Subject[] = ["math", "japanese", "english"];
-/** Phase 1 で使える教科（国語・英語は Phase 2/3 で追加） */
-export const ENABLED_SUBJECTS: readonly Subject[] = ["math"];
 
 export const SUBJECT_LABEL: Record<Subject, string> = {
   math: "さんすう",

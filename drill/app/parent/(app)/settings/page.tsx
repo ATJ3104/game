@@ -2,7 +2,9 @@ import { requireParentPage } from "@/server/auth";
 import { getDB } from "@/server/db";
 import { getFamilySettings, listChildren } from "@/server/repo";
 import { ActionForm, btnDanger, Field, inputCls, labelCls } from "@/ui/ActionForm";
-import { MATH_LEVELS } from "@/domain/math/levels";
+import { availableLevels } from "@/domain/levels";
+import type { Subject } from "@/domain/settings";
+import { levelOptions } from "@/server/contentPolicy";
 import {
   addChildAction,
   addParentAction,
@@ -33,12 +35,15 @@ function GradeSelect({ defaultValue }: { defaultValue?: number }) {
   );
 }
 
-function LevelSelect({ name, defaultValue }: { name: string; defaultValue?: string }) {
+function LevelSelect({ name, subject, defaultValue }: { name: string; subject: Subject; defaultValue?: string }) {
+  const levels = availableLevels(subject, levelOptions());
   return (
-    <select name={name} defaultValue={defaultValue ?? "M01"} className={inputCls}>
-      {MATH_LEVELS.map((l) => (
+    <select name={name} defaultValue={defaultValue ?? (subject === "math" ? "M01" : "none")} className={inputCls}>
+      {subject !== "math" && <option value="none">やらない</option>}
+      {levels.map((l) => (
         <option key={l.code} value={l.code}>
           {l.code} {l.name}
+          {l.unreviewed ? "（未確認の教材）" : ""}
         </option>
       ))}
     </select>
@@ -70,11 +75,11 @@ export default async function SettingsPage() {
       .all<{ id: string; child_id: string; label: string; created_at: string; last_seen_at: string | null }>(),
     db
       .prepare(
-        `SELECT l.child_id, l.level_code FROM child_levels l JOIN children c ON c.id = l.child_id
-          WHERE c.family_id = ? AND l.subject = 'math'`,
+        `SELECT l.child_id, l.subject, l.level_code FROM child_levels l JOIN children c ON c.id = l.child_id
+          WHERE c.family_id = ?`,
       )
       .bind(parent.family_id)
-      .all<{ child_id: string; level_code: string }>(),
+      .all<{ child_id: string; subject: Subject; level_code: string }>(),
   ]);
 
   return (
@@ -82,7 +87,8 @@ export default async function SettingsPage() {
       <h1 className="text-xl font-bold">設定</h1>
 
       {children.map((c) => {
-        const level = levels.results.find((l) => l.child_id === c.id)?.level_code;
+        const levelOf = (subject: Subject) =>
+          levels.results.find((l) => l.child_id === c.id && l.subject === subject)?.level_code;
         const childDevices = devices.results.filter((d) => d.child_id === c.id);
         return (
           <section key={c.id} className="space-y-5 rounded-2xl border p-4">
@@ -92,8 +98,13 @@ export default async function SettingsPage() {
               <input type="hidden" name="child_id" value={c.id} />
               <Field label="名前" name="name" defaultValue={c.name} required maxLength={20} />
               <GradeSelect defaultValue={c.grade} />
-              <Field label="算数の時間（分）" name="minutes_math" type="number" inputMode="numeric" min={1} max={120} defaultValue={c.minutes_math} required />
-              <p className="text-xs text-gray-500">国語・英語は準備中です（いまは算数のみ）。</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="算数の時間（分）" name="minutes_math" type="number" inputMode="numeric" min={1} max={120} defaultValue={c.minutes_math} required />
+                <Field label="国語の時間（分）" name="minutes_japanese" type="number" inputMode="numeric" min={1} max={120} defaultValue={c.minutes_japanese} required />
+              </div>
+              <p className="text-xs text-gray-500">
+                1日の合計：{c.minutes_math + (levelOf("japanese") ? c.minutes_japanese : 0)}分（国語が「やらない」のときは算数のみ）。英語は準備中です。
+              </p>
               <Field label="お小遣いの金額（円・表示用）" name="allowance_amount" type="number" inputMode="numeric" min={0} defaultValue={c.allowance_amount} required />
               <label className="block">
                 <span className={labelCls}>漢字の表示</span>
@@ -105,12 +116,21 @@ export default async function SettingsPage() {
               </label>
             </ActionForm>
 
-            <ActionForm action={setLevelAction} submitLabel="レベルを変更">
+            <ActionForm action={setLevelAction} submitLabel="算数のレベルを変更">
               <input type="hidden" name="child_id" value={c.id} />
               <input type="hidden" name="subject" value="math" />
               <label className="block">
                 <span className={labelCls}>算数のレベル（手動で上げ下げ）</span>
-                <LevelSelect name="level_code" defaultValue={level} />
+                <LevelSelect name="level_code" subject="math" defaultValue={levelOf("math")} />
+              </label>
+            </ActionForm>
+
+            <ActionForm action={setLevelAction} submitLabel="国語のレベルを変更">
+              <input type="hidden" name="child_id" value={c.id} />
+              <input type="hidden" name="subject" value="japanese" />
+              <label className="block">
+                <span className={labelCls}>国語のレベル（「やらない」でメニューから外す）</span>
+                <LevelSelect name="level_code" subject="japanese" defaultValue={levelOf("japanese")} />
               </label>
             </ActionForm>
 
@@ -142,7 +162,12 @@ export default async function SettingsPage() {
           <Field label="算数の時間（分）" name="minutes_math" type="number" inputMode="numeric" min={1} max={120} defaultValue={10} required />
           <label className="block">
             <span className={labelCls}>算数の初期レベル</span>
-            <LevelSelect name="level_math" />
+            <LevelSelect name="level_math" subject="math" />
+          </label>
+          <Field label="国語の時間（分）" name="minutes_japanese" type="number" inputMode="numeric" min={1} max={120} defaultValue={10} required />
+          <label className="block">
+            <span className={labelCls}>国語の初期レベル</span>
+            <LevelSelect name="level_japanese" subject="japanese" />
           </label>
         </ActionForm>
       </section>

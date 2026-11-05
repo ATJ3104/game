@@ -4,7 +4,8 @@ import { getDB } from "@/server/db";
 import { getFamilySettings, listChildren } from "@/server/repo";
 import { dayState, finalizeMonths, loadRecords, monthSummary, streakOf, todayProgress } from "@/server/summary";
 import { studyDateOf, yearMonthOf } from "@/domain/dates";
-import { getMathLevel } from "@/domain/math/levels";
+import { getLevel } from "@/domain/levels";
+import { SUBJECT_LABEL, type Subject } from "@/domain/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +35,9 @@ export default async function ParentDashboard() {
         loadRecords(db, c.id),
         todayProgress(db, c, today),
         db
-          .prepare("SELECT level_code FROM child_levels WHERE child_id = ? AND subject = 'math'")
+          .prepare("SELECT subject, level_code FROM child_levels WHERE child_id = ?")
           .bind(c.id)
-          .first<{ level_code: string }>(),
+          .all<{ subject: Subject; level_code: string }>(),
       ]);
       await finalizeMonths(db, c, settings, rec, today);
       const month = monthSummary(c, settings, rec, yearMonthOf(today), today);
@@ -46,7 +47,7 @@ export default async function ParentDashboard() {
         progress,
         month,
         streak: streakOf(c, settings, rec, today),
-        level: level?.level_code ?? "—",
+        levels: level.results,
       };
     }),
   );
@@ -59,9 +60,8 @@ export default async function ParentDashboard() {
           まだ子どもが登録されていません。<Link href="/parent/settings" className="font-bold underline">設定</Link>から登録してください。
         </p>
       )}
-      {cards.map(({ child, state, progress, month, streak, level }) => {
+      {cards.map(({ child, state, progress, month, streak, levels }) => {
         const st = STATE_LABEL[state];
-        const math = progress.find((p) => p.subject === "math");
         return (
           <Link
             key={child.id}
@@ -78,19 +78,24 @@ export default async function ParentDashboard() {
                 {st.text}
               </span>
             </div>
-            <div className="mt-3 grid grid-cols-4 gap-2 text-center text-xs text-gray-600">
-              <div>
-                <div className="text-base font-bold text-gray-900">
-                  {math ? `${Math.floor(math.activeSeconds / 60)}/${Math.round(math.targetSeconds / 60)}分` : "—"}
-                </div>
-                算数
-              </div>
-              <div>
-                <div className="text-base font-bold text-gray-900" title={getMathLevel(level)?.name}>
-                  {level}
-                </div>
-                レベル
-              </div>
+            <ul className="mt-3 space-y-1 text-sm">
+              {progress.map((p) => {
+                const lv = levels.find((l) => l.subject === p.subject)?.level_code ?? "";
+                return (
+                  <li key={p.subject} className="flex items-center justify-between">
+                    <span>
+                      {SUBJECT_LABEL[p.subject]}・{lv}
+                      <span className="ml-1 text-xs text-gray-500">{getLevel(p.subject, lv)?.name}</span>
+                    </span>
+                    <span className="font-bold">
+                      {p.status === "done" ? "✅ " : ""}
+                      {Math.floor(p.activeSeconds / 60)}/{Math.round(p.targetSeconds / 60)}分
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-center text-xs text-gray-600">
               <div>
                 <div className="text-base font-bold text-gray-900">{month.ticketsLeft}枚</div>
                 お休み券

@@ -1,8 +1,8 @@
 // 子どもの状態の集計（カレンダー・連続日数・今日の進み具合・月の結果の確定保存）
 import type { ChildRow } from "./auth";
-import { minutesFor } from "./repo";
+import { childSubjects, minutesFor } from "./repo";
 import { computeMonth, computeStreak, finalResultOf, finishedMonthsSince, type MonthSummary } from "@/domain/calendar";
-import { ENABLED_SUBJECTS, type FamilySettings, type Subject } from "@/domain/settings";
+import { type FamilySettings, type Subject } from "@/domain/settings";
 
 export interface ChildRecords {
   completed: Set<string>;
@@ -60,7 +60,8 @@ export async function todayProgress(db: D1Database, child: ChildRow, today: stri
     .prepare("SELECT subject, status, active_seconds, target_seconds FROM sessions WHERE child_id = ? AND study_date = ?")
     .bind(child.id, today)
     .all<{ subject: Subject; status: SubjectProgress["status"]; active_seconds: number; target_seconds: number }>();
-  return ENABLED_SUBJECTS.map((subject) => {
+  const subjects = await childSubjects(db, child.id);
+  return subjects.map((subject) => {
     const r = res.results.find((x) => x.subject === subject);
     return r
       ? { subject, status: r.status, activeSeconds: Math.floor(r.active_seconds), targetSeconds: r.target_seconds }
@@ -117,4 +118,22 @@ export async function finalizeMonths(
 export function monthLabel(yearMonth: string): string {
   const [y, m] = yearMonth.split("-");
   return `${y}年${Number(m)}月`;
+}
+
+/**
+ * 今日の教科がすべて終わっているのに「達成」が記録されていなければ記録する
+ * （親が途中で教科を外した場合など。ふだんは教科の完了時に記録される）
+ */
+export async function ensureDailyCompletion(
+  db: D1Database,
+  child: ChildRow,
+  today: string,
+  progress: SubjectProgress[],
+): Promise<boolean> {
+  if (progress.length === 0 || !progress.every((p) => p.status === "done")) return false;
+  await db
+    .prepare("INSERT INTO daily_completion (child_id, study_date, completed_at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING")
+    .bind(child.id, today, new Date().toISOString())
+    .run();
+  return true;
 }

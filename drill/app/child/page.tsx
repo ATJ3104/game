@@ -2,9 +2,9 @@ import Link from "next/link";
 import { requireChildPage } from "@/server/auth";
 import { getDB } from "@/server/db";
 import { getFamilySettings } from "@/server/repo";
-import { finalizeMonths, loadRecords, monthLabel, monthSummary, streakOf, todayProgress } from "@/server/summary";
+import { ensureDailyCompletion, finalizeMonths, loadRecords, monthLabel, monthSummary, streakOf, todayProgress } from "@/server/summary";
 import { studyDateOf, yearMonthOf } from "@/domain/dates";
-import { SUBJECT_LABEL, SUBJECTS, ENABLED_SUBJECTS } from "@/domain/settings";
+import { SUBJECT_LABEL, SUBJECTS } from "@/domain/settings";
 import { MonthCalendar } from "@/ui/MonthCalendar";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +14,9 @@ export default async function ChildHome() {
   const db = await getDB();
   const settings = await getFamilySettings(db, child.family_id);
   const today = studyDateOf(new Date(), settings.dayBoundaryHour);
-  const [rec, progress] = await Promise.all([loadRecords(db, child.id), todayProgress(db, child, today)]);
+  const progress = await todayProgress(db, child, today);
+  await ensureDailyCompletion(db, child, today, progress);
+  const rec = await loadRecords(db, child.id);
   await finalizeMonths(db, child, settings, rec, today);
   const month = monthSummary(child, settings, rec, yearMonthOf(today), today);
   const streak = streakOf(child, settings, rec, today);
@@ -31,11 +33,14 @@ export default async function ChildHome() {
       </header>
 
       <section className="space-y-3 rounded-3xl bg-white p-4 shadow">
-        <h2 className="font-bold text-gray-600">きょうの メニュー</h2>
+        <h2 className="flex items-center justify-between font-bold text-gray-600">
+          <span>きょうの メニュー</span>
+          <span className="text-sm">あわせて {Math.round(progress.reduce((t, p) => t + p.targetSeconds, 0) / 60)}ぷん</span>
+        </h2>
         <ul className="space-y-2">
           {SUBJECTS.map((s) => {
             const p = progress.find((x) => x.subject === s);
-            const enabled = ENABLED_SUBJECTS.includes(s);
+            const enabled = !!p;
             const pct = p ? Math.min(100, Math.round((p.activeSeconds / p.targetSeconds) * 100)) : 0;
             return (
               <li key={s} className={`rounded-2xl border-2 p-3 ${enabled ? "" : "opacity-40"}`} data-testid={`menu-${s}`}>

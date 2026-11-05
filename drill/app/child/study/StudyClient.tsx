@@ -6,6 +6,9 @@ import type { StudyState, AnswerResult } from "@/server/study";
 import type { Subject } from "@/domain/settings";
 import { MathTokens, Frac } from "@/ui/MathView";
 import { Keypad } from "@/ui/Keypad";
+import { ChoicePad } from "@/ui/ChoicePad";
+import { RichText, type FuriganaMode } from "@/ui/RichText";
+import { detectJaVoice, speakJa } from "@/ui/speech";
 
 type Phase = "loading" | "question" | "feedback" | "error";
 
@@ -107,7 +110,7 @@ function useActiveTimer(idleSeconds: number) {
 type Fields = string[];
 
 function emptyFields(kind: string): Fields {
-  return kind === "qr" ? ["", ""] : kind === "fraction" ? ["", "", ""] : [""];
+  return kind === "qr" ? ["", ""] : kind === "fraction" ? ["", "", ""] : kind === "choice" ? [] : [""];
 }
 
 function canSubmit(kind: string, f: Fields): boolean {
@@ -127,7 +130,15 @@ const FEEDBACK_TEXT: Record<string, string> = {
   can_reduce: "やくぶん できるよ",
 };
 
-export function StudyClient({ subject, subjectLabel }: { subject: Subject; subjectLabel: string }) {
+export function StudyClient({
+  subject,
+  subjectLabel,
+  furiganaMode = "none",
+}: {
+  subject: Subject;
+  subjectLabel: string;
+  furiganaMode?: FuriganaMode;
+}) {
   const router = useRouter();
   const [state, setState] = useState<StudyState | null>(null);
   const [phase, setPhase] = useState<Phase>("loading");
@@ -152,13 +163,20 @@ export function StudyClient({ subject, subjectLabel }: { subject: Subject; subje
       setFocus(s.question.kind === "fraction" ? 1 : 0);
       shownAtTotal.current = timer.total();
       setPhase("question");
+      if (s.question.speak) speakJa(s.question.speak);
     },
     [router, subject, timer],
   );
 
-  // 開始（または続きから）
+  // 開始（または続きから）。国語は、聞き取り問題を出せるか（日本語の声があるか）を先に調べる
+  const canSpeak = useRef<Promise<boolean> | null>(null);
+  const startBody = async () => {
+    canSpeak.current ??= subject === "japanese" ? detectJaVoice() : Promise.resolve(false);
+    return { subject, canSpeak: await canSpeak.current };
+  };
   useEffect(() => {
-    post<StudyState>("/api/child/study/start", { subject })
+    startBody()
+      .then((body) => post<StudyState>("/api/child/study/start", body))
       .then(showQuestion)
       .catch((e: Error) => {
         setError(e.message);
@@ -201,15 +219,17 @@ export function StudyClient({ subject, subjectLabel }: { subject: Subject; subje
     });
   };
 
-  const submit = async () => {
-    if (!state?.question || !state.qid || sending || !canSubmit(state.question.kind, fields)) return;
+  const submit = async (choiceIndex?: number) => {
+    if (!state?.question || !state.qid || sending || phase !== "question") return;
+    const isChoice = state.question.kind === "choice";
+    if (isChoice ? choiceIndex === undefined : !canSubmit(state.question.kind, fields)) return;
     setSending(true);
     const responseMs = Math.round(timer.total() - shownAtTotal.current);
     try {
       const r = await post<AnswerResult>("/api/child/study/answer", {
         sessionId: state.sessionId,
         qid: state.qid,
-        input: toInput(state.question.kind, fields),
+        input: isChoice ? { kind: "choice", index: choiceIndex } : toInput(state.question.kind, fields),
         responseMs,
         activeMs: timer.takeUnsent(),
       });
@@ -220,7 +240,10 @@ export function StudyClient({ subject, subjectLabel }: { subject: Subject; subje
       const err = e as Error & { code?: string };
       if (err.code === "stale") {
         // 別の画面で答えた等：最新の状態を取り直す
-        post<StudyState>("/api/child/study/start", { subject }).then(showQuestion).catch(() => {});
+        startBody()
+          .then((body) => post<StudyState>("/api/child/study/start", body))
+          .then(showQuestion)
+          .catch(() => {});
       } else {
         setError(err.message);
         if (err.code !== "invalid") setPhase("error");
@@ -233,6 +256,10 @@ export function StudyClient({ subject, subjectLabel }: { subject: Subject; subje
   // キーボードでも入力できる（PC での確認用）
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if (state?.question?.kind === "choice") {
+        if (/^[1-4]$/.test(e.key)) void submit(Number(e.key) - 1);
+        return;
+      }
       if (/^[0-9]$/.test(e.key)) onKey(e.key);
       else if (e.key === ".") onKey(".");
       else if (e.key === "Backspace") onKey("back");
@@ -300,10 +327,26 @@ export function StudyClient({ subject, subjectLabel }: { subject: Subject; subje
 
       <section className="relative flex flex-1 flex-col items-center justify-center gap-6 px-4">
         {q?.prompt && <p className="text-lg font-bold text-gray-700">{q.prompt}</p>}
-        {q && (
+        {q && q.tokens.length > 0 && (
           <div className="text-5xl">
             <MathTokens tokens={q.tokens} />
           </div>
+        )}
+        {q?.bigText && (
+          <div className="text-8xl font-bold" data-testid="big-text">
+            {q.bigText}
+          </div>
+        )}
+        {q?.rich && <RichText segments={q.rich} mode={furiganaMode} />}
+        {q?.speak && (
+          <button
+            type="button"
+            onClick={() => speakJa(q.speak!)}
+            className="min-h-14 rounded-2xl bg-sky-100 px-6 text-xl font-bold text-sky-800"
+            data-testid="speak"
+          >
+            🔊 きく
+          </button>
         )}
         <div className="flex items-center gap-3">
           {kind === "qr" && (
@@ -353,13 +396,22 @@ export function StudyClient({ subject, subjectLabel }: { subject: Subject; subje
       </section>
 
       <footer className="bg-amber-50 pb-[env(safe-area-inset-bottom)]">
-        <Keypad
-          onKey={onKey}
-          showDot={kind === "decimal"}
-          showNext={fields.length > 1}
-          onSubmit={() => void submit()}
-          submitDisabled={phase !== "question" || sending || !canSubmit(kind, fields)}
-        />
+        {kind === "choice" && q?.choices ? (
+          <ChoicePad
+            choices={q.choices}
+            style={q.choiceStyle ?? "kana"}
+            onChoose={(i) => void submit(i)}
+            disabled={phase !== "question" || sending}
+          />
+        ) : (
+          <Keypad
+            onKey={onKey}
+            showDot={kind === "decimal"}
+            showNext={fields.length > 1}
+            onSubmit={() => void submit()}
+            submitDisabled={phase !== "question" || sending || !canSubmit(kind, fields)}
+          />
+        )}
       </footer>
 
       {timer.paused && state.status !== "done" && (

@@ -7,6 +7,6 @@ export async function POST(req: Request) {
   return withChild(async ({ child }, body) => {
     const subject = str(body.subject) as Subject;
     if (!SUBJECTS.includes(subject)) throw new StudyError("invalid", "きょうかが ただしくありません");
-    return startOrResume(await getDB(), child, subject);
+    return startOrResume(await getDB(), child, subject, { canSpeak: body.canSpeak === true });
   }, req);
 }

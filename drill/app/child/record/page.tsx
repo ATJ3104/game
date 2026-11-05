@@ -4,8 +4,9 @@ import { getDB } from "@/server/db";
 import { getFamilySettings } from "@/server/repo";
 import { loadRecords, streakOf } from "@/server/summary";
 import { studyDateOf } from "@/domain/dates";
-import { getMathLevel, mathLevelIndex, MATH_LEVELS } from "@/domain/math/levels";
-import { ENABLED_SUBJECTS, SUBJECT_LABEL, SUBJECTS } from "@/domain/settings";
+import { availableLevels, getLevel, levelIndex, IMPLEMENTED_SUBJECTS } from "@/domain/levels";
+import { SUBJECT_LABEL, SUBJECTS } from "@/domain/settings";
+import { levelOptions } from "@/server/contentPolicy";
 
 export const dynamic = "force-dynamic";
 
@@ -50,15 +51,17 @@ export default async function RecordPage() {
         <h2 className="font-bold text-gray-600">いまの レベル</h2>
         {SUBJECTS.map((s) => {
           const code = levels.results.find((l) => l.subject === s)?.level_code;
-          if (!ENABLED_SUBJECTS.includes(s) || !code) {
+          if (!IMPLEMENTED_SUBJECTS.includes(s) || !code) {
             return (
               <div key={s} className="rounded-2xl border-2 p-3 opacity-40">
                 {SUBJECT_LABEL[s]}：じゅんびちゅう
               </div>
             );
           }
-          const lv = getMathLevel(code);
-          const pct = Math.round(((mathLevelIndex(code) + 1) / MATH_LEVELS.length) * 100);
+          const lv = getLevel(s, code);
+          const total = availableLevels(s, levelOptions()).length;
+          const idx = levelIndex(s, code, levelOptions()) + 1;
+          const pct = total ? Math.round((idx / total) * 100) : 0;
           return (
             <div key={s} className="rounded-2xl border-2 p-3">
               <div className="font-bold">
@@ -69,7 +72,7 @@ export default async function RecordPage() {
                 <div className="h-full bg-amber-400" style={{ width: `${pct}%` }} />
               </div>
               <div className="mt-1 text-right text-xs text-gray-500">
-                {mathLevelIndex(code) + 1} / {MATH_LEVELS.length}
+                {idx} / {total}
               </div>
             </div>
           );

@@ -4,7 +4,7 @@ import { getDB } from "@/server/db";
 import { getFamilySettings } from "@/server/repo";
 import { todayProgress } from "@/server/summary";
 import { studyDateOf } from "@/domain/dates";
-import { getMathLevel } from "@/domain/math/levels";
+import { getLevel } from "@/domain/levels";
 import { SUBJECT_LABEL, type Subject } from "@/domain/settings";
 
 export const dynamic = "force-dynamic";
@@ -16,11 +16,11 @@ export default async function DonePage({ searchParams }: { searchParams: Promise
   const settings = await getFamilySettings(db, child.family_id);
   const today = studyDateOf(new Date(), settings.dayBoundaryHour);
   const progress = await todayProgress(db, child, today);
+  const subject = (sp.subject ?? "math") as Subject;
   const dayDone =
     !!(await db.prepare("SELECT 1 FROM daily_completion WHERE child_id = ? AND study_date = ?").bind(child.id, today).first()) ||
     progress.every((p) => p.status === "done");
-  const subject = (sp.subject ?? "math") as Subject;
-  const up = sp.up ? getMathLevel(sp.up) : undefined;
+  const up = sp.up ? getLevel(subject, sp.up) : undefined;
   const next = progress.find((p) => p.status !== "done");
 
   return (
