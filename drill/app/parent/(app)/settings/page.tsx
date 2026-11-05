@@ -98,12 +98,15 @@ export default async function SettingsPage() {
               <input type="hidden" name="child_id" value={c.id} />
               <Field label="名前" name="name" defaultValue={c.name} required maxLength={20} />
               <GradeSelect defaultValue={c.grade} />
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="算数の時間（分）" name="minutes_math" type="number" inputMode="numeric" min={1} max={120} defaultValue={c.minutes_math} required />
-                <Field label="国語の時間（分）" name="minutes_japanese" type="number" inputMode="numeric" min={1} max={120} defaultValue={c.minutes_japanese} required />
+              <div className="grid grid-cols-3 gap-3">
+                <Field label="算数（分）" name="minutes_math" type="number" inputMode="numeric" min={1} max={120} defaultValue={c.minutes_math} required />
+                <Field label="国語（分）" name="minutes_japanese" type="number" inputMode="numeric" min={1} max={120} defaultValue={c.minutes_japanese} required />
+                <Field label="英語（分）" name="minutes_english" type="number" inputMode="numeric" min={1} max={120} defaultValue={c.minutes_english} required />
               </div>
               <p className="text-xs text-gray-500">
-                1日の合計：{c.minutes_math + (levelOf("japanese") ? c.minutes_japanese : 0)}分（国語が「やらない」のときは算数のみ）。英語は準備中です。
+                1日の合計：
+                {c.minutes_math + (levelOf("japanese") ? c.minutes_japanese : 0) + (levelOf("english") ? c.minutes_english : 0)}
+                分（「やらない」にした教科は数えません）
               </p>
               <Field label="お小遣いの金額（円・表示用）" name="allowance_amount" type="number" inputMode="numeric" min={0} defaultValue={c.allowance_amount} required />
               <label className="block">
@@ -131,6 +134,15 @@ export default async function SettingsPage() {
               <label className="block">
                 <span className={labelCls}>国語のレベル（「やらない」でメニューから外す）</span>
                 <LevelSelect name="level_code" subject="japanese" defaultValue={levelOf("japanese")} />
+              </label>
+            </ActionForm>
+
+            <ActionForm action={setLevelAction} submitLabel="英語のレベルを変更">
+              <input type="hidden" name="child_id" value={c.id} />
+              <input type="hidden" name="subject" value="english" />
+              <label className="block">
+                <span className={labelCls}>英語のレベル（「やらない」でメニューから外す）</span>
+                <LevelSelect name="level_code" subject="english" defaultValue={levelOf("english")} />
               </label>
             </ActionForm>
 
@@ -168,6 +180,11 @@ export default async function SettingsPage() {
           <label className="block">
             <span className={labelCls}>国語の初期レベル</span>
             <LevelSelect name="level_japanese" subject="japanese" />
+          </label>
+          <Field label="英語の時間（分）" name="minutes_english" type="number" inputMode="numeric" min={1} max={120} defaultValue={10} required />
+          <label className="block">
+            <span className={labelCls}>英語の初期レベル</span>
+            <LevelSelect name="level_english" subject="english" />
           </label>
         </ActionForm>
       </section>

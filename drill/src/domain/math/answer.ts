@@ -7,7 +7,8 @@ export type AnswerInput =
   | { kind: "decimal"; value: string }
   | { kind: "fraction"; whole?: string; num?: string; den?: string }
   | { kind: "qr"; q: string; r: string }
-  | { kind: "choice"; index: number };
+  | { kind: "choice"; index: number }
+  | { kind: "order"; order: number[] };
 
 export type Feedback =
   | "reduce" // 値は合っているが約分していない（reduced のレベルでは ×）
@@ -61,6 +62,16 @@ export function isSimplestForm(p: { whole: number; num: number | null; den: numb
 export function grade(q: MathQuestion, input: AnswerInput): GradeResult {
   if (input.kind !== q.kind) return { correct: false, invalid: true };
   switch (input.kind) {
+    case "order": {
+      const tiles = q.tiles ?? [];
+      const ok =
+        input.order.length === tiles.length &&
+        new Set(input.order).size === tiles.length &&
+        input.order.every((i) => Number.isInteger(i) && i >= 0 && i < tiles.length);
+      if (!ok) return { correct: false, invalid: true };
+      // 同じ単語のカードが2まいあっても、ならんだ単語で比べる
+      return { correct: input.order.map((i) => tiles[i]).join(" ") === (q.answerTokens ?? []).join(" ") };
+    }
     case "choice": {
       const n = q.choices?.length ?? 0;
       if (!Number.isInteger(input.index) || input.index < 0 || input.index >= n) return { correct: false, invalid: true };
@@ -100,6 +111,7 @@ export function grade(q: MathQuestion, input: AnswerInput): GradeResult {
 /** 正しい答えの表示用テキスト（間違えたときに見せる） */
 export function answerText(q: MathQuestion): string {
   if (q.kind === "choice") return q.choices?.[q.answerChoice ?? -1] ?? "";
+  if (q.kind === "order") return (q.answerTokens ?? []).join(" ");
   if (q.kind === "qr") return q.qr!.r === 0 ? `${q.qr!.q}` : `${q.qr!.q} あまり ${q.qr!.r}`;
   const v = q.value!;
   if (q.kind === "int") return String(v.n);
@@ -117,6 +129,8 @@ export function inputText(input: AnswerInput, q?: MathQuestion): string {
   switch (input.kind) {
     case "choice":
       return q?.choices?.[input.index] ?? String(input.index);
+    case "order":
+      return input.order.map((i) => q?.tiles?.[i] ?? "?").join(" ");
     case "int":
     case "decimal":
       return input.value;
@@ -150,6 +164,10 @@ export function parseAnswerInput(raw: unknown): AnswerInput | null {
     case "choice":
       return typeof o.index === "number" && Number.isInteger(o.index) && o.index >= 0 && o.index < 10
         ? { kind: "choice", index: o.index }
+        : null;
+    case "order":
+      return Array.isArray(o.order) && o.order.length <= 20 && o.order.every((i) => typeof i === "number")
+        ? { kind: "order", order: o.order as number[] }
         : null;
     default:
       return null;

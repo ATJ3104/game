@@ -4,6 +4,8 @@ import { MATH_LEVELS } from "./math/levels";
 import { generateQuestion as generateMath } from "./math/generators";
 import { JAPANESE_LEVELS } from "./japanese/levels";
 import { generateJapaneseQuestion } from "./japanese/generators";
+import { ENGLISH_LEVELS } from "./english/levels";
+import { generateEnglishQuestion } from "./english/generators";
 import type { Question } from "./math/question";
 import type { Rng } from "./math/rng";
 
@@ -17,8 +19,8 @@ export interface LevelInfo {
   unreviewed?: boolean;
 }
 
-/** 教科ごとに実装済みか（英語は Phase 3） */
-export const IMPLEMENTED_SUBJECTS: readonly Subject[] = ["math", "japanese"];
+/** 実装済みの教科 */
+export const IMPLEMENTED_SUBJECTS: readonly Subject[] = ["math", "japanese", "english"];
 
 export interface LevelOptions {
   /** 未確認の教材も使う（開発・確認用） */
@@ -29,6 +31,15 @@ export function allLevels(subject: Subject, opts: LevelOptions): LevelInfo[] {
   if (subject === "math") return MATH_LEVELS.map((l) => ({ ...l, available: true }));
   if (subject === "japanese") {
     return JAPANESE_LEVELS.map((l) => ({
+      code: l.code,
+      name: l.name,
+      targetMs: l.targetMs,
+      available: l.hasContent && (l.reviewed || opts.includeUnreviewed),
+      unreviewed: l.hasContent && !l.reviewed,
+    }));
+  }
+  if (subject === "english") {
+    return ENGLISH_LEVELS.map((l) => ({
       code: l.code,
       name: l.name,
       targetMs: l.targetMs,
@@ -73,5 +84,6 @@ export interface GenOptions {
 export function generateFor(subject: Subject, level: string, rng: Rng, opts: GenOptions): Question {
   if (subject === "math") return generateMath(level, rng);
   if (subject === "japanese") return generateJapaneseQuestion(level, rng, opts);
+  if (subject === "english") return generateEnglishQuestion(level, rng, opts);
   throw new Error(`subject not implemented: ${subject}`);
 }

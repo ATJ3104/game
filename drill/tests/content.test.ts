@@ -64,3 +64,36 @@ describe("まだ習わない漢字の例外", () => {
     expect(r.warnings.join("\n")).toMatch(/「年」はまだ習わない漢字（例外として許可）/);
   });
 });
+
+import { PHRASES, WORDS } from "@/domain/english/content";
+import { validatePhrases, validateWords } from "@/domain/english/validate";
+
+describe("英語の教材データ", () => {
+  (WORDS.levels.length ? it : it.skip)(`英語の単語（${WORDS.reviewed ? "確認済み" : "未確認"}）`, () => {
+    const r = validateWords(WORDS);
+    if (r.warnings.length) console.warn("[英語の単語 注意]\n" + r.warnings.join("\n"));
+    expect(r.errors).toEqual([]);
+  });
+  (PHRASES.levels.length ? it : it.skip)(`英語のフレーズ（${PHRASES.reviewed ? "確認済み" : "未確認"}）`, () => {
+    const r = validatePhrases(PHRASES);
+    if (r.warnings.length) console.warn("[英語のフレーズ 注意]\n" + r.warnings.join("\n"));
+    expect(r.errors).toEqual([]);
+  });
+  it("検証が機能していること", () => {
+    const bad = validateWords({
+      reviewed: false,
+      levels: [{ code: "E11", theme: "x", words: [{ en: "Dog!", ja: "犬", emoji: "" }] }],
+    }).errors.join("\n");
+    expect(bad).toMatch(/E10 から順に/);
+    expect(bad).toMatch(/8〜25こ/);
+    expect(bad).toMatch(/英語の形式/);
+    expect(bad).toMatch(/かなだけで/);
+    expect(bad).toMatch(/絵文字がありません/);
+    const badP = validatePhrases({
+      reviewed: false,
+      levels: [{ code: "E50", theme: "x", phrases: [{ en: "hello", ja: "こんにちは" }] }],
+    }).errors.join("\n");
+    expect(badP).toMatch(/大文字で始まり/);
+    expect(badP).toMatch(/2〜8こ/);
+  });
+});

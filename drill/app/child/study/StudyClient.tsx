@@ -8,7 +8,8 @@ import { MathTokens, Frac } from "@/ui/MathView";
 import { Keypad } from "@/ui/Keypad";
 import { ChoicePad } from "@/ui/ChoicePad";
 import { RichText, type FuriganaMode } from "@/ui/RichText";
-import { detectJaVoice, speakJa } from "@/ui/speech";
+import { detectVoice, speak } from "@/ui/speech";
+import { OrderPad } from "@/ui/OrderPad";
 
 type Phase = "loading" | "question" | "feedback" | "error";
 
@@ -146,6 +147,7 @@ export function StudyClient({
   const [fields, setFields] = useState<Fields>([""]);
   const [focus, setFocus] = useState(0);
   const [result, setResult] = useState<AnswerResult | null>(null);
+  const [order, setOrder] = useState<number[]>([]);
   const [sending, setSending] = useState(false);
   const timer = useActiveTimer(state?.idleSeconds ?? 60);
   const shownAtTotal = useRef(0);
@@ -162,8 +164,9 @@ export function StudyClient({
       setFields(emptyFields(s.question.kind));
       setFocus(s.question.kind === "fraction" ? 1 : 0);
       shownAtTotal.current = timer.total();
+      setOrder([]);
       setPhase("question");
-      if (s.question.speak) speakJa(s.question.speak);
+      if (s.question.speak) speak(s.question.speak, s.question.speakLang ?? "ja-JP");
     },
     [router, subject, timer],
   );
@@ -171,7 +174,8 @@ export function StudyClient({
   // 開始（または続きから）。国語は、聞き取り問題を出せるか（日本語の声があるか）を先に調べる
   const canSpeak = useRef<Promise<boolean> | null>(null);
   const startBody = async () => {
-    canSpeak.current ??= subject === "japanese" ? detectJaVoice() : Promise.resolve(false);
+    canSpeak.current ??=
+      subject === "japanese" ? detectVoice("ja-JP") : subject === "english" ? detectVoice("en-US") : Promise.resolve(false);
     return { subject, canSpeak: await canSpeak.current };
   };
   useEffect(() => {
@@ -221,15 +225,23 @@ export function StudyClient({
 
   const submit = async (choiceIndex?: number) => {
     if (!state?.question || !state.qid || sending || phase !== "question") return;
-    const isChoice = state.question.kind === "choice";
-    if (isChoice ? choiceIndex === undefined : !canSubmit(state.question.kind, fields)) return;
+    const kind = state.question.kind;
+    const isChoice = kind === "choice";
+    if (kind === "order") {
+      if (order.length !== (state.question.tiles?.length ?? 0)) return;
+    } else if (isChoice ? choiceIndex === undefined : !canSubmit(kind, fields)) return;
     setSending(true);
     const responseMs = Math.round(timer.total() - shownAtTotal.current);
     try {
       const r = await post<AnswerResult>("/api/child/study/answer", {
         sessionId: state.sessionId,
         qid: state.qid,
-        input: isChoice ? { kind: "choice", index: choiceIndex } : toInput(state.question.kind, fields),
+        input:
+          kind === "order"
+            ? { kind: "order", order }
+            : isChoice
+              ? { kind: "choice", index: choiceIndex }
+              : toInput(kind, fields),
         responseMs,
         activeMs: timer.takeUnsent(),
       });
@@ -256,6 +268,7 @@ export function StudyClient({
   // キーボードでも入力できる（PC での確認用）
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if (state?.question?.kind === "order") return;
       if (state?.question?.kind === "choice") {
         if (/^[1-4]$/.test(e.key)) void submit(Number(e.key) - 1);
         return;
@@ -333,7 +346,12 @@ export function StudyClient({
           </div>
         )}
         {q?.bigText && (
-          <div className="text-8xl font-bold" data-testid="big-text">
+          <div
+            className={`text-center font-bold ${
+              q.bigTextSize === "medium" ? "text-3xl leading-snug" : q.bigTextSize === "large" ? "text-5xl" : "text-8xl"
+            }`}
+            data-testid="big-text"
+          >
             {q.bigText}
           </div>
         )}
@@ -341,7 +359,7 @@ export function StudyClient({
         {q?.speak && (
           <button
             type="button"
-            onClick={() => speakJa(q.speak!)}
+            onClick={() => speak(q.speak!, q.speakLang ?? "ja-JP")}
             className="min-h-14 rounded-2xl bg-sky-100 px-6 text-xl font-bold text-sky-800"
             data-testid="speak"
           >
@@ -396,7 +414,15 @@ export function StudyClient({
       </section>
 
       <footer className="bg-amber-50 pb-[env(safe-area-inset-bottom)]">
-        {kind === "choice" && q?.choices ? (
+        {kind === "order" && q?.tiles ? (
+          <OrderPad
+            tiles={q.tiles}
+            order={order}
+            onChange={setOrder}
+            onSubmit={() => void submit()}
+            disabled={phase !== "question" || sending}
+          />
+        ) : kind === "choice" && q?.choices ? (
           <ChoicePad
             choices={q.choices}
             style={q.choiceStyle ?? "kana"}

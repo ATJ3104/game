@@ -7,6 +7,9 @@ const SIZE: Record<ChoiceStyle, string> = {
   reading: "text-2xl",
   kanji: "text-4xl",
   emoji: "text-6xl",
+  en: "text-3xl normal-case",
+  meaning: "text-2xl",
+  phrase: "text-lg leading-snug",
 };
 
 /** 4つの選択肢（2×2、大きなボタン）。押したらすぐ答える */

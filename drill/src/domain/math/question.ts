@@ -26,8 +26,9 @@ export type Segment =
  * - fraction: 分数（整数部〔帯分数用・省略可〕・分子・分母）
  * - qr: 商とあまり
  * - choice: 選択肢（国語・英語）
+ * - order: 単語カードの並べかえ（英語のフレーズ）
  */
-export type AnswerKind = "int" | "decimal" | "fraction" | "qr" | "choice";
+export type AnswerKind = "int" | "decimal" | "fraction" | "qr" | "choice" | "order";
 
 /**
  * 分数の答えの扱い
@@ -37,7 +38,7 @@ export type AnswerKind = "int" | "decimal" | "fraction" | "qr" | "choice";
 export type FractionRule = "value" | "reduced";
 
 /** 選択肢の見せ方 */
-export type ChoiceStyle = "kana" | "reading" | "kanji" | "emoji";
+export type ChoiceStyle = "kana" | "reading" | "kanji" | "emoji" | "en" | "meaning" | "phrase";
 
 export interface MathQuestion {
   level: string;
@@ -59,12 +60,22 @@ export interface MathQuestion {
   targetMode?: "show_kanji" | "show_reading";
   /** 大きく見せる1文字（かな） */
   bigText?: string;
-  /** 読み上げる文字列（日本語）。あれば「きく」ボタンを出す */
+  /** 大きく見せる文字の大きさ（1文字なら huge、単語なら large、文なら medium） */
+  bigTextSize?: "huge" | "large" | "medium";
+  /** 読み上げる文字列。あれば「きく」ボタンを出し、問題を出したときにも読み上げる */
   speak?: string;
+  /** 読み上げの言語（省略時は日本語） */
+  speakLang?: "ja-JP" | "en-US";
   choices?: string[];
   choiceStyle?: ChoiceStyle;
   /** 正解の選択肢の番号（サーバーだけが持つ） */
   answerChoice?: number;
+
+  // ---- 並べかえの問題（英語） ----
+  /** 並べかえるカード（ばらばらの順） */
+  tiles?: string[];
+  /** 正しい順の単語（サーバーだけが持つ） */
+  answerTokens?: string[];
 
   /** テスト・分析用の情報（演算の種類やオペランド） */
   meta: Record<string, number | string | boolean>;
@@ -82,9 +93,12 @@ export interface PublicQuestion {
   allowMixed?: boolean;
   rich?: Segment[];
   bigText?: string;
+  bigTextSize?: "huge" | "large" | "medium";
   speak?: string;
+  speakLang?: "ja-JP" | "en-US";
   choices?: string[];
   choiceStyle?: ChoiceStyle;
+  tiles?: string[];
 }
 
 /** 端末に送る文。答えになる側（読み or 漢字）を消してから送る */
@@ -103,9 +117,12 @@ export function toPublic(q: MathQuestion): PublicQuestion {
     allowMixed: q.kind === "fraction" ? true : undefined,
     rich: publicRich(q),
     bigText: q.bigText,
+    bigTextSize: q.bigTextSize,
     speak: q.speak,
+    speakLang: q.speakLang,
     choices: q.choices,
     choiceStyle: q.choiceStyle,
+    tiles: q.tiles,
   };
 }
 
