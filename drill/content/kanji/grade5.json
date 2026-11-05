@@ -1,6 +1,769 @@
 {
   "grade": 5,
   "reviewed": false,
-  "note": "作成中",
-  "kanji": []
+  "note": "学年別漢字配当表（5年）。並びは配当表の順（音読みの50音順）。書式は grade1.json と同じ。",
+  "kanji": [
+    { "kanji": "圧", "on": ["アツ"], "kun": [], "examples": [
+      {"word":"気圧","reading":"きあつ","sentence":"{山|やま}の うえは [[気圧]]が ひくい。","readWrong":["きあく","けあつ","きおう"],"kanjiWrong":["汽圧","気厚","期圧"]},
+      {"word":"圧力","reading":"あつりょく","sentence":"{水|みず}の [[圧力]]を しらべる。","readWrong":["あつりき","おうりょく","あっりょく"],"kanjiWrong":["圧刀","厚力","圧方"]}
+    ] },
+    { "kanji": "囲", "on": ["イ"], "kun": ["かこ.む","かこ.う"], "examples": [
+      {"word":"囲む","reading":"かこむ","sentence":"みんなで テーブルを [[囲む]]。","readWrong":["いむ","かこうむ","かくむ"],"kanjiWrong":["固む","回む","国む"]},
+      {"word":"周囲","reading":"しゅうい","sentence":"{池|いけ}の [[周囲]]を {歩|ある}く。","readWrong":["しゅうかこ","しょうい","しゅい"],"kanjiWrong":["周位","週囲","周医"]}
+    ] },
+    { "kanji": "移", "on": ["イ"], "kun": ["うつ.る","うつ.す"], "examples": [
+      {"word":"移る","reading":"うつる","sentence":"あたらしい {家|いえ}に [[移る]]。","readWrong":["いる","うつす","うごる"],"kanjiWrong":["多る","秒る","写る"]},
+      {"word":"移動","reading":"いどう","sentence":"バスで [[移動]]する。","readWrong":["いうご","いどお","うつどう"],"kanjiWrong":["位動","移働","意動"]}
+    ] },
+    { "kanji": "因", "on": ["イン"], "kun": ["よ.る"], "examples": [
+      {"word":"原因","reading":"げんいん","sentence":"じこの [[原因]]を しらべる。","readWrong":["げんにん","もといん","げいいん"],"kanjiWrong":["原印","元因","原員"]},
+      {"word":"要因","reading":"よういん","sentence":"チームが かった [[要因]]を かんがえる。","readWrong":["ようにん","よういい","かなめいん"],"kanjiWrong":["要印","用因","曜因"]}
+    ] },
+    { "kanji": "永", "on": ["エイ"], "kun": ["なが.い"], "examples": [
+      {"word":"永遠","reading":"えいえん","sentence":"この {思|おも}い{出|で}は [[永遠]]に わすれない。","readWrong":["ゆうえん","えいとお","ながえん"],"kanjiWrong":["水遠","氷遠","永園"]},
+      {"word":"永住","reading":"えいじゅう","sentence":"おじは その {国|くに}に [[永住]]する ことに した。","readWrong":["えいすむ","えいじゅ","ながじゅう"],"kanjiWrong":["水住","永主","氷住"]}
+    ] },
+    { "kanji": "営", "on": ["エイ"], "kun": ["いとな.む"], "examples": [
+      {"word":"営業","reading":"えいぎょう","sentence":"この {店|みせ}は {夜|よる}まで [[営業]]して いる。","readWrong":["えいごう","いとなぎょう","えいぎょ"],"kanjiWrong":["栄業","営楽","宮業"]},
+      {"word":"営む","reading":"いとなむ","sentence":"おじは {小|ちい}さな {店|みせ}を [[営む]]。","readWrong":["えいむ","いとなる","いなむ"],"kanjiWrong":["宮む","栄む","労む"]}
+    ] },
+    { "kanji": "衛", "on": ["エイ"], "kun": [], "examples": [
+      {"word":"衛生","reading":"えいせい","sentence":"{手|て}を あらって [[衛生]]に {気|き}を つける。","readWrong":["えいしょう","まもせい","えいぜい"],"kanjiWrong":["衛正","術生","街生"]},
+      {"word":"衛星","reading":"えいせい","sentence":"ちきゅうの まわりを [[衛星]]が まわる。","readWrong":["えいしょう","えいほし","えいせ"],"kanjiWrong":["衛生","街星","術星"]}
+    ] },
+    { "kanji": "易", "on": ["エキ","イ"], "kun": ["やさ.しい"], "examples": [
+      {"word":"易しい","reading":"やさしい","sentence":"この もんだいは [[易しい]]。","readWrong":["えきしい","いしい","やすしい"],"kanjiWrong":["陽しい","湯しい","場しい"]},
+      {"word":"安易","reading":"あんい","sentence":"[[安易]]に きめないで よく かんがえる。","readWrong":["あんえき","やすい","あんいい"],"kanjiWrong":["安意","案易","安陽"]}
+    ] },
+    { "kanji": "益", "on": ["エキ","ヤク"], "kun": [], "examples": [
+      {"word":"利益","reading":"りえき","sentence":"お{店|みせ}の [[利益]]が ふえる。","readWrong":["りえい","としえき","りいき"],"kanjiWrong":["利液","利駅","科益"]},
+      {"word":"有益","reading":"ゆうえき","sentence":"[[有益]]な {話|はなし}を きく。","readWrong":["うえき","ゆうやく","ありえき"],"kanjiWrong":["有液","右益","有駅"]}
+    ] },
+    { "kanji": "液", "on": ["エキ"], "kun": [], "examples": [
+      {"word":"液体","reading":"えきたい","sentence":"{水|みず}は [[液体]]だ。","readWrong":["えきてい","しるたい","えったい"],"kanjiWrong":["夜体","液休","駅体"]},
+      {"word":"血液","reading":"けつえき","sentence":"[[血液]]が からだを めぐる。","readWrong":["ちえき","けつやく","けつえっき"],"kanjiWrong":["血夜","皿液","血駅"]}
+    ] },
+    { "kanji": "演", "on": ["エン"], "kun": [], "examples": [
+      {"word":"出演","reading":"しゅつえん","sentence":"{学校|がっこう}の げきに [[出演]]する。","readWrong":["でえん","しゅつえい","しゅえん"],"kanjiWrong":["出園","出遠","出円"]},
+      {"word":"演じる","reading":"えんじる","sentence":"おうさまの {役|やく}を [[演じる]]。","readWrong":["いんじる","えじる","えんしる"],"kanjiWrong":["円じる","遠じる","園じる"]}
+    ] },
+    { "kanji": "応", "on": ["オウ"], "kun": ["こた.える"], "examples": [
+      {"word":"応える","reading":"こたえる","sentence":"みんなの きたいに [[応える]]。","readWrong":["おうえる","こたる","おえる"],"kanjiWrong":["心える","広える","店える"]},
+      {"word":"応用","reading":"おうよう","sentence":"{習|なら}った ことを [[応用]]する。","readWrong":["おうゆう","こたよう","おうよ"],"kanjiWrong":["心用","応月","広用"]}
+    ] },
+    { "kanji": "往", "on": ["オウ"], "kun": [], "examples": [
+      {"word":"往来","reading":"おうらい","sentence":"{車|くるま}の [[往来]]が はげしい。","readWrong":["じゅうらい","おおらい","いきらい"],"kanjiWrong":["住来","往米","注来"]},
+      {"word":"右往左往","reading":"うおうさおう","sentence":"あわてて [[右往左往]]する。","readWrong":["うおさお","ゆうおうさおう","うじゅうさじゅう"],"kanjiWrong":["右住左住","右往左住","石往左往"]}
+    ] },
+    { "kanji": "桜", "on": ["オウ"], "kun": ["さくら"], "examples": [
+      {"word":"桜","reading":"さくら","sentence":"[[桜]]の {花|はな}が さく。","readWrong":["おう","さぐら","もも"],"kanjiWrong":["梅","松","柱"]},
+      {"word":"夜桜","reading":"よざくら","sentence":"{家族|かぞく}で [[夜桜]]を {見|み}に いく。","readWrong":["よるさくら","やおう","よさくら"],"kanjiWrong":["夜梅","液桜","夜松"]}
+    ] },
+    { "kanji": "可", "on": ["カ"], "kun": [], "examples": [
+      {"word":"可決","reading":"かけつ","sentence":"{話|はな}し{合|あ}いで あんが [[可決]]された。","readWrong":["かけっ","かきめ","がけつ"],"kanjiWrong":["加決","何決","可欠"]}
+    ] },
+    { "kanji": "仮", "on": ["カ","ケ"], "kun": ["かり"], "examples": [
+      {"word":"仮","reading":"かり","sentence":"[[仮]]の なまえを つける。","readWrong":["か","がり","かえ"],"kanjiWrong":["反","板","化"]},
+      {"word":"仮定","reading":"かてい","sentence":"もし {雨|あめ}なら と [[仮定]]して かんがえる。","readWrong":["かりてい","けてい","かじょう"],"kanjiWrong":["仮庭","反定","化定"]}
+    ] },
+    { "kanji": "価", "on": ["カ"], "kun": ["あたい"], "examples": [
+      {"word":"物価","reading":"ぶっか","sentence":"[[物価]]が {上|あ}がる。","readWrong":["ぶつか","ものか","ぶっかく"],"kanjiWrong":["物何","物化","牧価"]},
+      {"word":"定価","reading":"ていか","sentence":"[[定価]]より {安|やす}く かう。","readWrong":["じょうか","さだか","ていが"],"kanjiWrong":["定化","定何","庭価"]}
+    ] },
+    { "kanji": "河", "on": ["カ"], "kun": ["かわ"], "examples": [
+      {"word":"河口","reading":"かこう","sentence":"[[河口]]で つりを する。","readWrong":["かぐち","がこう","かこお"],"kanjiWrong":["何口","河日","可口"]},
+      {"word":"運河","reading":"うんが","sentence":"ふねが [[運河]]を すすむ。","readWrong":["うんか","うんかわ","うんこう"],"kanjiWrong":["運何","運可","連河"]}
+    ] },
+    { "kanji": "過", "on": ["カ"], "kun": ["す.ぎる","す.ごす","あやま.つ","あやま.ち"], "examples": [
+      {"word":"過ぎる","reading":"すぎる","sentence":"あっというまに {時間|じかん}が [[過ぎる]]。","readWrong":["かぎる","すごる","すきる"],"kanjiWrong":["週ぎる","通ぎる","進ぎる"]},
+      {"word":"過去","reading":"かこ","sentence":"[[過去]]の できごとを ふりかえる。","readWrong":["かきょ","すぎさ","かご"],"kanjiWrong":["過古","週去","化去"]}
+    ] },
+    { "kanji": "快", "on": ["カイ"], "kun": ["こころよ.い"], "examples": [
+      {"word":"快晴","reading":"かいせい","sentence":"きょうは [[快晴]]だ。","readWrong":["かいはれ","けいせい","かいぜい"],"kanjiWrong":["決晴","快青","海晴"]},
+      {"word":"快い","reading":"こころよい","sentence":"[[快い]] {風|かぜ}が ふく。","readWrong":["かいい","こころい","ここちよい"],"kanjiWrong":["決い","性い","情い"]}
+    ] },
+    { "kanji": "解", "on": ["カイ","ゲ"], "kun": ["と.く","と.かす","と.ける"], "examples": [
+      {"word":"解く","reading":"とく","sentence":"さんすうの もんだいを [[解く]]。","readWrong":["かいく","げく","よく"],"kanjiWrong":["説く","角く","読く"]},
+      {"word":"理解","reading":"りかい","sentence":"{話|はなし}を よく [[理解]]する。","readWrong":["りげ","りとく","りがい"],"kanjiWrong":["理会","里解","理界"]}
+    ] },
+    { "kanji": "格", "on": ["カク","コウ"], "kun": [], "examples": [
+      {"word":"合格","reading":"ごうかく","sentence":"しけんに [[合格]]する。","readWrong":["ごうかっ","あいかく","ごうがく"],"kanjiWrong":["合確","合各","合客"]},
+      {"word":"価格","reading":"かかく","sentence":"{二|ふた}つの {店|みせ}の [[価格]]を くらべる。","readWrong":["かがく","あたいかく","かかっ"],"kanjiWrong":["価確","価各","化格"]}
+    ] },
+    { "kanji": "確", "on": ["カク"], "kun": ["たし.か","たし.かめる"], "examples": [
+      {"word":"確かめる","reading":"たしかめる","sentence":"こたえを [[確かめる]]。","readWrong":["かくかめる","たしめる","たかめる"],"kanjiWrong":["格かめる","角かめる","石かめる"]},
+      {"word":"正確","reading":"せいかく","sentence":"ものさしで [[正確]]に はかる。","readWrong":["しょうかく","せいがく","ただかく"],"kanjiWrong":["正格","生確","正角"]}
+    ] },
+    { "kanji": "額", "on": ["ガク"], "kun": ["ひたい"], "examples": [
+      {"word":"額","reading":"ひたい","sentence":"[[額]]に あせを かく。","readWrong":["がく","ひたえ","かお"],"kanjiWrong":["頭","顔","題"]},
+      {"word":"金額","reading":"きんがく","sentence":"おつりの [[金額]]を たしかめる。","readWrong":["きんかく","かねがく","こんがく"],"kanjiWrong":["金客","金顔","全額"]}
+    ] },
+    { "kanji": "刊", "on": ["カン"], "kun": [], "examples": [
+      {"word":"朝刊","reading":"ちょうかん","sentence":"{父|ちち}は [[朝刊]]を よむ。","readWrong":["あさかん","ちょうがん","ちょかん"],"kanjiWrong":["朝利","朝列","朝間"]},
+      {"word":"週刊","reading":"しゅうかん","sentence":"[[週刊]]の まんが ざっしを かう。","readWrong":["しゅうがん","しゅかん","しゅうけん"],"kanjiWrong":["週間","週利","週列"]}
+    ] },
+    { "kanji": "幹", "on": ["カン"], "kun": ["みき"], "examples": [
+      {"word":"幹","reading":"みき","sentence":"{木|き}の [[幹]]は ふとい。","readWrong":["かん","えだ","みぎ"],"kanjiWrong":["根","枝","草"]},
+      {"word":"新幹線","reading":"しんかんせん","sentence":"[[新幹線]]に のる。","readWrong":["しんみきせん","しんがんせん","しんかんぜん"],"kanjiWrong":["新館線","新幹緑","親幹線"]}
+    ] },
+    { "kanji": "慣", "on": ["カン"], "kun": ["な.れる","な.らす"], "examples": [
+      {"word":"慣れる","reading":"なれる","sentence":"あたらしい クラスに [[慣れる]]。","readWrong":["かんれる","ならる","なえる"],"kanjiWrong":["習れる","情れる","館れる"]},
+      {"word":"習慣","reading":"しゅうかん","sentence":"はやおきの [[習慣]]を つける。","readWrong":["しゅかん","しゅうなれ","しゅうがん"],"kanjiWrong":["習館","習関","週慣"]}
+    ] },
+    { "kanji": "眼", "on": ["ガン","ゲン"], "kun": ["まなこ"], "examples": [
+      {"word":"眼科","reading":"がんか","sentence":"[[眼科]]で {目|め}を みて もらう。","readWrong":["めか","げんか","かんか"],"kanjiWrong":["目科","眼料","根科"]},
+      {"word":"肉眼","reading":"にくがん","sentence":"[[肉眼]]で {星|ほし}を みる。","readWrong":["にくめ","にくげん","にくかん"],"kanjiWrong":["肉目","肉根","内眼"]}
+    ] },
+    { "kanji": "紀", "on": ["キ"], "kun": [], "examples": [
+      {"word":"世紀","reading":"せいき","sentence":"{二十一|にじゅういち}[[世紀]]の くらし。","readWrong":["せき","よき","せいぎ"],"kanjiWrong":["世記","世紙","生紀"]},
+      {"word":"紀行文","reading":"きこうぶん","sentence":"たびの [[紀行文]]を よむ。","readWrong":["きぎょうぶん","ききょうぶん","きこうもん"],"kanjiWrong":["記行文","紀行分","紙行文"]}
+    ] },
+    { "kanji": "基", "on": ["キ"], "kun": ["もと","もとい"], "examples": [
+      {"word":"基本","reading":"きほん","sentence":"[[基本]]を たいせつに する。","readWrong":["きもと","もとほん","きぽん"],"kanjiWrong":["期本","基木","寄本"]},
+      {"word":"基地","reading":"きち","sentence":"ひみつ [[基地]]を つくる。","readWrong":["もとち","きじ","ぎち"],"kanjiWrong":["期地","基池","器地"]}
+    ] },
+    { "kanji": "寄", "on": ["キ"], "kun": ["よ.る","よ.せる"], "examples": [
+      {"word":"寄る","reading":"よる","sentence":"かえりに {本屋|ほんや}に [[寄る]]。","readWrong":["きる","よろ","ちる"],"kanjiWrong":["寺る","宿る","客る"]},
+      {"word":"寄付","reading":"きふ","sentence":"みんなで [[寄付]]を あつめる。","readWrong":["よりふ","きぶ","きつけ"],"kanjiWrong":["記付","寄府","客付"]}
+    ] },
+    { "kanji": "規", "on": ["キ"], "kun": [], "examples": [
+      {"word":"定規","reading":"じょうぎ","sentence":"[[定規]]で {線|せん}を ひく。","readWrong":["ていき","じょうき","さだぎ"],"kanjiWrong":["定見","定現","丁規"]},
+      {"word":"規格","reading":"きかく","sentence":"{同|おな}じ [[規格]]の でんちを かう。","readWrong":["きかっ","きがく","のりかく"],"kanjiWrong":["規確","親格","期格"]}
+    ] },
+    { "kanji": "喜", "on": ["キ"], "kun": ["よろこ.ぶ"], "examples": [
+      {"word":"喜ぶ","reading":"よろこぶ","sentence":"プレゼントを もらって [[喜ぶ]]。","readWrong":["きぶ","よろぶ","よろこむ"],"kanjiWrong":["楽ぶ","書ぶ","豆ぶ"]},
+      {"word":"大喜び","reading":"おおよろこび","sentence":"{妹|いもうと}は [[大喜び]]で はしりまわった。","readWrong":["だいきび","おおきび","だいよろこび"],"kanjiWrong":["大書び","太喜び","大楽び"]}
+    ] },
+    { "kanji": "技", "on": ["ギ"], "kun": ["わざ"], "examples": [
+      {"word":"技","reading":"わざ","sentence":"すごい [[技]]を みせる。","readWrong":["ぎ","わさ","わき"],"kanjiWrong":["枝","持","投"]},
+      {"word":"競技","reading":"きょうぎ","sentence":"ぼくは この [[競技]]が とくいだ。","readWrong":["けいぎ","きょうわざ","きょうき"],"kanjiWrong":["競枝","鏡技","競議"]}
+    ] },
+    { "kanji": "義", "on": ["ギ"], "kun": [], "examples": [
+      {"word":"正義","reading":"せいぎ","sentence":"[[正義]]の みかたが あらわれた。","readWrong":["しょうぎ","せいき","ただぎ"],"kanjiWrong":["正議","生義","正美"]},
+      {"word":"意義","reading":"いぎ","sentence":"[[意義]]の ある かつどうを する。","readWrong":["いき","おもぎ","いぎい"],"kanjiWrong":["意議","意美","医義"]}
+    ] },
+    { "kanji": "逆", "on": ["ギャク"], "kun": ["さか","さか.らう"], "examples": [
+      {"word":"逆","reading":"ぎゃく","sentence":"[[逆]]の ほうこうに すすむ。","readWrong":["げき","きゃく","ぎゃっく"],"kanjiWrong":["送","通","返"]},
+      {"word":"逆さま","reading":"さかさま","sentence":"えを [[逆さま]]に かけて しまった。","readWrong":["ぎゃくさま","さかしま","さかさ"],"kanjiWrong":["送さま","反さま","返さま"]}
+    ] },
+    { "kanji": "久", "on": ["キュウ","ク"], "kun": ["ひさ.しい"], "examples": [
+      {"word":"久しぶり","reading":"ひさしぶり","sentence":"[[久しぶり]]に {友|とも}だちに あう。","readWrong":["きゅうしぶり","ひさぶり","ひさしふり"],"kanjiWrong":["入しぶり","人しぶり","欠しぶり"]},
+      {"word":"永久","reading":"えいきゅう","sentence":"この カードは [[永久]]に つかえる。","readWrong":["えいく","ながきゅう","えいひさ"],"kanjiWrong":["永休","水久","永究"]}
+    ] },
+    { "kanji": "旧", "on": ["キュウ"], "kun": [], "examples": [
+      {"word":"旧友","reading":"きゅうゆう","sentence":"{駅|えき}で [[旧友]]に あう。","readWrong":["きゅうとも","ふるゆう","ぎゅうゆう"],"kanjiWrong":["旧右","日友","休友"]},
+      {"word":"新旧","reading":"しんきゅう","sentence":"[[新旧]]の {電車|でんしゃ}が ならぶ。","readWrong":["しんく","あたらきゅう","しんぎゅう"],"kanjiWrong":["新休","新日","親旧"]}
+    ] },
+    { "kanji": "救", "on": ["キュウ"], "kun": ["すく.う"], "examples": [
+      {"word":"救う","reading":"すくう","sentence":"おぼれた {子|こ}いぬを [[救う]]。","readWrong":["きゅうう","すくむ","たすう"],"kanjiWrong":["求う","球う","教う"]},
+      {"word":"救急車","reading":"きゅうきゅうしゃ","sentence":"[[救急車]]が はしって くる。","readWrong":["すくきゅうしゃ","きゅきゅうしゃ","きゅうきゅうじゃ"],"kanjiWrong":["求急車","球急車","救級車"]}
+    ] },
+    { "kanji": "居", "on": ["キョ"], "kun": ["い.る"], "examples": [
+      {"word":"居間","reading":"いま","sentence":"[[居間]]で テレビを みる。","readWrong":["きょま","いあいだ","おるま"],"kanjiWrong":["屋間","居門","店間"]},
+      {"word":"住居","reading":"じゅうきょ","sentence":"あたらしい [[住居]]に {移|うつ}る。","readWrong":["じゅうきょう","じゅきょ","すみきょ"],"kanjiWrong":["住屋","注居","住局"]}
+    ] },
+    { "kanji": "許", "on": ["キョ"], "kun": ["ゆる.す"], "examples": [
+      {"word":"許す","reading":"ゆるす","sentence":"{友|とも}だちの しっぱいを [[許す]]。","readWrong":["きょす","ゆすす","ゆるる"],"kanjiWrong":["語す","話す","計す"]},
+      {"word":"許可","reading":"きょか","sentence":"{先生|せんせい}の [[許可]]を もらう。","readWrong":["きょうか","ゆるか","きょが"],"kanjiWrong":["許加","計可","語可"]}
+    ] },
+    { "kanji": "境", "on": ["キョウ","ケイ"], "kun": ["さかい"], "examples": [
+      {"word":"境","reading":"さかい","sentence":"{町|まち}の [[境]]に {川|かわ}が ながれる。","readWrong":["きょう","さけい","さかえ"],"kanjiWrong":["鏡","場","坂"]},
+      {"word":"国境","reading":"こっきょう","sentence":"ふねで [[国境]]を こえる。","readWrong":["こくきょう","こっけい","くにきょう"],"kanjiWrong":["国鏡","国競","固境"]}
+    ] },
+    { "kanji": "均", "on": ["キン"], "kun": [], "examples": [
+      {"word":"平均","reading":"へいきん","sentence":"テストの [[平均]]を {出|だ}す。","readWrong":["へいぎん","ひらきん","へいこん"],"kanjiWrong":["平近","平金","半均"]},
+      {"word":"均等","reading":"きんとう","sentence":"おかしを [[均等]]に わける。","readWrong":["きんど","ぎんとう","きんひと"],"kanjiWrong":["均答","近等","均登"]}
+    ] },
+    { "kanji": "禁", "on": ["キン"], "kun": [], "examples": [
+      {"word":"禁止","reading":"きんし","sentence":"ここで およぐのは [[禁止]]だ。","readWrong":["きんしい","ぎんし","こんし"],"kanjiWrong":["林止","禁正","金止"]},
+      {"word":"禁物","reading":"きんもつ","sentence":"しあいでは ゆだんは [[禁物]]だ。","readWrong":["きんぶつ","きんもの","ぎんもつ"],"kanjiWrong":["林物","金物","森物"]}
+    ] },
+    { "kanji": "句", "on": ["ク"], "kun": [], "examples": [
+      {"word":"文句","reading":"もんく","sentence":"[[文句]]を いわずに てつだう。","readWrong":["ぶんく","もんぐ","ぶく"],"kanjiWrong":["文何","文向","文可"]},
+      {"word":"語句","reading":"ごく","sentence":"わからない [[語句]]の いみを しらべる。","readWrong":["ごぐ","かたく","ごっく"],"kanjiWrong":["語何","話句","語向"]}
+    ] },
+    { "kanji": "型", "on": ["ケイ"], "kun": ["かた"], "examples": [
+      {"word":"型","reading":"かた","sentence":"ケーキの [[型]]に きじを いれる。","readWrong":["けい","がた","かたち"],"kanjiWrong":["刊","列","地"]},
+      {"word":"大型","reading":"おおがた","sentence":"[[大型]]の トラックが とおる。","readWrong":["だいけい","おおかた","おおけい"],"kanjiWrong":["大刊","太型","大列"]}
+    ] },
+    { "kanji": "経", "on": ["ケイ","キョウ"], "kun": ["へ.る"], "examples": [
+      {"word":"経験","reading":"けいけん","sentence":"はじめての [[経験]]に どきどきする。","readWrong":["きょうけん","けいげん","へけん"],"kanjiWrong":["経検","軽験","径験"]},
+      {"word":"経由","reading":"けいゆ","sentence":"{大阪|おおさか}を [[経由]]して {東京|とうきょう}へ いく。","readWrong":["けいゆう","きょうゆ","へゆ"],"kanjiWrong":["経油","軽由","径由"]}
+    ] },
+    { "kanji": "潔", "on": ["ケツ"], "kun": ["いさぎよ.い"], "examples": [
+      {"word":"清潔","reading":"せいけつ","sentence":"[[清潔]]な ハンカチを もつ。","readWrong":["せいげつ","しょうけつ","きよけつ"],"kanjiWrong":["清決","清結","晴潔"]},
+      {"word":"潔い","reading":"いさぎよい","sentence":"まけを みとめる [[潔い]] たいど。","readWrong":["けついい","いさよい","きよい"],"kanjiWrong":["決い","結い","清い"]}
+    ] },
+    { "kanji": "件", "on": ["ケン"], "kun": [], "examples": [
+      {"word":"事件","reading":"じけん","sentence":"ふしぎな [[事件]]が おきた。","readWrong":["じげん","ことけん","じっけん"],"kanjiWrong":["事牛","事県","事健"]},
+      {"word":"用件","reading":"ようけん","sentence":"でんわで [[用件]]を つたえる。","readWrong":["ようげん","もちけん","ようけ"],"kanjiWrong":["用牛","用健","用建"]}
+    ] },
+    { "kanji": "険", "on": ["ケン"], "kun": ["けわ.しい"], "examples": [
+      {"word":"険しい","reading":"けわしい","sentence":"[[険しい]] {山道|やまみち}を のぼる。","readWrong":["けんしい","けわい","きびしい"],"kanjiWrong":["検しい","験しい","陸しい"]}
+    ] },
+    { "kanji": "検", "on": ["ケン"], "kun": [], "examples": [
+      {"word":"点検","reading":"てんけん","sentence":"じてんしゃを [[点検]]する。","readWrong":["てんげん","てけん","てんけい"],"kanjiWrong":["点険","点験","店検"]},
+      {"word":"検算","reading":"けんざん","sentence":"{計算|けいさん}の あとに [[検算]]を する。","readWrong":["けんさ","けいさん","けんぜん"],"kanjiWrong":["険算","験算","検産"]}
+    ] },
+    { "kanji": "限", "on": ["ゲン"], "kun": ["かぎ.る"], "examples": [
+      {"word":"限る","reading":"かぎる","sentence":"さんかは {五年生|ごねんせい}に [[限る]]。","readWrong":["げんる","かきる","かぎれる"],"kanjiWrong":["根る","眼る","銀る"]},
+      {"word":"期限","reading":"きげん","sentence":"しゅくだいの [[期限]]を まもる。","readWrong":["きかぎ","ごげん","きけん"],"kanjiWrong":["期根","期眼","基限"]}
+    ] },
+    { "kanji": "現", "on": ["ゲン"], "kun": ["あらわ.れる","あらわ.す"], "examples": [
+      {"word":"現れる","reading":"あらわれる","sentence":"くもの あいだから {月|つき}が [[現れる]]。","readWrong":["げんれる","あらわる","あられる"],"kanjiWrong":["見れる","理れる","規れる"]},
+      {"word":"表現","reading":"ひょうげん","sentence":"きもちを ことばで [[表現]]する。","readWrong":["ひょうけん","おもてげん","ひょうげ"],"kanjiWrong":["表見","表験","表限"]}
+    ] },
+    { "kanji": "減", "on": ["ゲン"], "kun": ["へ.る","へ.らす"], "examples": [
+      {"word":"減る","reading":"へる","sentence":"おこづかいが [[減る]]。","readWrong":["げんる","へれる","へらる"],"kanjiWrong":["城る","感る","温る"]},
+      {"word":"加減","reading":"かげん","sentence":"ちからの [[加減]]が むずかしい。","readWrong":["かへん","くわげん","かけん"],"kanjiWrong":["加限","加現","可減"]}
+    ] },
+    { "kanji": "故", "on": ["コ"], "kun": ["ゆえ"], "examples": [
+      {"word":"事故","reading":"じこ","sentence":"{交通|こうつう}[[事故]]に {気|き}を つける。","readWrong":["じご","ことこ","じこう"],"kanjiWrong":["事古","事固","事個"]}
+    ] },
+    { "kanji": "個", "on": ["コ"], "kun": [], "examples": [
+      {"word":"個人","reading":"こじん","sentence":"[[個人]]の もちものに なまえを かく。","readWrong":["こにん","こひと","ごじん"],"kanjiWrong":["固人","古人","個入"]},
+      {"word":"一個","reading":"いっこ","sentence":"りんごを [[一個]] たべる。","readWrong":["いちこ","ひとこ","いっか"],"kanjiWrong":["一固","一古","一故"]}
+    ] },
+    { "kanji": "護", "on": ["ゴ"], "kun": [], "examples": [
+      {"word":"救護","reading":"きゅうご","sentence":"うんどうかいの [[救護]]テント。","readWrong":["きゅうこ","すくご","きゅご"],"kanjiWrong":["救語","求護","救議"]}
+    ] },
+    { "kanji": "効", "on": ["コウ"], "kun": ["き.く"], "examples": [
+      {"word":"効く","reading":"きく","sentence":"この くすりは よく [[効く]]。","readWrong":["こうく","きかく","ききく"],"kanjiWrong":["交く","功く","校く"]},
+      {"word":"効果","reading":"こうか","sentence":"れんしゅうの [[効果]]が {出|で}る。","readWrong":["きか","こうが","こか"],"kanjiWrong":["交果","功果","効科"]}
+    ] },
+    { "kanji": "厚", "on": ["コウ"], "kun": ["あつ.い"], "examples": [
+      {"word":"厚い","reading":"あつい","sentence":"[[厚い]] {本|ほん}を よむ。","readWrong":["こうい","あつかい","あったい"],"kanjiWrong":["暑い","熱い","原い"]},
+      {"word":"厚紙","reading":"あつがみ","sentence":"[[厚紙]]で はこを つくる。","readWrong":["こうし","あつかみ","あつし"],"kanjiWrong":["暑紙","原紙","厚組"]}
+    ] },
+    { "kanji": "耕", "on": ["コウ"], "kun": ["たがや.す"], "examples": [
+      {"word":"耕す","reading":"たがやす","sentence":"はたけを [[耕す]]。","readWrong":["こうす","たがやる","たかやす"],"kanjiWrong":["井す","畑す","料す"]},
+      {"word":"農耕","reading":"のうこう","sentence":"むかしの [[農耕]]の くらしを しらべる。","readWrong":["のうたがや","のうごう","のこう"],"kanjiWrong":["農構","農講","豊耕"]}
+    ] },
+    { "kanji": "航", "on": ["コウ"], "kun": [], "examples": [
+      {"word":"航海","reading":"こうかい","sentence":"ふねで [[航海]]する。","readWrong":["こうがい","こううみ","こかい"],"kanjiWrong":["航会","船海","構海"]},
+      {"word":"航空","reading":"こうくう","sentence":"[[航空]]ショーを みる。","readWrong":["こうそら","こうぐう","ごうくう"],"kanjiWrong":["航究","構空","船空"]}
+    ] },
+    { "kanji": "鉱", "on": ["コウ"], "kun": [], "examples": [
+      {"word":"鉱石","reading":"こうせき","sentence":"いろいろな [[鉱石]]を あつめる。","readWrong":["こういし","こうしゃく","こせき"],"kanjiWrong":["鉱右","銀石","広石"]},
+      {"word":"鉱山","reading":"こうざん","sentence":"むかしの [[鉱山]]を けんがくする。","readWrong":["こうさん","こうやま","こざん"],"kanjiWrong":["広山","鉱出","銅山"]}
+    ] },
+    { "kanji": "構", "on": ["コウ"], "kun": ["かま.える","かま.う"], "examples": [
+      {"word":"構成","reading":"こうせい","sentence":"{話|はなし}の [[構成]]を かんがえる。","readWrong":["こうしょう","かまえせい","こうぜい"],"kanjiWrong":["講成","構城","構正"]},
+      {"word":"構える","reading":"かまえる","sentence":"バットを [[構える]]。","readWrong":["こうえる","かまる","かもえる"],"kanjiWrong":["講える","横える","持える"]}
+    ] },
+    { "kanji": "興", "on": ["コウ","キョウ"], "kun": ["おこ.る","おこ.す"], "examples": [
+      {"word":"興味","reading":"きょうみ","sentence":"{虫|むし}に [[興味]]が ある。","readWrong":["こうみ","きょうあじ","きょみ"],"kanjiWrong":["共味","興未","鏡味"]}
+    ] },
+    { "kanji": "講", "on": ["コウ"], "kun": [], "examples": [
+      {"word":"講演","reading":"こうえん","sentence":"はかせの [[講演]]を きく。","readWrong":["こうえい","こうおん","こえん"],"kanjiWrong":["構演","講園","公演"]},
+      {"word":"講習","reading":"こうしゅう","sentence":"すいえいの [[講習]]に さんかする。","readWrong":["こうしょう","こうなら","ごうしゅう"],"kanjiWrong":["構習","講週","公習"]}
+    ] },
+    { "kanji": "告", "on": ["コク"], "kun": ["つ.げる"], "examples": [
+      {"word":"広告","reading":"こうこく","sentence":"しんぶんの [[広告]]を みる。","readWrong":["こうつげ","ひろこく","こうごく"],"kanjiWrong":["広合","光告","広造"]},
+      {"word":"告げる","reading":"つげる","sentence":"{友|とも}だちに わかれを [[告げる]]。","readWrong":["こくげる","つける","つぐる"],"kanjiWrong":["合げる","造げる","古げる"]}
+    ] },
+    { "kanji": "混", "on": ["コン"], "kun": ["ま.じる","ま.ざる","ま.ぜる","こ.む"], "examples": [
+      {"word":"混ぜる","reading":"まぜる","sentence":"えのぐを [[混ぜる]]。","readWrong":["こんぜる","まぜぜる","かぜる"],"kanjiWrong":["根ぜる","温ぜる","湯ぜる"]},
+      {"word":"混雑","reading":"こんざつ","sentence":"{朝|あさ}の {駅|えき}は [[混雑]]して いる。","readWrong":["こんさつ","まざつ","こんぞう"],"kanjiWrong":["混集","温雑","根雑"]}
+    ] },
+    { "kanji": "査", "on": ["サ"], "kun": [], "examples": [
+      {"word":"検査","reading":"けんさ","sentence":"からだの [[検査]]を うける。","readWrong":["けんさあ","けんざ","けいさ"],"kanjiWrong":["険査","検香","験査"]},
+      {"word":"調査","reading":"ちょうさ","sentence":"{川|かわ}の {水|みず}を [[調査]]する。","readWrong":["ちょうざ","しらさ","ちょさ"],"kanjiWrong":["調香","週査","調者"]}
+    ] },
+    { "kanji": "再", "on": ["サイ","サ"], "kun": ["ふたた.び"], "examples": [
+      {"word":"再び","reading":"ふたたび","sentence":"[[再び]] あう {日|ひ}まで げんきでね。","readWrong":["さいび","ふたび","さたび"],"kanjiWrong":["両び","西び","円び"]},
+      {"word":"再生","reading":"さいせい","sentence":"ビデオを [[再生]]する。","readWrong":["さいしょう","ふたせい","させい"],"kanjiWrong":["西生","再正","最生"]}
+    ] },
+    { "kanji": "災", "on": ["サイ"], "kun": ["わざわ.い"], "examples": [
+      {"word":"火災","reading":"かさい","sentence":"[[火災]]を ふせぐ。","readWrong":["ひさい","かざい","かわざわ"],"kanjiWrong":["火才","火材","水災"]},
+      {"word":"災害","reading":"さいがい","sentence":"[[災害]]に そなえて じゅんびする。","readWrong":["さいかい","わざがい","ざいがい"],"kanjiWrong":["才害","災書","最害"]}
+    ] },
+    { "kanji": "妻", "on": ["サイ"], "kun": ["つま"], "examples": [
+      {"word":"妻","reading":"つま","sentence":"{夫|おっと}と [[妻]]が ならんで すわる。","readWrong":["さい","つめ","よめ"],"kanjiWrong":["要","委","婦"]},
+      {"word":"夫妻","reading":"ふさい","sentence":"{田中|たなか}[[夫妻]]が あそびに くる。","readWrong":["ふつま","ぶさい","おっとつま"],"kanjiWrong":["夫要","天妻","失妻"]}
+    ] },
+    { "kanji": "採", "on": ["サイ"], "kun": ["と.る"], "examples": [
+      {"word":"採る","reading":"とる","sentence":"{山|やま}で きのこを [[採る]]。","readWrong":["さいる","とれる","とらる"],"kanjiWrong":["菜る","深る","授る"]},
+      {"word":"採集","reading":"さいしゅう","sentence":"{夏休|なつやす}みに こんちゅう[[採集]]を する。","readWrong":["さいしゅ","とりしゅう","ざいしゅう"],"kanjiWrong":["菜集","採習","最集"]}
+    ] },
+    { "kanji": "際", "on": ["サイ"], "kun": ["きわ"], "examples": [
+      {"word":"国際","reading":"こくさい","sentence":"{世界|せかい}の チームが あつまる [[国際]]{大会|たいかい}。","readWrong":["こくざい","くにさい","こっさい"],"kanjiWrong":["国祭","国察","国再"]},
+      {"word":"実際","reading":"じっさい","sentence":"[[実際]]に やって みる。","readWrong":["じつさい","みさい","じっざい"],"kanjiWrong":["実祭","実察","実再"]}
+    ] },
+    { "kanji": "在", "on": ["ザイ"], "kun": ["あ.る"], "examples": [
+      {"word":"現在","reading":"げんざい","sentence":"[[現在]]の {時|じ}こくを たしかめる。","readWrong":["げんさい","げんある","けんざい"],"kanjiWrong":["現材","現財","見在"]},
+      {"word":"在校生","reading":"ざいこうせい","sentence":"[[在校生]]が {新入生|しんにゅうせい}を むかえる。","readWrong":["さいこうせい","ざいがくせい","あるこうせい"],"kanjiWrong":["材校生","財校生","在交生"]}
+    ] },
+    { "kanji": "財", "on": ["ザイ","サイ"], "kun": [], "examples": [
+      {"word":"財産","reading":"ざいさん","sentence":"{家|いえ}の [[財産]]を たいせつに する。","readWrong":["さいさん","ざいざん","たからさん"],"kanjiWrong":["材産","在産","財散"]},
+      {"word":"文化財","reading":"ぶんかざい","sentence":"むかしの [[文化財]]を まもる。","readWrong":["ぶんかさい","ぶんけざい","もんかざい"],"kanjiWrong":["文化材","文化在","文花財"]}
+    ] },
+    { "kanji": "罪", "on": ["ザイ"], "kun": ["つみ"], "examples": [
+      {"word":"罪","reading":"つみ","sentence":"{小|ちい}さな うそも [[罪]]に なる。","readWrong":["ざい","つぶ","ばつ"],"kanjiWrong":["置","買","非"]}
+    ] },
+    { "kanji": "殺", "on": ["サツ","サイ","セツ"], "kun": ["ころ.す"], "examples": [
+      {"word":"殺風景","reading":"さっぷうけい","sentence":"かざりの ない [[殺風景]]な へや。","readWrong":["さつふうけい","ころふうけい","さっぷけい"],"kanjiWrong":["設風景","殺風京","察風景"]}
+    ] },
+    { "kanji": "雑", "on": ["ザツ","ゾウ"], "kun": [], "examples": [
+      {"word":"雑木林","reading":"ぞうきばやし","sentence":"[[雑木林]]で {虫|むし}を とる。","readWrong":["ざつきばやし","ざつぼくりん","ぞうもくばやし"],"kanjiWrong":["集木林","雑本林","雑木村"]},
+      {"word":"雑音","reading":"ざつおん","sentence":"ラジオから [[雑音]]が きこえる。","readWrong":["ざつね","ぞうおん","さつおん"],"kanjiWrong":["集音","雑意","雑章"]}
+    ] },
+    { "kanji": "酸", "on": ["サン"], "kun": ["す.い"], "examples": [
+      {"word":"酸化","reading":"さんか","sentence":"てつが [[酸化]]して さびる。","readWrong":["さんけ","すか","ざんか"],"kanjiWrong":["賛化","産化","酸花"]},
+      {"word":"酸味","reading":"さんみ","sentence":"この みかんは [[酸味]]が つよい。","readWrong":["すみ","さんあじ","ざんみ"],"kanjiWrong":["酸未","賛味","産味"]}
+    ] },
+    { "kanji": "賛", "on": ["サン"], "kun": [], "examples": [
+      {"word":"賛成","reading":"さんせい","sentence":"その {意見|いけん}に [[賛成]]する。","readWrong":["さんしょう","ざんせい","さんなり"],"kanjiWrong":["酸成","賛正","参成"]},
+      {"word":"自画自賛","reading":"じがじさん","sentence":"じぶんの えを [[自画自賛]]する。","readWrong":["じかじさん","じがじざん","じがくじさん"],"kanjiWrong":["自画自参","自画自産","白画自賛"]}
+    ] },
+    { "kanji": "士", "on": ["シ"], "kun": [], "examples": [
+      {"word":"力士","reading":"りきし","sentence":"[[力士]]が すもうを とる。","readWrong":["りょくし","ちからし","りきじ"],"kanjiWrong":["力土","力仕","刀士"]},
+      {"word":"栄養士","reading":"えいようし","sentence":"[[栄養士]]さんが こんだてを {決|き}める。","readWrong":["えいようじ","えいよし","さかえようし"],"kanjiWrong":["栄養土","栄養仕","栄羊士"]}
+    ] },
+    { "kanji": "支", "on": ["シ"], "kun": ["ささ.える"], "examples": [
+      {"word":"支える","reading":"ささえる","sentence":"みんなで チームを [[支える]]。","readWrong":["しえる","ささる","さかえる"],"kanjiWrong":["枝える","技える","反える"]},
+      {"word":"支店","reading":"してん","sentence":"ぎんこうの [[支店]]に いく。","readWrong":["しみせ","じてん","さてん"],"kanjiWrong":["枝店","支点","史店"]}
+    ] },
+    { "kanji": "史", "on": ["シ"], "kun": [], "examples": [
+      {"word":"史上","reading":"しじょう","sentence":"[[史上]] {最高|さいこう}の {記録|きろく}が {出|で}た。","readWrong":["しうえ","しじょ","ふみじょう"],"kanjiWrong":["支上","使上","史土"]},
+      {"word":"世界史","reading":"せかいし","sentence":"{本|ほん}で [[世界史]]を まなぶ。","readWrong":["せいかいし","よかいし","せかいじ"],"kanjiWrong":["世界使","世界支","世界子"]}
+    ] },
+    { "kanji": "志", "on": ["シ"], "kun": ["こころざ.す","こころざし"], "examples": [
+      {"word":"志","reading":"こころざし","sentence":"たかい [[志]]を もつ。","readWrong":["し","こころざす","こころざ"],"kanjiWrong":["意","思","息"]},
+      {"word":"意志","reading":"いし","sentence":"さいごまで やりぬく つよい [[意志]]。","readWrong":["いこころ","いじ","おもし"],"kanjiWrong":["意士","意支","医志"]}
+    ] },
+    { "kanji": "枝", "on": ["シ"], "kun": ["えだ"], "examples": [
+      {"word":"枝","reading":"えだ","sentence":"{木|き}の [[枝]]に {鳥|とり}が とまる。","readWrong":["し","えた","みき"],"kanjiWrong":["技","板","林"]},
+      {"word":"小枝","reading":"こえだ","sentence":"{公園|こうえん}で [[小枝]]を ひろう。","readWrong":["しょうし","こえた","こし"],"kanjiWrong":["小技","少枝","小板"]}
+    ] },
+    { "kanji": "師", "on": ["シ"], "kun": [], "examples": [
+      {"word":"教師","reading":"きょうし","sentence":"ゆめは [[教師]]に なる ことだ。","readWrong":["きょうじ","おしし","こうし"],"kanjiWrong":["教史","教市","教使"]},
+      {"word":"医師","reading":"いし","sentence":"[[医師]]の しんさつを うける。","readWrong":["いじ","いっし","えし"],"kanjiWrong":["医使","医市","医史"]}
+    ] },
+    { "kanji": "資", "on": ["シ"], "kun": [], "examples": [
+      {"word":"資料","reading":"しりょう","sentence":"しらべ{学習|がくしゅう}の [[資料]]を あつめる。","readWrong":["しりょ","じりょう","しりよう"],"kanjiWrong":["次料","資科","賀料"]},
+      {"word":"資格","reading":"しかく","sentence":"{母|はは}は かんごしの [[資格]]を もって いる。","readWrong":["しがく","じかく","しかっ"],"kanjiWrong":["資確","次格","資各"]}
+    ] },
+    { "kanji": "飼", "on": ["シ"], "kun": ["か.う"], "examples": [
+      {"word":"飼う","reading":"かう","sentence":"{家|いえ}で いぬを [[飼う]]。","readWrong":["しう","かいう","こう"],"kanjiWrong":["飯う","飲う","司う"]},
+      {"word":"飼育","reading":"しいく","sentence":"{学校|がっこう}で うさぎを [[飼育]]する。","readWrong":["しそだ","しく","じいく"],"kanjiWrong":["飯育","飼有","司育"]}
+    ] },
+    { "kanji": "示", "on": ["ジ","シ"], "kun": ["しめ.す"], "examples": [
+      {"word":"示す","reading":"しめす","sentence":"{地図|ちず}で みちを [[示す]]。","readWrong":["じす","しめる","しるす"],"kanjiWrong":["未す","末す","指す"]},
+      {"word":"指示","reading":"しじ","sentence":"{先生|せんせい}の [[指示]]に したがう。","readWrong":["しし","さしじ","しめじ"],"kanjiWrong":["指事","指字","持示"]}
+    ] },
+    { "kanji": "似", "on": ["ジ"], "kun": ["に.る"], "examples": [
+      {"word":"似る","reading":"にる","sentence":"{子|こ}どもは おやに [[似る]]。","readWrong":["じる","にれる","ねる"],"kanjiWrong":["以る","化る","仕る"]},
+      {"word":"似顔絵","reading":"にがおえ","sentence":"{友|とも}だちの [[似顔絵]]を かく。","readWrong":["にかおえ","じがんえ","にがおかい"],"kanjiWrong":["以顔絵","似頭絵","似顔会"]}
+    ] },
+    { "kanji": "識", "on": ["シキ"], "kun": [], "examples": [
+      {"word":"知識","reading":"ちしき","sentence":"{本|ほん}を よんで [[知識]]を ふやす。","readWrong":["ちしょく","しりしき","ちじき"],"kanjiWrong":["知織","知職","知式"]},
+      {"word":"意識","reading":"いしき","sentence":"せすじを [[意識]]して すわる。","readWrong":["いしょく","いじき","いしっき"],"kanjiWrong":["意織","意式","意職"]}
+    ] },
+    { "kanji": "質", "on": ["シツ","シチ","チ"], "kun": [], "examples": [
+      {"word":"質問","reading":"しつもん","sentence":"{先生|せんせい}に [[質問]]する。","readWrong":["しちもん","しつぶん","しつもの"],"kanjiWrong":["質門","賀問","質間"]},
+      {"word":"品質","reading":"ひんしつ","sentence":"[[品質]]の よい くつを えらぶ。","readWrong":["ひんしち","しなしつ","ひんじつ"],"kanjiWrong":["品室","品賀","口質"]}
+    ] },
+    { "kanji": "舎", "on": ["シャ"], "kun": [], "examples": [
+      {"word":"校舎","reading":"こうしゃ","sentence":"あたらしい [[校舎]]に はいる。","readWrong":["こうしゃあ","こうや","ごうしゃ"],"kanjiWrong":["校者","校写","校車"]},
+      {"word":"宿舎","reading":"しゅくしゃ","sentence":"しあいの {前|まえ}の {日|ひ}は [[宿舎]]に とまる。","readWrong":["しゅくや","やどしゃ","しゅうしゃ"],"kanjiWrong":["宿者","宿車","宿写"]}
+    ] },
+    { "kanji": "謝", "on": ["シャ"], "kun": ["あやま.る"], "examples": [
+      {"word":"謝る","reading":"あやまる","sentence":"ごめんなさいと [[謝る]]。","readWrong":["しゃる","あやまれる","あやめる"],"kanjiWrong":["話る","語る","詩る"]},
+      {"word":"感謝","reading":"かんしゃ","sentence":"てつだって くれた {人|ひと}に [[感謝]]する。","readWrong":["かんじゃ","かんしゃく","かんあやま"],"kanjiWrong":["感社","感者","館謝"]}
+    ] },
+    { "kanji": "授", "on": ["ジュ"], "kun": ["さず.ける","さず.かる"], "examples": [
+      {"word":"授業","reading":"じゅぎょう","sentence":"もうすぐ [[授業]]が はじまる。","readWrong":["じゅうぎょう","さずぎょう","じゅごう"],"kanjiWrong":["受業","授楽","採業"]},
+      {"word":"授ける","reading":"さずける","sentence":"{王|おう}さまが ゆうしゃに ちえを [[授ける]]。","readWrong":["さずる","さつける","じゅける"],"kanjiWrong":["受ける","採ける","招ける"]}
+    ] },
+    { "kanji": "修", "on": ["シュウ","シュ"], "kun": ["おさ.める","おさ.まる"], "examples": [
+      {"word":"修理","reading":"しゅうり","sentence":"こわれた じてんしゃを [[修理]]する。","readWrong":["しゅり","おさり","しゅうりい"],"kanjiWrong":["終理","修里","習理"]},
+      {"word":"修学旅行","reading":"しゅうがくりょこう","sentence":"[[修学旅行]]で {京都|きょうと}へ いく。","readWrong":["しゅがくりょこう","しゅうがくりょぎょう","おさがくりょこう"],"kanjiWrong":["習学旅行","修学族行","終学旅行"]}
+    ] },
+    { "kanji": "述", "on": ["ジュツ"], "kun": ["の.べる"], "examples": [
+      {"word":"述べる","reading":"のべる","sentence":"じぶんの かんがえを [[述べる]]。","readWrong":["じゅつべる","のぶる","のこべる"],"kanjiWrong":["術べる","迷べる","逆べる"]},
+      {"word":"記述","reading":"きじゅつ","sentence":"もんだいに [[記述]]で こたえる。","readWrong":["きのべ","きじゅつう","きしゅつ"],"kanjiWrong":["記術","紀述","記迷"]}
+    ] },
+    { "kanji": "術", "on": ["ジュツ"], "kun": [], "examples": [
+      {"word":"手術","reading":"しゅじゅつ","sentence":"[[手術]]が ぶじに おわる。","readWrong":["てじゅつ","しゅうじゅつ","しゅしゅつ"],"kanjiWrong":["手述","手街","毛術"]},
+      {"word":"美術","reading":"びじゅつ","sentence":"[[美術]]の {時間|じかん}に えを かく。","readWrong":["みじゅつ","びじゅっ","びしゅつ"],"kanjiWrong":["美述","美街","米術"]}
+    ] },
+    { "kanji": "準", "on": ["ジュン"], "kun": [], "examples": [
+      {"word":"基準","reading":"きじゅん","sentence":"えらぶ [[基準]]を きめる。","readWrong":["きしゅん","もとじゅん","きじゅ"],"kanjiWrong":["基順","期準","基集"]},
+      {"word":"準決勝","reading":"じゅんけっしょう","sentence":"ぼくたちの チームが [[準決勝]]に すすむ。","readWrong":["じゅんけつしょう","じゅんきっしょう","しゅんけっしょう"],"kanjiWrong":["順決勝","準結勝","集決勝"]}
+    ] },
+    { "kanji": "序", "on": ["ジョ"], "kun": [], "examples": [
+      {"word":"順序","reading":"じゅんじょ","sentence":"[[順序]]よく ならぶ。","readWrong":["じゅんしょ","じゅんよ","じゅうじょ"],"kanjiWrong":["順予","順字","準序"]},
+      {"word":"序曲","reading":"じょきょく","sentence":"オペラの [[序曲]]が ながれる。","readWrong":["じょごく","よきょく","じょうきょく"],"kanjiWrong":["予曲","字曲","序局"]}
+    ] },
+    { "kanji": "招", "on": ["ショウ"], "kun": ["まね.く"], "examples": [
+      {"word":"招く","reading":"まねく","sentence":"{友|とも}だちを {家|いえ}に [[招く]]。","readWrong":["しょうく","まねる","まいく"],"kanjiWrong":["拾く","指く","持く"]},
+      {"word":"招待","reading":"しょうたい","sentence":"たんじょうかいに [[招待]]する。","readWrong":["しょうだい","まねたい","しょたい"],"kanjiWrong":["昭待","招持","照待"]}
+    ] },
+    { "kanji": "証", "on": ["ショウ"], "kun": [], "examples": [
+      {"word":"証明","reading":"しょうめい","sentence":"こたえが ただしい ことを [[証明]]する。","readWrong":["しょうみょう","しょうあか","せいめい"],"kanjiWrong":["正明","照明","証名"]},
+      {"word":"証言","reading":"しょうげん","sentence":"{見|み}た {人|ひと}の [[証言]]を きく。","readWrong":["しょうごん","しょうこと","せいげん"],"kanjiWrong":["正言","証語","招言"]}
+    ] },
+    { "kanji": "象", "on": ["ショウ","ゾウ"], "kun": [], "examples": [
+      {"word":"象","reading":"ぞう","sentence":"どうぶつえんで [[象]]を みる。","readWrong":["しょう","ぞお","そう"],"kanjiWrong":["像","家","馬"]},
+      {"word":"印象","reading":"いんしょう","sentence":"あかるい [[印象]]の {人|ひと}。","readWrong":["いんぞう","しるししょう","いんしょ"],"kanjiWrong":["印像","印賞","印章"]}
+    ] },
+    { "kanji": "賞", "on": ["ショウ"], "kun": [], "examples": [
+      {"word":"賞","reading":"しょう","sentence":"えの コンクールで [[賞]]を もらう。","readWrong":["じょう","しょ","ほう"],"kanjiWrong":["賀","常","堂"]},
+      {"word":"賞品","reading":"しょうひん","sentence":"ゲームに かって [[賞品]]を もらう。","readWrong":["しょうしな","じょうひん","しょひん"],"kanjiWrong":["商品","常品","賞器"]}
+    ] },
+    { "kanji": "条", "on": ["ジョウ"], "kun": [], "examples": [
+      {"word":"条件","reading":"じょうけん","sentence":"さんかの [[条件]]を たしかめる。","readWrong":["じょうげん","じょけん","ちょうけん"],"kanjiWrong":["条牛","冬件","乗件"]},
+      {"word":"条約","reading":"じょうやく","sentence":"{国|くに}と {国|くに}が [[条約]]を むすぶ。","readWrong":["じょうやっく","じょやく","ちょうやく"],"kanjiWrong":["条役","冬約","乗約"]}
+    ] },
+    { "kanji": "状", "on": ["ジョウ"], "kun": [], "examples": [
+      {"word":"年賀状","reading":"ねんがじょう","sentence":"[[年賀状]]を かく。","readWrong":["ねんがしょう","としがじょう","ねんかじょう"],"kanjiWrong":["年賀条","年加状","年賀常"]},
+      {"word":"現状","reading":"げんじょう","sentence":"[[現状]]を よく しらべる。","readWrong":["げんしょう","げんじょ","けんじょう"],"kanjiWrong":["現条","現常","見状"]}
+    ] },
+    { "kanji": "常", "on": ["ジョウ"], "kun": ["つね","とこ"], "examples": [
+      {"word":"日常","reading":"にちじょう","sentence":"[[日常]]の できごとを {日記|にっき}に かく。","readWrong":["ひじょう","にちつね","にっじょう"],"kanjiWrong":["日堂","日賞","日場"]},
+      {"word":"正常","reading":"せいじょう","sentence":"きかいが [[正常]]に うごく。","readWrong":["せいしょう","しょうじょう","せいつね"],"kanjiWrong":["正状","正堂","生常"]}
+    ] },
+    { "kanji": "情", "on": ["ジョウ","セイ"], "kun": ["なさ.け"], "examples": [
+      {"word":"友情","reading":"ゆうじょう","sentence":"[[友情]]を たいせつに する。","readWrong":["ゆうしょう","ともじょう","ゆうせい"],"kanjiWrong":["友清","友晴","友精"]},
+      {"word":"情け","reading":"なさけ","sentence":"{人|ひと}の [[情け]]に ふれる。","readWrong":["じょうけ","なけ","なさげ"],"kanjiWrong":["清け","晴け","精け"]}
+    ] },
+    { "kanji": "織", "on": ["ショク","シキ"], "kun": ["お.る"], "examples": [
+      {"word":"織る","reading":"おる","sentence":"はたで ぬのを [[織る]]。","readWrong":["しょくる","おれる","おりる"],"kanjiWrong":["職る","識る","折る"]},
+      {"word":"組織","reading":"そしき","sentence":"あたらしい [[組織]]を つくる。","readWrong":["そしょく","くみしき","そじき"],"kanjiWrong":["組職","組識","組式"]}
+    ] },
+    { "kanji": "職", "on": ["ショク"], "kun": [], "examples": [
+      {"word":"職人","reading":"しょくにん","sentence":"うでの よい [[職人]]。","readWrong":["しょくじん","しきにん","しょっにん"],"kanjiWrong":["織人","識人","色人"]},
+      {"word":"職業","reading":"しょくぎょう","sentence":"しょうらいの [[職業]]を かんがえる。","readWrong":["しょくごう","しきぎょう","しょくぎょ"],"kanjiWrong":["織業","識業","食業"]}
+    ] },
+    { "kanji": "制", "on": ["セイ"], "kun": [], "examples": [
+      {"word":"制服","reading":"せいふく","sentence":"{中学校|ちゅうがっこう}の [[制服]]を きる。","readWrong":["せいぶく","しょうふく","せいふ"],"kanjiWrong":["製服","正服","制福"]},
+      {"word":"制限","reading":"せいげん","sentence":"ゲームの {時間|じかん}を [[制限]]する。","readWrong":["せいけん","しょうげん","せいかぎ"],"kanjiWrong":["製限","制眼","正限"]}
+    ] },
+    { "kanji": "性", "on": ["セイ","ショウ"], "kun": [], "examples": [
+      {"word":"性質","reading":"せいしつ","sentence":"{水|みず}の [[性質]]を しらべる。","readWrong":["しょうしつ","せいしち","せいじつ"],"kanjiWrong":["生質","性賀","性室"]},
+      {"word":"個性","reading":"こせい","sentence":"ひとりひとりの [[個性]]を たいせつに する。","readWrong":["こしょう","こせ","ごせい"],"kanjiWrong":["個生","固性","個正"]}
+    ] },
+    { "kanji": "政", "on": ["セイ","ショウ"], "kun": ["まつりごと"], "examples": [
+      {"word":"政治","reading":"せいじ","sentence":"[[政治]]の しくみを まなぶ。","readWrong":["しょうじ","せいち","まつりじ"],"kanjiWrong":["正治","政台","故治"]},
+      {"word":"政府","reading":"せいふ","sentence":"[[政府]]が あたらしい きまりを つくる。","readWrong":["しょうふ","せいぶ","まつりふ"],"kanjiWrong":["正府","政付","故府"]}
+    ] },
+    { "kanji": "勢", "on": ["セイ"], "kun": ["いきお.い"], "examples": [
+      {"word":"勢い","reading":"いきおい","sentence":"[[勢い]]よく はしりだす。","readWrong":["せいい","いきおおい","ちからい"],"kanjiWrong":["熱い","努い","動い"]},
+      {"word":"大勢","reading":"おおぜい","sentence":"[[大勢]]の {人|ひと}が あつまる。","readWrong":["だいせい","おおせい","おおいきおい"],"kanjiWrong":["大熱","大努","太勢"]}
+    ] },
+    { "kanji": "精", "on": ["セイ","ショウ"], "kun": [], "examples": [
+      {"word":"精神","reading":"せいしん","sentence":"[[精神]]を きたえる。","readWrong":["しょうしん","せいじん","せいかみ"],"kanjiWrong":["清神","情神","晴神"]},
+      {"word":"精算","reading":"せいさん","sentence":"{駅|えき}で うんちんを [[精算]]する。","readWrong":["せいざん","しょうさん","せいけい"],"kanjiWrong":["晴算","精計","情算"]}
+    ] },
+    { "kanji": "製", "on": ["セイ"], "kun": [], "examples": [
+      {"word":"製品","reading":"せいひん","sentence":"この [[製品]]は {日本|にほん}で つくられた。","readWrong":["せいしな","しょうひん","ぜいひん"],"kanjiWrong":["制品","製器","清品"]},
+      {"word":"手製","reading":"てせい","sentence":"{母|はは}の [[手製]]の ケーキ。","readWrong":["しゅせい","てづくり","てぜい"],"kanjiWrong":["手制","毛製","手衣"]}
+    ] },
+    { "kanji": "税", "on": ["ゼイ"], "kun": [], "examples": [
+      {"word":"税金","reading":"ぜいきん","sentence":"おとなは [[税金]]を おさめる。","readWrong":["せいきん","ぜいかね","ぜきん"],"kanjiWrong":["説金","税全","秋金"]},
+      {"word":"税関","reading":"ぜいかん","sentence":"くうこうの [[税関]]を とおる。","readWrong":["せいかん","ぜいせき","ぜいがん"],"kanjiWrong":["説関","税間","税館"]}
+    ] },
+    { "kanji": "責", "on": ["セキ"], "kun": ["せ.める"], "examples": [
+      {"word":"責める","reading":"せめる","sentence":"しっぱいした {友|とも}だちを [[責める]]のは よくない。","readWrong":["せきめる","せまる","ぜめる"],"kanjiWrong":["青める","積める","績める"]}
+    ] },
+    { "kanji": "績", "on": ["セキ"], "kun": [], "examples": [
+      {"word":"成績","reading":"せいせき","sentence":"テストの [[成績]]が {上|あ}がる。","readWrong":["せいしゃく","せいぜき","なりせき"],"kanjiWrong":["成積","成責","生績"]},
+      {"word":"実績","reading":"じっせき","sentence":"たくさんの [[実績]]を のこす。","readWrong":["じつせき","みせき","じっしゃく"],"kanjiWrong":["実積","実責","実青"]}
+    ] },
+    { "kanji": "接", "on": ["セツ"], "kun": ["つ.ぐ"], "examples": [
+      {"word":"直接","reading":"ちょくせつ","sentence":"{会|あ}って [[直接]] {話|はな}す。","readWrong":["じきせつ","ちょくせっ","ちょせつ"],"kanjiWrong":["直切","直説","直節"]},
+      {"word":"接する","reading":"せっする","sentence":"{海|うみ}に [[接する]] {町|まち}。","readWrong":["せつする","つぐする","せいする"],"kanjiWrong":["節する","切する","設する"]}
+    ] },
+    { "kanji": "設", "on": ["セツ"], "kun": ["もう.ける"], "examples": [
+      {"word":"設計","reading":"せっけい","sentence":"{家|いえ}を [[設計]]する。","readWrong":["せつけい","もうけい","せっき"],"kanjiWrong":["説計","接計","節計"]},
+      {"word":"設ける","reading":"もうける","sentence":"クラスで あたらしい きまりを [[設ける]]。","readWrong":["せつける","もちける","もうげる"],"kanjiWrong":["説ける","役ける","投ける"]}
+    ] },
+    { "kanji": "絶", "on": ["ゼツ"], "kun": ["た.える","た.やす","た.つ"], "examples": [
+      {"word":"絶対","reading":"ぜったい","sentence":"つぎは [[絶対]]に まけない。","readWrong":["ぜつたい","せったい","たったい"],"kanjiWrong":["絶体","色対","紀対"]},
+      {"word":"絶える","reading":"たえる","sentence":"{夜|よる}に なると {人|ひと}どおりが [[絶える]]。","readWrong":["ぜつえる","たてる","たつえる"],"kanjiWrong":["色える","給える","約える"]}
+    ] },
+    { "kanji": "祖", "on": ["ソ"], "kun": [], "examples": [
+      {"word":"祖父","reading":"そふ","sentence":"なつやすみに [[祖父]]の {家|いえ}へ いく。","readWrong":["そぶ","そちち","じいふ"],"kanjiWrong":["組父","祖文","祝父"]},
+      {"word":"先祖","reading":"せんぞ","sentence":"[[先祖]]を たいせつに おもう。","readWrong":["せんそ","さきそ","せんじょ"],"kanjiWrong":["先組","先祝","先神"]}
+    ] },
+    { "kanji": "素", "on": ["ソ","ス"], "kun": [], "examples": [
+      {"word":"素直","reading":"すなお","sentence":"[[素直]]な きもちで あやまる。","readWrong":["そなお","すちょく","そちょく"],"kanjiWrong":["表直","素真","青直"]},
+      {"word":"酸素","reading":"さんそ","sentence":"しょくぶつは [[酸素]]を {出|だ}す。","readWrong":["さんす","さんすう","ざんそ"],"kanjiWrong":["酸表","賛素","酸組"]}
+    ] },
+    { "kanji": "総", "on": ["ソウ"], "kun": [], "examples": [
+      {"word":"総合","reading":"そうごう","sentence":"うんどうかいで [[総合]] {一位|いちい}に なる。","readWrong":["そうあい","そごう","そうがっ"],"kanjiWrong":["絵合","総台","線合"]},
+      {"word":"総数","reading":"そうすう","sentence":"クラスの [[総数]]を かぞえる。","readWrong":["そすう","そうかず","ぞうすう"],"kanjiWrong":["絵数","線数","総教"]}
+    ] },
+    { "kanji": "造", "on": ["ゾウ"], "kun": ["つく.る"], "examples": [
+      {"word":"造る","reading":"つくる","sentence":"みなとで {大|おお}きな ふねを [[造る]]。","readWrong":["ぞうる","つける","つかる"],"kanjiWrong":["告る","進る","速る"]},
+      {"word":"木造","reading":"もくぞう","sentence":"[[木造]]の {古|ふる}い {家|いえ}。","readWrong":["きぞう","もくそう","もくぞ"],"kanjiWrong":["木像","本造","木告"]}
+    ] },
+    { "kanji": "像", "on": ["ゾウ"], "kun": [], "examples": [
+      {"word":"想像","reading":"そうぞう","sentence":"みらいの {町|まち}を [[想像]]する。","readWrong":["そうしょう","そうぞ","そぞう"],"kanjiWrong":["想象","想造","相像"]},
+      {"word":"画像","reading":"がぞう","sentence":"とった [[画像]]を ほぞんする。","readWrong":["がしょう","がそう","かぞう"],"kanjiWrong":["画象","画造","面像"]}
+    ] },
+    { "kanji": "増", "on": ["ゾウ"], "kun": ["ま.す","ふ.える","ふ.やす"], "examples": [
+      {"word":"増える","reading":"ふえる","sentence":"クラスの {人数|にんずう}が [[増える]]。","readWrong":["ぞうえる","ますえる","ふやえる"],"kanjiWrong":["倍える","場える","加える"]},
+      {"word":"増加","reading":"ぞうか","sentence":"{町|まち}の {人口|じんこう}が [[増加]]する。","readWrong":["ぞうが","ますか","そうか"],"kanjiWrong":["増可","像加","造加"]}
+    ] },
+    { "kanji": "則", "on": ["ソク"], "kun": [], "examples": [
+      {"word":"規則","reading":"きそく","sentence":"{学校|がっこう}の [[規則]]を まもる。","readWrong":["きぞく","きそっ","きのり"],"kanjiWrong":["規測","規側","規速"]},
+      {"word":"反則","reading":"はんそく","sentence":"サッカーで [[反則]]を して しまう。","readWrong":["はんぞく","たんそく","はんのり"],"kanjiWrong":["反測","反側","反速"]}
+    ] },
+    { "kanji": "測", "on": ["ソク"], "kun": ["はか.る"], "examples": [
+      {"word":"測る","reading":"はかる","sentence":"へやの ひろさを [[測る]]。","readWrong":["そくる","はかれる","ほかる"],"kanjiWrong":["側る","則る","湯る"]},
+      {"word":"観測","reading":"かんそく","sentence":"{夜|よる}に {星|ほし}を [[観測]]する。","readWrong":["かんぞく","かんはか","かんそう"],"kanjiWrong":["観則","観側","観速"]}
+    ] },
+    { "kanji": "属", "on": ["ゾク"], "kun": [], "examples": [
+      {"word":"金属","reading":"きんぞく","sentence":"[[金属]]で できた コップ。","readWrong":["きんそく","きんぞっ","かねぞく"],"kanjiWrong":["金族","金局","金居"]},
+      {"word":"所属","reading":"しょぞく","sentence":"サッカーぶに [[所属]]する。","readWrong":["しょそく","ところぞく","しょうぞく"],"kanjiWrong":["所族","所局","所居"]}
+    ] },
+    { "kanji": "率", "on": ["ソツ","リツ"], "kun": ["ひき.いる"], "examples": [
+      {"word":"率いる","reading":"ひきいる","sentence":"キャプテンが チームを [[率いる]]。","readWrong":["りついる","そついる","ひきる"],"kanjiWrong":["卒いる","引いる","幸いる"]},
+      {"word":"確率","reading":"かくりつ","sentence":"くじが あたる [[確率]]は ひくい。","readWrong":["かくそつ","かくりち","かくりっ"],"kanjiWrong":["確立","格率","確卒"]}
+    ] },
+    { "kanji": "損", "on": ["ソン"], "kun": ["そこ.なう","そこ.ねる"], "examples": [
+      {"word":"損","reading":"そん","sentence":"まちがえて かうと [[損]]を する。","readWrong":["ぞん","そこ","そこね"],"kanjiWrong":["員","孫","村"]},
+      {"word":"損害","reading":"そんがい","sentence":"たいふうで [[損害]]を うける。","readWrong":["そんかい","そこがい","ぞんがい"],"kanjiWrong":["孫害","員害","村害"]}
+    ] },
+    { "kanji": "貸", "on": ["タイ"], "kun": ["か.す"], "examples": [
+      {"word":"貸す","reading":"かす","sentence":"{友|とも}だちに {本|ほん}を [[貸す]]。","readWrong":["たいす","かしす","かわす"],"kanjiWrong":["代す","借す","貨す"]},
+      {"word":"貸し出す","reading":"かしだす","sentence":"{図書館|としょかん}で {本|ほん}を [[貸し出す]]。","readWrong":["たいしだす","かしいだす","かりだす"],"kanjiWrong":["代し出す","借し出す","貨し出す"]}
+    ] },
+    { "kanji": "態", "on": ["タイ"], "kun": [], "examples": [
+      {"word":"状態","reading":"じょうたい","sentence":"からだの [[状態]]が よい。","readWrong":["じょうだい","しょうたい","じょうたいい"],"kanjiWrong":["状能","条態","状熊"]},
+      {"word":"態度","reading":"たいど","sentence":"ていねいな [[態度]]で {話|はな}す。","readWrong":["たいと","だいど","たいたび"],"kanjiWrong":["能度","熊度","体度"]}
+    ] },
+    { "kanji": "団", "on": ["ダン","トン"], "kun": [], "examples": [
+      {"word":"団体","reading":"だんたい","sentence":"[[団体]]で りょこうする。","readWrong":["だんてい","とんたい","たんたい"],"kanjiWrong":["回体","団休","園体"]},
+      {"word":"集団","reading":"しゅうだん","sentence":"[[集団]]で {登校|とうこう}する。","readWrong":["しゅうたん","しゅだん","あつだん"],"kanjiWrong":["集回","集田","集断"]}
+    ] },
+    { "kanji": "断", "on": ["ダン"], "kun": ["た.つ","ことわ.る"], "examples": [
+      {"word":"断る","reading":"ことわる","sentence":"さそいを ていねいに [[断る]]。","readWrong":["だんる","ことわれる","こだわる"],"kanjiWrong":["新る","所る","折る"]},
+      {"word":"横断","reading":"おうだん","sentence":"[[横断]]{歩道|ほどう}を わたる。","readWrong":["よこだん","おうたん","こうだん"],"kanjiWrong":["横新","黄断","横談"]}
+    ] },
+    { "kanji": "築", "on": ["チク"], "kun": ["きず.く"], "examples": [
+      {"word":"建築","reading":"けんちく","sentence":"[[建築]]の しごとを する。","readWrong":["けんじく","けんつく","けんちっく"],"kanjiWrong":["健築","建竹","建等"]},
+      {"word":"築く","reading":"きずく","sentence":"すなで しろを [[築く]]。","readWrong":["ちくく","きづく","きずける"],"kanjiWrong":["等く","竹く","箱く"]}
+    ] },
+    { "kanji": "貯", "on": ["チョ"], "kun": [], "examples": [
+      {"word":"貯金","reading":"ちょきん","sentence":"おこづかいを [[貯金]]する。","readWrong":["ちょうきん","ちょかね","じょきん"],"kanjiWrong":["貸金","貯全","財金"]},
+      {"word":"貯水池","reading":"ちょすいち","sentence":"[[貯水池]]の {水|みず}が へる。","readWrong":["ちょうすいち","ちょみずいけ","ちょすいいけ"],"kanjiWrong":["貯水地","財水池","貯氷池"]}
+    ] },
+    { "kanji": "張", "on": ["チョウ"], "kun": ["は.る"], "examples": [
+      {"word":"張る","reading":"はる","sentence":"キャンプで テントを [[張る]]。","readWrong":["ちょうる","はれる","ばる"],"kanjiWrong":["長る","帳る","強る"]},
+      {"word":"主張","reading":"しゅちょう","sentence":"じぶんの {意見|いけん}を [[主張]]する。","readWrong":["しゅうちょう","しゅはる","しゅちょ"],"kanjiWrong":["主帳","主長","注張"]}
+    ] },
+    { "kanji": "停", "on": ["テイ"], "kun": [], "examples": [
+      {"word":"停車","reading":"ていしゃ","sentence":"{電車|でんしゃ}が {駅|えき}に [[停車]]する。","readWrong":["ちょうしゃ","ていじゃ","とめしゃ"],"kanjiWrong":["低車","停東","停事"]},
+      {"word":"停電","reading":"ていでん","sentence":"かみなりで [[停電]]した。","readWrong":["ていてん","ちょうでん","とまでん"],"kanjiWrong":["低電","停雪","定電"]}
+    ] },
+    { "kanji": "提", "on": ["テイ"], "kun": ["さ.げる"], "examples": [
+      {"word":"提出","reading":"ていしゅつ","sentence":"しゅくだいを [[提出]]する。","readWrong":["ていしゅっ","さげしゅつ","てしゅつ"],"kanjiWrong":["題出","提山","定出"]},
+      {"word":"提案","reading":"ていあん","sentence":"あたらしい あそびを [[提案]]する。","readWrong":["ていさん","だいあん","ていあ"],"kanjiWrong":["題案","提安","定案"]}
+    ] },
+    { "kanji": "程", "on": ["テイ"], "kun": ["ほど"], "examples": [
+      {"word":"程度","reading":"ていど","sentence":"この [[程度]]の さむさなら へいきだ。","readWrong":["ていと","ほどど","てど"],"kanjiWrong":["税度","定度","程席"]},
+      {"word":"日程","reading":"にってい","sentence":"りょこうの [[日程]]を きめる。","readWrong":["ひほど","にちてい","にってえ"],"kanjiWrong":["日定","日税","日庭"]}
+    ] },
+    { "kanji": "適", "on": ["テキ"], "kun": [], "examples": [
+      {"word":"適当","reading":"てきとう","sentence":"{肉|にく}を [[適当]]な {大|おお}きさに きる。","readWrong":["てきど","てきと","てっとう"],"kanjiWrong":["的当","適答","通当"]},
+      {"word":"快適","reading":"かいてき","sentence":"エアコンで へやが [[快適]]に なる。","readWrong":["かいてっき","けてき","かいでき"],"kanjiWrong":["快的","決適","快通"]}
+    ] },
+    { "kanji": "統", "on": ["トウ"], "kun": ["す.べる"], "examples": [
+      {"word":"伝統","reading":"でんとう","sentence":"{町|まち}の [[伝統]]を まもる。","readWrong":["でんどう","でんすべ","でんと"],"kanjiWrong":["伝続","電灯","伝結"]},
+      {"word":"統一","reading":"とういつ","sentence":"チームの {意見|いけん}を [[統一]]する。","readWrong":["とうひと","どういつ","すべいち"],"kanjiWrong":["続一","絵一","結一"]}
+    ] },
+    { "kanji": "堂", "on": ["ドウ"], "kun": [], "examples": [
+      {"word":"食堂","reading":"しょくどう","sentence":"[[食堂]]で ひるごはんを たべる。","readWrong":["しょくとう","しょくどお","しょどう"],"kanjiWrong":["食常","食道","食当"]},
+      {"word":"講堂","reading":"こうどう","sentence":"{全校|ぜんこう}で [[講堂]]に あつまる。","readWrong":["こうとう","こどう","ごうどう"],"kanjiWrong":["講常","講道","構堂"]}
+    ] },
+    { "kanji": "銅", "on": ["ドウ"], "kun": [], "examples": [
+      {"word":"銅","reading":"どう","sentence":"[[銅]]メダルを もらう。","readWrong":["とう","かね","どお"],"kanjiWrong":["銀","同","鉄"]},
+      {"word":"銅像","reading":"どうぞう","sentence":"{公園|こうえん}の [[銅像]]の {前|まえ}で まつ。","readWrong":["どうしょう","どうぞ","とうぞう"],"kanjiWrong":["銅象","同像","銀像"]}
+    ] },
+    { "kanji": "導", "on": ["ドウ"], "kun": ["みちび.く"], "examples": [
+      {"word":"導く","reading":"みちびく","sentence":"キャプテンが チームを {勝|しょう}りに [[導く]]。","readWrong":["どうく","みちく","みちびける"],"kanjiWrong":["道く","通く","送く"]},
+      {"word":"指導","reading":"しどう","sentence":"コーチの [[指導]]を うける。","readWrong":["しどお","さしどう","しとう"],"kanjiWrong":["指道","指動","指童"]}
+    ] },
+    { "kanji": "得", "on": ["トク"], "kun": ["え.る","う.る"], "examples": [
+      {"word":"得意","reading":"とくい","sentence":"さんすうが [[得意]]だ。","readWrong":["えい","とくいい","どくい"],"kanjiWrong":["徳意","特意","待意"]},
+      {"word":"説得","reading":"せっとく","sentence":"{母|はは}を [[説得]]して いぬを かう。","readWrong":["せつとく","せっえ","せつどく"],"kanjiWrong":["説徳","説特","話得"]}
+    ] },
+    { "kanji": "毒", "on": ["ドク"], "kun": [], "examples": [
+      {"word":"毒","reading":"どく","sentence":"この きのこには [[毒]]が ある。","readWrong":["とく","どっく","どお"],"kanjiWrong":["母","毎","素"]},
+      {"word":"気の毒","reading":"きのどく","sentence":"{雨|あめ}で えんそくが なくなって [[気の毒]]だ。","readWrong":["けのどく","きのとく","きのどっく"],"kanjiWrong":["気の母","気の毎","汽の毒"]}
+    ] },
+    { "kanji": "独", "on": ["ドク"], "kun": ["ひと.り"], "examples": [
+      {"word":"単独","reading":"たんどく","sentence":"[[単独]]で こうどうする。","readWrong":["たんとく","たんひとり","だんどく"],"kanjiWrong":["単毒","単虫","単読"]},
+      {"word":"独特","reading":"どくとく","sentence":"この くだものは [[独特]]の あじが する。","readWrong":["どくどく","とくとく","ひとりとく"],"kanjiWrong":["毒特","独持","読特"]}
+    ] },
+    { "kanji": "任", "on": ["ニン"], "kun": ["まか.せる","まか.す"], "examples": [
+      {"word":"任せる","reading":"まかせる","sentence":"あとは きみに [[任せる]]。","readWrong":["にんせる","まかれる","まがせる"],"kanjiWrong":["仕せる","住せる","往せる"]},
+      {"word":"責任","reading":"せきにん","sentence":"[[責任]]を もって さいごまで やる。","readWrong":["せきじん","せめにん","せっにん"],"kanjiWrong":["責仕","績任","責住"]}
+    ] },
+    { "kanji": "燃", "on": ["ネン"], "kun": ["も.える","も.やす","も.す"], "examples": [
+      {"word":"燃える","reading":"もえる","sentence":"まきが よく [[燃える]]。","readWrong":["ねんえる","もやえる","もいえる"],"kanjiWrong":["然える","熱える","照える"]},
+      {"word":"燃料","reading":"ねんりょう","sentence":"{車|くるま}の [[燃料]]が へる。","readWrong":["もえりょう","ねりょう","ぜんりょう"],"kanjiWrong":["然料","燃科","熱料"]}
+    ] },
+    { "kanji": "能", "on": ["ノウ"], "kun": [], "examples": [
+      {"word":"可能","reading":"かのう","sentence":"その けいかくは [[可能]]だ。","readWrong":["かのお","かの","かよう"],"kanjiWrong":["可態","可熊","化能"]},
+      {"word":"能力","reading":"のうりょく","sentence":"じぶんの [[能力]]を のばす。","readWrong":["のうりき","のりょく","のうちから"],"kanjiWrong":["態力","熊力","能刀"]}
+    ] },
+    { "kanji": "破", "on": ["ハ"], "kun": ["やぶ.る","やぶ.れる"], "examples": [
+      {"word":"破れる","reading":"やぶれる","sentence":"おもい {荷物|にもつ}で ふくろが [[破れる]]。","readWrong":["はれる","やぶえる","わぶれる"],"kanjiWrong":["敗れる","波れる","皮れる"]},
+      {"word":"破る","reading":"やぶる","sentence":"やくそくを [[破る]]のは よくない。","readWrong":["はる","わる","やぶく"],"kanjiWrong":["敗る","波る","皮る"]}
+    ] },
+    { "kanji": "犯", "on": ["ハン"], "kun": ["おか.す"], "examples": [
+      {"word":"犯人","reading":"はんにん","sentence":"めいたんていが [[犯人]]を みつける。","readWrong":["はんじん","おかにん","ぱんにん"],"kanjiWrong":["反人","判人","犯入"]}
+    ] },
+    { "kanji": "判", "on": ["ハン","バン"], "kun": [], "examples": [
+      {"word":"判断","reading":"はんだん","sentence":"ただしく [[判断]]する。","readWrong":["ばんだん","はんたん","わかだん"],"kanjiWrong":["半断","判新","反断"]},
+      {"word":"評判","reading":"ひょうばん","sentence":"この {店|みせ}は [[評判]]が いい。","readWrong":["ひょうはん","ひょうぱん","へいばん"],"kanjiWrong":["評半","評板","評反"]}
+    ] },
+    { "kanji": "版", "on": ["ハン"], "kun": [], "examples": [
+      {"word":"出版","reading":"しゅっぱん","sentence":"{本|ほん}を [[出版]]する。","readWrong":["しゅつはん","しゅっばん","でばん"],"kanjiWrong":["出反","出板","出飯"]},
+      {"word":"版画","reading":"はんが","sentence":"{図工|ずこう}で [[版画]]を つくる。","readWrong":["ばんが","はんかく","はんえ"],"kanjiWrong":["板画","反画","版面"]}
+    ] },
+    { "kanji": "比", "on": ["ヒ"], "kun": ["くら.べる"], "examples": [
+      {"word":"比べる","reading":"くらべる","sentence":"せの たかさを [[比べる]]。","readWrong":["ひべる","くらぶる","ならべる"],"kanjiWrong":["北べる","化べる","地べる"]},
+      {"word":"比例","reading":"ひれい","sentence":"[[比例]]の グラフを かく。","readWrong":["ひりい","くられい","びれい"],"kanjiWrong":["北例","比列","比礼"]}
+    ] },
+    { "kanji": "肥", "on": ["ヒ"], "kun": ["こ.える","こえ","こ.やす","こ.やし"], "examples": [
+      {"word":"肥料","reading":"ひりょう","sentence":"はたけに [[肥料]]を まく。","readWrong":["こえりょう","ひりょ","びりょう"],"kanjiWrong":["皮料","肥科","比料"]},
+      {"word":"肥やす","reading":"こやす","sentence":"はたけの つちを [[肥やす]]。","readWrong":["ひやす","こいやす","こやさす"],"kanjiWrong":["皮やす","比やす","服やす"]}
+    ] },
+    { "kanji": "非", "on": ["ヒ"], "kun": [], "examples": [
+      {"word":"非常口","reading":"ひじょうぐち","sentence":"[[非常口]]の ばしょを たしかめる。","readWrong":["ひじょうくち","ひつねぐち","びじょうぐち"],"kanjiWrong":["非常日","悲常口","飛常口"]},
+      {"word":"非公開","reading":"ひこうかい","sentence":"この しりょうは [[非公開]]だ。","readWrong":["ひこうがい","ひおおかい","びこうかい"],"kanjiWrong":["飛公開","悲公開","非公間"]}
+    ] },
+    { "kanji": "費", "on": ["ヒ"], "kun": ["つい.やす","つい.える"], "examples": [
+      {"word":"費用","reading":"ひよう","sentence":"りょこうの [[費用]]を けいさんする。","readWrong":["ひゆう","ひょう","ついよう"],"kanjiWrong":["賀用","費月","比用"]},
+      {"word":"消費","reading":"しょうひ","sentence":"でんきの [[消費]]を へらす。","readWrong":["しょうび","しょうひい","けしひ"],"kanjiWrong":["消飛","消比","消賀"]}
+    ] },
+    { "kanji": "備", "on": ["ビ"], "kun": ["そな.える","そな.わる"], "examples": [
+      {"word":"準備","reading":"じゅんび","sentence":"えんそくの [[準備]]を する。","readWrong":["じゅんひ","じゅうび","じゅんそな"],"kanjiWrong":["準美","順備","準鼻"]},
+      {"word":"備える","reading":"そなえる","sentence":"じしんに [[備える]]。","readWrong":["びえる","そなる","そろえる"],"kanjiWrong":["借える","倍える","構える"]}
+    ] },
+    { "kanji": "評", "on": ["ヒョウ"], "kun": [], "examples": [
+      {"word":"評価","reading":"ひょうか","sentence":"みんなの さくひんを [[評価]]する。","readWrong":["ひょうが","へいか","ひょか"],"kanjiWrong":["平価","評可","表価"]},
+      {"word":"好評","reading":"こうひょう","sentence":"あたらしい おかしは [[好評]]だ。","readWrong":["こうへい","すきひょう","こうびょう"],"kanjiWrong":["好平","好表","好秒"]}
+    ] },
+    { "kanji": "貧", "on": ["ヒン","ビン"], "kun": ["まず.しい"], "examples": [
+      {"word":"貧しい","reading":"まずしい","sentence":"むかしの くらしは [[貧しい]] ものだった。","readWrong":["ひんしい","まずい","まつしい"],"kanjiWrong":["貨しい","分しい","資しい"]},
+      {"word":"貧血","reading":"ひんけつ","sentence":"[[貧血]]に ならないように {食|た}べる。","readWrong":["びんけつ","ひんち","ひんげつ"],"kanjiWrong":["貨血","貧皿","分血"]}
+    ] },
+    { "kanji": "布", "on": ["フ"], "kun": ["ぬの"], "examples": [
+      {"word":"布","reading":"ぬの","sentence":"[[布]]で ふくろを つくる。","readWrong":["ふ","ぬいの","きぬ"],"kanjiWrong":["市","希","有"]},
+      {"word":"毛布","reading":"もうふ","sentence":"さむいので [[毛布]]を かける。","readWrong":["けふ","もうぬの","もふ"],"kanjiWrong":["毛市","毛希","手布"]}
+    ] },
+    { "kanji": "婦", "on": ["フ"], "kun": [], "examples": [
+      {"word":"夫婦","reading":"ふうふ","sentence":"なかの よい [[夫婦]]。","readWrong":["ふふ","おっとふ","ふうぶ"],"kanjiWrong":["夫帰","天婦","夫姉"]},
+      {"word":"主婦","reading":"しゅふ","sentence":"{母|はは}は [[主婦]]を しながら はたらく。","readWrong":["しゅぶ","おもふ","しゅうふ"],"kanjiWrong":["主帰","住婦","主妻"]}
+    ] },
+    { "kanji": "武", "on": ["ブ","ム"], "kun": [], "examples": [
+      {"word":"武士","reading":"ぶし","sentence":"むかしの [[武士]]の くらしを しらべる。","readWrong":["むし","ぶじ","たけし"],"kanjiWrong":["式士","武土","代士"]},
+      {"word":"武道","reading":"ぶどう","sentence":"{兄|あに}は [[武道]]を ならって いる。","readWrong":["むどう","ぶとう","ぶみち"],"kanjiWrong":["式道","武通","部道"]}
+    ] },
+    { "kanji": "復", "on": ["フク"], "kun": [], "examples": [
+      {"word":"往復","reading":"おうふく","sentence":"{学校|がっこう}まで [[往復]]で あるく。","readWrong":["おうぶく","ゆきふく","おうふっく"],"kanjiWrong":["往複","住復","往服"]},
+      {"word":"回復","reading":"かいふく","sentence":"かぜが [[回復]]する。","readWrong":["かいぶく","まわふく","かいふ"],"kanjiWrong":["回複","回服","会復"]}
+    ] },
+    { "kanji": "複", "on": ["フク"], "kun": [], "examples": [
+      {"word":"複数","reading":"ふくすう","sentence":"こたえが [[複数]] ある。","readWrong":["ふくかず","ふくず","ぶくすう"],"kanjiWrong":["復数","服数","福数"]},
+      {"word":"複雑","reading":"ふくざつ","sentence":"[[複雑]]な もんだいを とく。","readWrong":["ふくさつ","ふくぞう","ふざつ"],"kanjiWrong":["復雑","福雑","複集"]}
+    ] },
+    { "kanji": "仏", "on": ["ブツ"], "kun": ["ほとけ"], "examples": [
+      {"word":"仏","reading":"ほとけ","sentence":"[[仏]]さまに {手|て}を あわせる。","readWrong":["ぶつ","ほどけ","かみ"],"kanjiWrong":["化","仕","伝"]},
+      {"word":"大仏","reading":"だいぶつ","sentence":"{奈良|なら}の [[大仏]]を みる。","readWrong":["おおぶつ","だいふつ","だいほとけ"],"kanjiWrong":["大化","太仏","大物"]}
+    ] },
+    { "kanji": "粉", "on": ["フン"], "kun": ["こ","こな"], "examples": [
+      {"word":"小麦粉","reading":"こむぎこ","sentence":"[[小麦粉]]で パンを つくる。","readWrong":["こむぎこな","しょうばくこ","こむぎふん"],"kanjiWrong":["小麦料","小麦米","少麦粉"]},
+      {"word":"花粉","reading":"かふん","sentence":"はるは [[花粉]]が とぶ。","readWrong":["はなこ","かぶん","はなこな"],"kanjiWrong":["花分","花米","化粉"]}
+    ] },
+    { "kanji": "編", "on": ["ヘン"], "kun": ["あ.む"], "examples": [
+      {"word":"編む","reading":"あむ","sentence":"けいとで マフラーを [[編む]]。","readWrong":["へんむ","あまむ","くむ"],"kanjiWrong":["組む","絵む","練む"]},
+      {"word":"編集","reading":"へんしゅう","sentence":"{学級|がっきゅう}しんぶんを [[編集]]する。","readWrong":["へんじゅう","あみしゅう","へしゅう"],"kanjiWrong":["変集","編習","返集"]}
+    ] },
+    { "kanji": "弁", "on": ["ベン"], "kun": [], "examples": [
+      {"word":"弁当","reading":"べんとう","sentence":"えんそくに [[弁当]]を もって いく。","readWrong":["べんどう","へんとう","ぺんとう"],"kanjiWrong":["便当","弁答","勉当"]},
+      {"word":"弁護士","reading":"べんごし","sentence":"[[弁護士]]に そうだんする。","readWrong":["べんごうし","べんこし","べんまもし"],"kanjiWrong":["弁語士","便護士","弁護土"]}
+    ] },
+    { "kanji": "保", "on": ["ホ"], "kun": ["たも.つ"], "examples": [
+      {"word":"保つ","reading":"たもつ","sentence":"へやの {温度|おんど}を [[保つ]]。","readWrong":["ほつ","たもる","たまつ"],"kanjiWrong":["持つ","休つ","体つ"]},
+      {"word":"保健室","reading":"ほけんしつ","sentence":"ぐあいが わるくて [[保健室]]で やすむ。","readWrong":["ほうけんしつ","たもけんしつ","ほげんしつ"],"kanjiWrong":["保険室","保検室","体健室"]}
+    ] },
+    { "kanji": "墓", "on": ["ボ"], "kun": ["はか"], "examples": [
+      {"word":"墓","reading":"はか","sentence":"お[[墓]]に {花|はな}を そなえる。","readWrong":["ぼ","ばか","つか"],"kanjiWrong":["基","塩","草"]},
+      {"word":"墓地","reading":"ぼち","sentence":"おてらの うらに [[墓地]]が ある。","readWrong":["はかち","ぼじ","もち"],"kanjiWrong":["基地","墓池","草地"]}
+    ] },
+    { "kanji": "報", "on": ["ホウ"], "kun": ["むく.いる"], "examples": [
+      {"word":"報告","reading":"ほうこく","sentence":"しらべた ことを [[報告]]する。","readWrong":["ほうごく","むくこく","ほこく"],"kanjiWrong":["放告","報合","方告"]},
+      {"word":"天気予報","reading":"てんきよほう","sentence":"{朝|あさ}の [[天気予報]]を みる。","readWrong":["てんきよぼう","てんきようほう","てんけよほう"],"kanjiWrong":["天気予放","天気予豊","天気子報"]}
+    ] },
+    { "kanji": "豊", "on": ["ホウ"], "kun": ["ゆた.か"], "examples": [
+      {"word":"豊か","reading":"ゆたか","sentence":"しぜんが [[豊か]]な {町|まち}。","readWrong":["ほうか","ゆたが","とよか"],"kanjiWrong":["農か","豆か","曲か"]},
+      {"word":"豊作","reading":"ほうさく","sentence":"ことしは おこめが [[豊作]]だ。","readWrong":["ほうさっく","ゆたさく","とよさく"],"kanjiWrong":["農作","豆作","豊昨"]}
+    ] },
+    { "kanji": "防", "on": ["ボウ"], "kun": ["ふせ.ぐ"], "examples": [
+      {"word":"防ぐ","reading":"ふせぐ","sentence":"{手|て}を あらって びょうきを [[防ぐ]]。","readWrong":["ぼうぐ","ふさぐ","ふせる"],"kanjiWrong":["放ぐ","方ぐ","陸ぐ"]},
+      {"word":"消防車","reading":"しょうぼうしゃ","sentence":"[[消防車]]が はしって いく。","readWrong":["しょうほうしゃ","しょうぼしゃ","けしぼうしゃ"],"kanjiWrong":["消放車","消防東","清防車"]}
+    ] },
+    { "kanji": "貿", "on": ["ボウ"], "kun": [], "examples": [
+      {"word":"貿易","reading":"ぼうえき","sentence":"ほかの {国|くに}と [[貿易]]を する。","readWrong":["ぼうやく","ぼえき","ぼうい"],"kanjiWrong":["貸易","貿駅","貿液"]}
+    ] },
+    { "kanji": "暴", "on": ["ボウ","バク"], "kun": ["あば.く","あば.れる"], "examples": [
+      {"word":"暴れる","reading":"あばれる","sentence":"うまが [[暴れる]]。","readWrong":["ぼうれる","あはれる","あらわれる"],"kanjiWrong":["暑れる","景れる","表れる"]},
+      {"word":"暴風","reading":"ぼうふう","sentence":"[[暴風]]に ちゅういする。","readWrong":["ばくふう","あばふう","ぼうかぜ"],"kanjiWrong":["暑風","報風","防風"]}
+    ] },
+    { "kanji": "脈", "on": ["ミャク"], "kun": [], "examples": [
+      {"word":"山脈","reading":"さんみゃく","sentence":"たかい [[山脈]]が つづく。","readWrong":["やまみゃく","さんまく","さんみゃっく"],"kanjiWrong":["山旅","山服","出脈"]},
+      {"word":"脈","reading":"みゃく","sentence":"はしった あとで [[脈]]を はかる。","readWrong":["まく","みゃっく","ばく"],"kanjiWrong":["旅","服","永"]}
+    ] },
+    { "kanji": "務", "on": ["ム"], "kun": ["つと.める","つと.まる"], "examples": [
+      {"word":"務める","reading":"つとめる","sentence":"{会|かい}の {司会|しかい}を [[務める]]。","readWrong":["むめる","つとまる","つめる"],"kanjiWrong":["努める","勝める","動める"]},
+      {"word":"事務","reading":"じむ","sentence":"[[事務]]の しごとを する。","readWrong":["じぶ","ことむ","じむう"],"kanjiWrong":["事努","事夢","時務"]}
+    ] },
+    { "kanji": "夢", "on": ["ム"], "kun": ["ゆめ"], "examples": [
+      {"word":"夢","reading":"ゆめ","sentence":"ふしぎな [[夢]]を みた。","readWrong":["む","ゆみ","ゆうめ"],"kanjiWrong":["夕","夜","草"]},
+      {"word":"夢中","reading":"むちゅう","sentence":"ゲームに [[夢中]]に なる。","readWrong":["ゆめなか","むなか","むじゅう"],"kanjiWrong":["無中","夢仲","夢虫"]}
+    ] },
+    { "kanji": "迷", "on": ["メイ"], "kun": ["まよ.う"], "examples": [
+      {"word":"迷う","reading":"まよう","sentence":"{森|もり}で みちに [[迷う]]。","readWrong":["めいう","まいう","まどう"],"kanjiWrong":["米う","述う","送う"]},
+      {"word":"迷子","reading":"まいご","sentence":"{遊園地|ゆうえんち}で [[迷子]]に なる。","readWrong":["めいし","まよいご","まいこ"],"kanjiWrong":["米子","述子","迷字"]}
+    ] },
+    { "kanji": "綿", "on": ["メン"], "kun": ["わた"], "examples": [
+      {"word":"綿","reading":"わた","sentence":"ふわふわの [[綿]]を さわる。","readWrong":["めん","わだ","いと"],"kanjiWrong":["線","紙","緑"]},
+      {"word":"木綿","reading":"もめん","sentence":"[[木綿]]の シャツを きる。","readWrong":["きわた","もくめん","もわた"],"kanjiWrong":["木線","木紙","本綿"]}
+    ] },
+    { "kanji": "輸", "on": ["ユ"], "kun": [], "examples": [
+      {"word":"輸出","reading":"ゆしゅつ","sentence":"{車|くるま}を [[輸出]]する。","readWrong":["ゆしゅっ","ゆうしゅつ","ゆで"],"kanjiWrong":["輪出","輸山","油出"]},
+      {"word":"輸入","reading":"ゆにゅう","sentence":"[[輸入]]した くだものを かう。","readWrong":["ゆうにゅう","ゆいり","ゆはいる"],"kanjiWrong":["輪入","輸人","油入"]}
+    ] },
+    { "kanji": "余", "on": ["ヨ"], "kun": ["あま.る","あま.す"], "examples": [
+      {"word":"余る","reading":"あまる","sentence":"おかしが {二|ふた}つ [[余る]]。","readWrong":["よる","あまえる","おまる"],"kanjiWrong":["全る","金る","茶る"]},
+      {"word":"余白","reading":"よはく","sentence":"ノートの [[余白]]に メモを する。","readWrong":["よしろ","あまはく","よばく"],"kanjiWrong":["余百","全白","余日"]}
+    ] },
+    { "kanji": "容", "on": ["ヨウ"], "kun": [], "examples": [
+      {"word":"内容","reading":"ないよう","sentence":"{本|ほん}の [[内容]]を まとめる。","readWrong":["うちよう","ないよ","だいよう"],"kanjiWrong":["内要","内用","内客"]},
+      {"word":"容器","reading":"ようき","sentence":"プラスチックの [[容器]]に いれる。","readWrong":["ようぎ","よき","いれき"],"kanjiWrong":["用器","客器","容機"]}
+    ] },
+    { "kanji": "略", "on": ["リャク"], "kun": [], "examples": [
+      {"word":"省略","reading":"しょうりゃく","sentence":"せつめいを [[省略]]する。","readWrong":["せいりゃく","しょうりゃっく","しょうらく"],"kanjiWrong":["省路","省各","少略"]},
+      {"word":"略す","reading":"りゃくす","sentence":"ながい ことばを [[略す]]。","readWrong":["りゃくする","ほぼす","りゃす"],"kanjiWrong":["路す","各す","格す"]}
+    ] },
+    { "kanji": "留", "on": ["リュウ","ル"], "kun": ["と.める","と.まる"], "examples": [
+      {"word":"留守","reading":"るす","sentence":"{家|いえ}の {人|ひと}は [[留守]]だ。","readWrong":["りゅうす","るしゅ","とめもり"],"kanjiWrong":["留主","貿守","流守"]},
+      {"word":"留学","reading":"りゅうがく","sentence":"{兄|あに}は アメリカに [[留学]]する。","readWrong":["るがく","とめがく","りゅうかく"],"kanjiWrong":["流学","貿学","留字"]}
+    ] },
+    { "kanji": "領", "on": ["リョウ"], "kun": [], "examples": [
+      {"word":"大統領","reading":"だいとうりょう","sentence":"アメリカの [[大統領]]。","readWrong":["たいとうりょう","だいとりょう","だいとうれい"],"kanjiWrong":["大統頭","大続領","太統領"]},
+      {"word":"領土","reading":"りょうど","sentence":"{国|くに}の [[領土]]を まもる。","readWrong":["りょうと","れいど","りょうつち"],"kanjiWrong":["頭土","領上","令土"]}
+    ] },
+    { "kanji": "歴", "on": ["レキ"], "kun": [], "examples": [
+      {"word":"歴史","reading":"れきし","sentence":"{日本|にほん}の [[歴史]]を まなぶ。","readWrong":["れっし","れきじ","れきふみ"],"kanjiWrong":["歴使","林史","歴支"]},
+      {"word":"歴代","reading":"れきだい","sentence":"[[歴代]]の ゆうしょうチームを しらべる。","readWrong":["れきたい","れつだい","れきよ"],"kanjiWrong":["歴台","林代","列代"]}
+    ] }
+  ]
 }

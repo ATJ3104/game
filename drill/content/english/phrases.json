@@ -1,5 +1,241 @@
 {
   "reviewed": false,
-  "note": "作成中",
-  "levels": []
+  "levels": [
+    {
+      "code": "E50",
+      "theme": "あいさつ",
+      "phrases": [
+        {"en": "Hello, everyone.", "ja": "みなさん、こんにちは。"},
+        {"en": "Good morning.", "ja": "おはよう。"},
+        {"en": "Good night.", "ja": "おやすみなさい。"},
+        {"en": "See you.", "ja": "またね。"},
+        {"en": "See you tomorrow.", "ja": "またあした。"},
+        {"en": "How are you?", "ja": "げんき？"},
+        {"en": "I'm fine, thank you.", "ja": "げんきです、ありがとう。"},
+        {"en": "Thank you very much.", "ja": "どうもありがとう。"},
+        {"en": "You're welcome.", "ja": "どういたしまして。"},
+        {"en": "I'm sorry.", "ja": "ごめんなさい。"},
+        {"en": "Nice to meet you.", "ja": "はじめまして。"},
+        {"en": "Nice to meet you, too.", "ja": "こちらこそ、よろしく。"},
+        {"en": "Excuse me.", "ja": "すみません。"},
+        {"en": "Happy birthday!", "ja": "おたんじょうびおめでとう！"},
+        {"en": "Take care.", "ja": "きをつけてね。"}
+      ]
+    },
+    {
+      "code": "E51",
+      "theme": "じこしょうかい",
+      "phrases": [
+        {"en": "My name is Ken.", "ja": "ぼくのなまえはケンです。"},
+        {"en": "I'm Yuki.", "ja": "わたしはユキです。"},
+        {"en": "What's your name?", "ja": "あなたのなまえはなに？"},
+        {"en": "How do you spell your name?", "ja": "なまえはどうつづるの？"},
+        {"en": "How old are you?", "ja": "なんさい？"},
+        {"en": "I'm ten years old.", "ja": "わたしはじゅっさいです。"},
+        {"en": "Where are you from?", "ja": "どこからきたの？"},
+        {"en": "I'm from Japan.", "ja": "にほんからきました。"},
+        {"en": "I live in Tokyo.", "ja": "とうきょうにすんでいます。"},
+        {"en": "When is your birthday?", "ja": "たんじょうびはいつ？"},
+        {"en": "My birthday is May fifth.", "ja": "たんじょうびはごがついつかです。"},
+        {"en": "This is my friend.", "ja": "こちらはわたしのともだちです。"},
+        {"en": "She is my mother.", "ja": "かのじょはわたしのおかあさんです。"},
+        {"en": "I'm good at swimming.", "ja": "すいえいがとくいです。"}
+      ]
+    },
+    {
+      "code": "E52",
+      "theme": "すきなもの",
+      "phrases": [
+        {"en": "I like dogs.", "ja": "いぬがすきです。"},
+        {"en": "I like soccer very much.", "ja": "サッカーがだいすきです。"},
+        {"en": "I don't like carrots.", "ja": "にんじんはすきじゃないです。"},
+        {"en": "Do you like cats?", "ja": "ねこはすき？"},
+        {"en": "Yes, I do.", "ja": "はい、すきです。"},
+        {"en": "No, I don't.", "ja": "いいえ、すきじゃないです。"},
+        {"en": "What do you like?", "ja": "なにがすき？"},
+        {"en": "What color do you like?", "ja": "なにいろがすき？"},
+        {"en": "What sport do you like?", "ja": "どんなスポーツがすき？"},
+        {"en": "What food do you like?", "ja": "どんなたべものがすき？"},
+        {"en": "What's your favorite animal?", "ja": "いちばんすきなどうぶつはなに？"},
+        {"en": "My favorite color is blue.", "ja": "いちばんすきないろはあおです。"},
+        {"en": "I like music, too.", "ja": "わたしもおんがくがすきです。"},
+        {"en": "Me, too.", "ja": "わたしも。"}
+      ]
+    },
+    {
+      "code": "E53",
+      "theme": "できること",
+      "phrases": [
+        {"en": "I can swim.", "ja": "わたしはおよげます。"},
+        {"en": "I can play the piano.", "ja": "ピアノがひけます。"},
+        {"en": "I can't cook.", "ja": "りょうりができません。"},
+        {"en": "Can you skate?", "ja": "スケートはできる？"},
+        {"en": "Yes, I can.", "ja": "はい、できます。"},
+        {"en": "No, I can't.", "ja": "いいえ、できません。"},
+        {"en": "He can run fast.", "ja": "かれははやくはしれます。"},
+        {"en": "She can sing well.", "ja": "かのじょはじょうずにうたえます。"},
+        {"en": "Can you play the recorder?", "ja": "リコーダーはふける？"},
+        {"en": "I can jump high.", "ja": "たかくジャンプできます。"},
+        {"en": "What can you do?", "ja": "なにができる？"},
+        {"en": "Can I use this?", "ja": "これをつかってもいい？"},
+        {"en": "Sure, go ahead.", "ja": "いいよ、どうぞ。"}
+      ]
+    },
+    {
+      "code": "E54",
+      "theme": "ほしいもの・かいもの",
+      "phrases": [
+        {"en": "I want a new bike.", "ja": "あたらしいじてんしゃがほしいです。"},
+        {"en": "What do you want?", "ja": "なにがほしい？"},
+        {"en": "I want to go to Italy.", "ja": "イタリアにいきたいです。"},
+        {"en": "Where do you want to go?", "ja": "どこにいきたい？"},
+        {"en": "What do you want to be?", "ja": "なにになりたい？"},
+        {"en": "I want to be a doctor.", "ja": "いしゃになりたいです。"},
+        {"en": "What would you like?", "ja": "なににしますか？"},
+        {"en": "I'd like pizza.", "ja": "ピザをおねがいします。"},
+        {"en": "How much is it?", "ja": "いくらですか？"},
+        {"en": "It's 500 yen.", "ja": "ごひゃくえんです。"},
+        {"en": "Here you are.", "ja": "はい、どうぞ。"},
+        {"en": "Do you want some juice?", "ja": "ジュースはいる？"},
+        {"en": "Yes, please.", "ja": "はい、おねがいします。"},
+        {"en": "No, thank you.", "ja": "いいえ、けっこうです。"}
+      ]
+    },
+    {
+      "code": "E55",
+      "theme": "たずねる（なに・どこ・いくつ）",
+      "phrases": [
+        {"en": "What's this?", "ja": "これはなに？"},
+        {"en": "It's a pen.", "ja": "それはペンです。"},
+        {"en": "Who is this?", "ja": "これはだれ？"},
+        {"en": "Where is the station?", "ja": "えきはどこですか？"},
+        {"en": "It's next to the bank.", "ja": "ぎんこうのとなりです。"},
+        {"en": "Go straight.", "ja": "まっすぐいってください。"},
+        {"en": "Turn right.", "ja": "みぎにまがってください。"},
+        {"en": "Turn left at the corner.", "ja": "かどをひだりにまがってください。"},
+        {"en": "How many apples?", "ja": "りんごはいくつ？"},
+        {"en": "I have three apples.", "ja": "りんごをみっつもっています。"},
+        {"en": "Where is my cap?", "ja": "わたしのキャップはどこ？"},
+        {"en": "It's on the desk.", "ja": "つくえのうえにあるよ。"},
+        {"en": "It's under the chair.", "ja": "いすのしたにあるよ。"},
+        {"en": "Which do you like?", "ja": "どっちがすき？"}
+      ]
+    },
+    {
+      "code": "E56",
+      "theme": "じかん・ようび・てんき",
+      "phrases": [
+        {"en": "What time is it?", "ja": "いまなんじ？"},
+        {"en": "It's seven o'clock.", "ja": "しちじです。"},
+        {"en": "It's three thirty.", "ja": "さんじはんです。"},
+        {"en": "What day is it today?", "ja": "きょうはなんようび？"},
+        {"en": "It's Monday.", "ja": "げつようびです。"},
+        {"en": "What's the date today?", "ja": "きょうはなんにち？"},
+        {"en": "It's July seventh.", "ja": "しちがつなのかです。"},
+        {"en": "How is the weather?", "ja": "てんきはどう？"},
+        {"en": "It's sunny today.", "ja": "きょうははれです。"},
+        {"en": "It's rainy and cold.", "ja": "あめでさむいです。"},
+        {"en": "I have P.E. on Tuesday.", "ja": "かようびにたいいくがあります。"},
+        {"en": "What do you have on Friday?", "ja": "きんようびはなにがある？"},
+        {"en": "See you on Saturday.", "ja": "どようびにあおうね。"}
+      ]
+    },
+    {
+      "code": "E57",
+      "theme": "いちにちのせいかつ",
+      "phrases": [
+        {"en": "I get up at six.", "ja": "ろくじにおきます。"},
+        {"en": "I eat breakfast at seven.", "ja": "しちじにあさごはんをたべます。"},
+        {"en": "I go to school at eight.", "ja": "はちじにがっこうへいきます。"},
+        {"en": "What time do you get up?", "ja": "なんじにおきる？"},
+        {"en": "I always walk my dog.", "ja": "いつもいぬのさんぽをします。"},
+        {"en": "I usually do my homework after dinner.", "ja": "たいていゆうごはんのあとにしゅくだいをします。"},
+        {"en": "I sometimes watch TV.", "ja": "ときどきテレビをみます。"},
+        {"en": "I take a bath at nine.", "ja": "くじにおふろにはいります。"},
+        {"en": "I go to bed at ten.", "ja": "じゅうじにねます。"},
+        {"en": "I wash the dishes.", "ja": "おさらをあらいます。"},
+        {"en": "I clean my room.", "ja": "へやをそうじします。"},
+        {"en": "What do you do on Sundays?", "ja": "にちようびはなにをする？"},
+        {"en": "I play soccer with my friends.", "ja": "ともだちとサッカーをします。"}
+      ]
+    },
+    {
+      "code": "E58",
+      "theme": "きょうしつのえいご",
+      "phrases": [
+        {"en": "Stand up.", "ja": "たってください。"},
+        {"en": "Sit down.", "ja": "すわってください。"},
+        {"en": "Open your book.", "ja": "ほんをひらいてください。"},
+        {"en": "Close your book.", "ja": "ほんをとじてください。"},
+        {"en": "Look at this.", "ja": "これをみてください。"},
+        {"en": "Listen carefully.", "ja": "よくきいてください。"},
+        {"en": "Repeat after me.", "ja": "わたしのあとについていってください。"},
+        {"en": "Raise your hand.", "ja": "てをあげてください。"},
+        {"en": "Let's start.", "ja": "はじめましょう。"},
+        {"en": "Make pairs.", "ja": "ペアをつくってください。"},
+        {"en": "Any questions?", "ja": "しつもんはありますか？"},
+        {"en": "I have a question.", "ja": "しつもんがあります。"},
+        {"en": "One more time, please.", "ja": "もういちどおねがいします。"},
+        {"en": "I don't know.", "ja": "わかりません。"},
+        {"en": "I see.", "ja": "なるほど。"},
+        {"en": "Good job!", "ja": "よくできました！"}
+      ]
+    },
+    {
+      "code": "E59",
+      "theme": "したこと（かこ）",
+      "phrases": [
+        {"en": "I went to the beach.", "ja": "うみにいきました。"},
+        {"en": "I went to Kyoto with my family.", "ja": "かぞくときょうとにいきました。"},
+        {"en": "I saw a big castle.", "ja": "おおきなおしろをみました。"},
+        {"en": "I ate shaved ice.", "ja": "かきごおりをたべました。"},
+        {"en": "I enjoyed swimming.", "ja": "すいえいをたのしみました。"},
+        {"en": "It was fun.", "ja": "たのしかったです。"},
+        {"en": "It was delicious.", "ja": "おいしかったです。"},
+        {"en": "It was exciting.", "ja": "わくわくしました。"},
+        {"en": "Where did you go?", "ja": "どこにいったの？"},
+        {"en": "What did you eat?", "ja": "なにをたべたの？"},
+        {"en": "How was your summer vacation?", "ja": "なつやすみはどうだった？"},
+        {"en": "I played baseball yesterday.", "ja": "きのうやきゅうをしました。"},
+        {"en": "I watched fireworks.", "ja": "はなびをみました。"},
+        {"en": "I bought a T-shirt.", "ja": "ティーシャツをかいました。"}
+      ]
+    },
+    {
+      "code": "E60",
+      "theme": "わたしのまち・くに",
+      "phrases": [
+        {"en": "We have a big park.", "ja": "おおきなこうえんがあります。"},
+        {"en": "We don't have a zoo.", "ja": "どうぶつえんはありません。"},
+        {"en": "I want a new library.", "ja": "あたらしいとしょかんがほしいです。"},
+        {"en": "My town is nice.", "ja": "わたしのまちはすてきです。"},
+        {"en": "You can see beautiful mountains.", "ja": "うつくしいやまがみられます。"},
+        {"en": "You can eat good sushi.", "ja": "おいしいすしがたべられます。"},
+        {"en": "Let's go to Australia.", "ja": "オーストラリアにいこう。"},
+        {"en": "You can see koalas.", "ja": "コアラがみられます。"},
+        {"en": "It's a beautiful country.", "ja": "うつくしいくにです。"},
+        {"en": "Who is your hero?", "ja": "あなたのヒーローはだれ？"},
+        {"en": "My hero is my father.", "ja": "わたしのヒーローはおとうさんです。"},
+        {"en": "He is kind and strong.", "ja": "かれはやさしくてつよいです。"}
+      ]
+    },
+    {
+      "code": "E61",
+      "theme": "おもいで・しょうらいのゆめ",
+      "phrases": [
+        {"en": "What's your best memory?", "ja": "いちばんのおもいではなに？"},
+        {"en": "My best memory is the school trip.", "ja": "いちばんのおもいではしゅうがくりょこうです。"},
+        {"en": "We went to Nara.", "ja": "わたしたちはならにいきました。"},
+        {"en": "We sang songs together.", "ja": "みんなでうたをうたいました。"},
+        {"en": "I want to join the soccer team.", "ja": "サッカーぶにはいりたいです。"},
+        {"en": "What club do you want to join?", "ja": "なにぶにはいりたい？"},
+        {"en": "I want to study English hard.", "ja": "えいごをがんばってべんきょうしたいです。"},
+        {"en": "I want to be a teacher.", "ja": "せんせいになりたいです。"},
+        {"en": "Why do you want to be a teacher?", "ja": "どうしてせんせいになりたいの？"},
+        {"en": "I like children.", "ja": "こどもがすきです。"},
+        {"en": "I want to read many books.", "ja": "ほんをたくさんよみたいです。"},
+        {"en": "Thank you for everything.", "ja": "いままでありがとう。"}
+      ]
+    }
+  ]
 }

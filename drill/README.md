@@ -264,18 +264,22 @@ drill/
 ### 教材データ（`content/`）
 
 - `content/kana/words.json`：ひらがなの絵（絵文字と、その文字で始まる言葉）。
-- `content/kanji/grade1.json`：1年の漢字80字です。2〜6年は確認が済んだら学年ごとに追加します。1字ごとに次の内容を持ちます。
+- `content/kanji/grade1.json`〜`grade6.json`：1〜6年の漢字 1,026字（学年別漢字配当表、2020年度から）。字と並びは `src/domain/japanese/haitou.ts` の配当表と一致することを検証します。1字ごとに次の内容を持ちます。
   - 音読み・訓読み（送りがなは `.` で区切る。例：`ひと.つ`）
   - 例（熟語・読み・例文・読みのまちがいの選択肢3つ・漢字のまちがいの選択肢3つ）
 - **例文の書式**：`{漢字|よみ}` はふりがな付きの漢字、`[[漢字]]` は問題の部分です。問題以外の漢字には、必ずふりがなを付けます。
+- **まだ習わない漢字の例外**：「昭和」の「和」のように、どうしても使う場合だけ例ごとに `allowUnlearned` に書きます（検証では注意として表示）。
+- **作り方**：1行形式のテキストで書いて `node scripts/kanji-from-text.cjs <学年> <テキスト>` で JSON にできます。
 
 ### 親の確認 → 取り込み
 
 1. 確認用のページを作ります。
 
    ```bash
-   node scripts/make-review.cjs review.html
+   node scripts/make-review.cjs 1 review.html
    ```
+
+   英語は `node scripts/make-review-english.cjs review-english.html` で作ります。
 
    例文・正解・まちがいの選択肢を一覧にしたページができます。
 2. 確認が済んだら、JSON の `"reviewed": false` を `true` にしてデプロイします。

@@ -46,7 +46,7 @@ describe("国語のレベル表", () => {
   });
   it("データがない学年は選べない。未確認のデータは開発中だけ選べる", () => {
     const dev = availableLevels("japanese", { includeUnreviewed: true }).map((l) => l.code);
-    expect(dev).toEqual(["K01", "K02", ...Array.from({ length: 22 }, (_, i) => `K${10 + i}`)]);
+    expect(dev).toEqual(["K01", "K02", ...Array.from({ length: 52 }, (_, i) => `K${10 + i}`)]);
     const prod = availableLevels("japanese", { includeUnreviewed: false }).map((l) => l.code);
     // K02（カタカナ）は文字表だけで作るので常に使える。K01 と1年の漢字は確認後に使える
     expect(prod).toContain("K02");
@@ -59,7 +59,8 @@ describe("国語のレベル表", () => {
     expect(prevLevel("japanese", "K10", o)).toBe("K02");
     expect(nextLevel("japanese", "K13", o)).toBe("K14"); // 1年 → 2年
     expect(nextLevel("japanese", "K21", o)).toBe("K22"); // 2年 → 3年
-    expect(nextLevel("japanese", "K31", o)).toBeNull(); // 4年のデータはまだない
+    expect(nextLevel("japanese", "K31", o)).toBe("K32"); // 3年 → 4年
+    expect(nextLevel("japanese", "K61", o)).toBeNull(); // 6年の最後
     expect(prevLevel("japanese", "K01", o)).toBeNull();
   });
 });
@@ -130,7 +131,17 @@ describe("漢字（1年 K10〜K13・2年 K14〜K21）", () => {
     expect(kanjiOfLevel(getJapaneseLevel("K31")!).at(-1)!.kanji).toBe("和");
     expect(learnedKanjiThrough(getJapaneseLevel("K31")!).size).toBe(440);
   });
-  for (const code of ["K10", "K11", "K12", "K13", ...Array.from({ length: 18 }, (_, i) => `K${14 + i}`)]) {
+  it("4〜6年はそれぞれ10レベル、合わせて586字", () => {
+    for (const [first, grade, total] of [[32, 4, 202], [42, 5, 193], [52, 6, 191]] as const) {
+      const sizes = Array.from({ length: 10 }, (_, i) => kanjiOfLevel(getJapaneseLevel(`K${first + i}`)!).length);
+      expect(sizes.reduce((a, b) => a + b, 0)).toBe(total);
+      expect(Math.min(...sizes)).toBeGreaterThanOrEqual(19);
+      expect(Math.max(...sizes)).toBeLessThanOrEqual(21);
+      expect(getJapaneseLevel(`K${first}`)!.grade).toBe(grade);
+    }
+    expect(learnedKanjiThrough(getJapaneseLevel("K61")!).size).toBe(1026);
+  });
+  for (const code of Array.from({ length: 52 }, (_, i) => `K${10 + i}`)) {
     it(`${code}：読み・漢字えらびの両方が出て、正解はデータどおり`, () => {
       const qs = sample(code, 300, false, 5);
       expect(new Set(qs.map((q) => q.meta.type))).toEqual(new Set(["read", "write"]));
