@@ -15,3 +15,22 @@ body {
   font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
   overscroll-behavior-y: none;
 }
+
+/* 完了画面の演出 */
+@keyframes confetti-fall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0.6; }
+}
+.confetti { top: -10vh; animation: confetti-fall 2.6s ease-in 2 both; }
+
+@keyframes pop {
+  0% { transform: scale(0.3); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.pop { animation: pop 0.6s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti, .pop { animation: none; }
+  .confetti { display: none; }
+}
