@@ -107,6 +107,26 @@ npm test
 
    `https://mainichi-drill.<アカウント>.workers.dev` で公開されます。独自ドメインは Cloudflare のダッシュボードの「Workers & Pages → mainichi-drill → Settings → Domains & Routes」で設定します。
 
+### GitHub Actions で自動デプロイ（おすすめ）
+
+`.github/workflows/drill-deploy.yml` が、`drill/` を変更して push するたびに次の順で実行します。
+
+1. テスト
+2. D1 の作成（初回のみ）
+3. マイグレーション
+4. デプロイ
+
+使うには、GitHub のリポジトリの「Settings → Secrets and variables → Actions → New repository secret」に、次の2つを登録します。
+
+| 名前 | 内容 |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare の「My Profile → API Tokens → Create Token」で作る。権限は「Account / Workers Scripts / Edit」と「Account / D1 / Edit」 |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare のダッシュボードの「Workers & Pages」の右側に表示されるアカウント ID |
+
+- 未登録のあいだは、テストだけ実行してデプロイはとばします。
+- D1 の ID は CI の中で自動で調べて使います。`scripts/ci-ensure-d1.cjs` がその処理です。
+- Workers をはじめて使うアカウントは、先にダッシュボードで workers.dev のサブドメインを決めておいてください。
+
 ### 2回目以降
 
 テーブルを変更したときは、`migrations/` に新しい SQL ファイルを追加します（例：`npx wrangler d1 migrations create DB 説明`）。そのあと次の2つを実行します。
