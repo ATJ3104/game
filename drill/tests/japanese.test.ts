@@ -46,7 +46,7 @@ describe("国語のレベル表", () => {
   });
   it("データがない学年は選べない。未確認のデータは開発中だけ選べる", () => {
     const dev = availableLevels("japanese", { includeUnreviewed: true }).map((l) => l.code);
-    expect(dev).toEqual(["K01", "K02", "K10", "K11", "K12", "K13"]);
+    expect(dev).toEqual(["K01", "K02", ...Array.from({ length: 12 }, (_, i) => `K${10 + i}`)]);
     const prod = availableLevels("japanese", { includeUnreviewed: false }).map((l) => l.code);
     // K02（カタカナ）は文字表だけで作るので常に使える。K01 と1年の漢字は確認後に使える
     expect(prod).toContain("K02");
@@ -57,7 +57,8 @@ describe("国語のレベル表", () => {
     const o = { includeUnreviewed: true };
     expect(nextLevel("japanese", "K02", o)).toBe("K10");
     expect(prevLevel("japanese", "K10", o)).toBe("K02");
-    expect(nextLevel("japanese", "K13", o)).toBeNull(); // 2年のデータはまだない
+    expect(nextLevel("japanese", "K13", o)).toBe("K14"); // 1年 → 2年
+    expect(nextLevel("japanese", "K21", o)).toBeNull(); // 3年のデータはまだない
     expect(prevLevel("japanese", "K01", o)).toBeNull();
   });
 });
@@ -113,8 +114,15 @@ describe("カタカナ（K02）", () => {
   });
 });
 
-describe("漢字（K10〜K13）", () => {
-  for (const code of ["K10", "K11", "K12", "K13"]) {
+describe("漢字（1年 K10〜K13・2年 K14〜K21）", () => {
+  it("2年の漢字は8レベルに20字ずつ", () => {
+    const sizes = Array.from({ length: 8 }, (_, i) => kanjiOfLevel(getJapaneseLevel(`K${14 + i}`)!).length);
+    expect(sizes).toEqual([20, 20, 20, 20, 20, 20, 20, 20]);
+    expect(kanjiOfLevel(getJapaneseLevel("K14")!)[0]!.kanji).toBe("引");
+    expect(kanjiOfLevel(getJapaneseLevel("K21")!).at(-1)!.kanji).toBe("話");
+    expect(learnedKanjiThrough(getJapaneseLevel("K21")!).size).toBe(240);
+  });
+  for (const code of ["K10", "K11", "K12", "K13", ...Array.from({ length: 8 }, (_, i) => `K${14 + i}`)]) {
     it(`${code}：読み・漢字えらびの両方が出て、正解はデータどおり`, () => {
       const qs = sample(code, 300, false, 5);
       expect(new Set(qs.map((q) => q.meta.type))).toEqual(new Set(["read", "write"]));

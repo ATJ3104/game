@@ -1,5 +1,6 @@
 // 国語の教材データ（content/ の JSON）の読み込み
 import grade1 from "@content/kanji/grade1.json";
+import grade2 from "@content/kanji/grade2.json";
 import kanaWords from "@content/kana/words.json";
 
 export interface KanjiExample {
@@ -40,6 +41,7 @@ export const GRADE_SIZES: Record<number, number> = { 1: 80, 2: 160, 3: 200, 4: 2
 /** 作成済みの学年のデータ（まだない学年は undefined） */
 export const KANJI_FILES: Partial<Record<number, KanjiFile>> = {
   1: grade1 as KanjiFile,
+  2: grade2 as KanjiFile,
 };
 
 export const KANA_WORDS = kanaWords as KanaWordsFile;

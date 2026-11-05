@@ -1,10 +1,12 @@
-// 教材確認ページ（HTML）を content/ の JSON から作る。使い方: node scripts/make-review.cjs 出力先.html
+// 教材確認ページ（HTML）を content/ の JSON から作る。
+// 使い方: node scripts/make-review.cjs <学年> [出力先.html]   （1年のときは、ひらがなの絵も載せる）
 const fs = require("node:fs");
 const path = require("node:path");
 const root = path.join(__dirname, "..", "content");
-const g1 = JSON.parse(fs.readFileSync(path.join(root, "kanji/grade1.json"), "utf8"));
+const grade = Number(process.argv[2] || 1);
+const g1 = JSON.parse(fs.readFileSync(path.join(root, `kanji/grade${grade}.json`), "utf8"));
 const kana = JSON.parse(fs.readFileSync(path.join(root, "kana/words.json"), "utf8"));
-const out = process.argv[2] || "review.html";
+const out = process.argv[3] || `review-grade${grade}.html`;
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -14,15 +16,24 @@ function sentence(src) {
     .replace(/\[\[([^\]]+)\]\]/g, (_, t) => `<span class="target">${t}</span>`);
 }
 
-const levels = ["K10", "K11", "K12", "K13"];
-const groups = levels.map((code, i) => ({ code, items: g1.kanji.slice(i * 20, i * 20 + 20) }));
+// レベルの区切り（src/domain/japanese/levels.ts と同じ計算）
+const SIZES = { 1: 80, 2: 160, 3: 200, 4: 202, 5: 193, 6: 191 };
+const partsOf = (g) => Math.round(SIZES[g] / 20);
+let first = 10;
+for (let g = 1; g < grade; g++) first += partsOf(g);
+const parts = partsOf(grade);
+const levels = Array.from({ length: parts }, (_, i) => `K${first + i}`);
+const groups = levels.map((code, p) => ({
+  code,
+  items: g1.kanji.filter((_, i) => Math.floor((i * parts) / SIZES[grade]) === p),
+}));
 const total = g1.kanji.length;
 
 const kanjiCards = groups
   .map(
     (grp) => `
 <section class="level" id="${grp.code}">
-  <h2><span class="code">${grp.code}</span> 1年の漢字（${levels.indexOf(grp.code) + 1}/4）<span class="chars">${grp.items.map((k) => k.kanji).join("")}</span></h2>
+  <h2><span class="code">${grp.code}</span> ${grade}年の漢字（${levels.indexOf(grp.code) + 1}/${parts}）<span class="chars">${grp.items.map((k) => k.kanji).join("")}</span></h2>
   <div class="cards">
   ${grp.items
     .map(
@@ -60,7 +71,7 @@ const kanaGrid = kana.words
   .map((w) => `<li><span class="k">${esc(w.kana)}</span><span class="e">${w.emoji}</span><span class="w">${esc(w.word)}</span></li>`)
   .join("");
 
-const html = `<title>まいにちドリル 国語教材の確認</title>
+const html = `<title>まいにちドリル ${grade}年の漢字の確認</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&family=BIZ+UDPGothic:wght@400;700&display=swap">
@@ -134,33 +145,33 @@ h2 { font-size: 18px; margin: 0 0 14px; display: flex; flex-wrap: wrap; align-it
 
 <div class="wrap">
   <div>
-    <h1>国語教材の確認（ひらがなの絵・1年の漢字）</h1>
-    <p class="lead">まいにちドリルの国語で出題する内容です。まだ「未確認」なので、確認が済むまで子どもには出題されません。漢字は${total}字、例文は${g1.kanji.reduce((t, k) => t + k.examples.length, 0)}文です。</p>
+    <h1>${grade === 1 ? "国語教材の確認（ひらがなの絵・1年の漢字）" : `国語教材の確認（${grade}年の漢字）`}</h1>
+    <p class="lead">まいにちドリルの国語で出題する内容です。まだ「未確認」なので、確認が済むまで子どもには出題されません。例文では、そのレベルまでに習う漢字だけを使い、まだ習わない漢字はひらがなで書いています。漢字は${total}字、例文は${g1.kanji.reduce((t, k) => t + k.examples.length, 0)}文です。</p>
   </div>
 
   <div class="howto">
     <div>例文の<b>下線</b>が問題の部分です。読みの問題は下線の漢字を見て読みを選び、漢字の問題は読みを見て漢字を選びます。</div>
     <div class="legend"><span><span class="ok">朱</span> 正解</span><span><span class="ng">灰</span> まちがいの選択肢（3つ）</span><span>ふりがな付きの漢字は、子どもの設定に応じて表示を変えます</span></div>
-    <div>見てほしい点：まちがいの選択肢がその文でも正解になってしまわないか、例文が自然か、小1に難しすぎないか。直してほしい箇所は、漢字と内容をチャットで教えてください。</div>
+    <div>見てほしい点：まちがいの選択肢がその文でも正解になってしまわないか、例文が自然か、${grade}年生に難しすぎないか。直してほしい箇所は、漢字と内容をチャットで教えてください。</div>
   </div>
 
   <div class="progress" aria-label="確認の進み具合">
     <span>確認した漢字 <span class="count" id="count">0</span> / ${total}</span>
-    <nav>${levels.map((c) => `<a href="#${c}">${c}</a>`).join("")}<a href="#kana">かなの絵</a></nav>
+    <nav>${levels.map((c) => `<a href="#${c}">${c}</a>`).join("")}${grade === 1 ? '<a href="#kana">かなの絵</a>' : ""}</nav>
   </div>
 
   ${kanjiCards}
 
-  <section class="kana" id="kana">
+  ${grade === 1 ? `<section class="kana" id="kana">
     <h2><span class="code">K01</span> ひらがなの絵（${kana.words.length}語）</h2>
     <p class="note">「もじを見て、その文字で始まるものを選ぶ」問題に使います。絵文字がその名前に見えるか、ほかの呼び方をしないかを見てください。を・ん・せ・の・ま・る などは、よい絵がないので使っていません（聞き取りの問題では出ます）。</p>
     <ul>${kanaGrid}</ul>
-  </section>
+  </section>` : ""}
 </div>
 
 <script>
 (function () {
-  var KEY = "drill-review-g1";
+  var KEY = "drill-review-g${grade}";
   var saved = {};
   try { saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { saved = {}; }
   var boxes = document.querySelectorAll(".check input");
