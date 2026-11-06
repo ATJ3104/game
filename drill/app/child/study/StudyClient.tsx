@@ -8,7 +8,7 @@ import { MathTokens, Frac } from "@/ui/MathView";
 import { Keypad } from "@/ui/Keypad";
 import { ChoicePad } from "@/ui/ChoicePad";
 import { RichText, type FuriganaMode } from "@/ui/RichText";
-import { detectVoice, installSpeechUnlock, isSpeechUnlocked, speak, type SpeechProblem } from "@/ui/speech";
+import { detectVoice, installSpeechUnlock, isIOS, isSpeechUnlocked, leavePlaybackMode, speak, type SpeechProblem } from "@/ui/speech";
 import { OrderPad } from "@/ui/OrderPad";
 
 type Phase = "loading" | "question" | "feedback" | "error";
@@ -152,7 +152,15 @@ export function StudyClient({
   const [speechProblem, setSpeechProblem] = useState<SpeechProblem | null>(null);
 
   // スマホは最初のタップで読み上げを「解錠」する必要がある
-  useEffect(() => installSpeechUnlock(), []);
+  useEffect(() => {
+    const off = installSpeechUnlock();
+    return () => {
+      off();
+      leavePlaybackMode();
+    };
+  }, []);
+  const [ios, setIos] = useState(false);
+  useEffect(() => setIos(isIOS()), []);
   const [sending, setSending] = useState(false);
   const timer = useActiveTimer(state?.idleSeconds ?? 60);
   const shownAtTotal = useRef(0);
@@ -379,6 +387,11 @@ export function StudyClient({
           >
             🔊 {played ? "もういちど きく" : "おして きいてね"}
           </button>
+        )}
+        {q?.speak && ios && !speechProblem && (
+          <p className="max-w-xs text-center text-xs text-gray-500" data-testid="silent-hint">
+            きこえない ときは、iPhone の よこの マナーモードの スイッチを きってね
+          </p>
         )}
         {q?.speak && speechProblem && (
           <p className="max-w-xs rounded-xl bg-amber-50 p-3 text-center text-sm font-bold text-amber-800" data-testid="speech-problem">

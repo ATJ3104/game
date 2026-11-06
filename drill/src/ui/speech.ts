@@ -7,6 +7,9 @@
 // 3. Chrome は読み上げ中の SpeechSynthesisUtterance がガベージコレクションされると止まる → 参照を持っておく
 // 4. 一時停止のまま固まることがある → speak の前に resume()
 // 5. 失敗しても画面に何も出ない → onError で知らせる
+// 6. iPhone / iPad はマナーモード（消音スイッチ）だと読み上げが聞こえない
+//    → ページを「メディア再生」として扱わせる（audioSession.type = "playback" と、無音の音声のくり返し再生）。
+//      効くかどうかは iOS のバージョンによるので、画面にもマナーモードの案内を出す
 
 export type SpeechLang = "ja-JP" | "en-US";
 
@@ -59,6 +62,68 @@ export function detectVoice(lang: SpeechLang, timeoutMs = 1500): Promise<boolean
   });
 }
 
+/** iPhone / iPad か（iPadOS は Mac として名乗るので、タッチの有無でも判定） */
+export function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+}
+
+/** 無音の WAV（0.5秒・8kHz・8bit）。アセットを持たずにその場で作る */
+function silentWavUrl(): string {
+  const n = 4000;
+  const buf = new Uint8Array(44 + n);
+  const dv = new DataView(buf.buffer);
+  const str = (o: number, t: string) => [...t].forEach((c, i) => dv.setUint8(o + i, c.charCodeAt(0)));
+  str(0, "RIFF");
+  dv.setUint32(4, 36 + n, true);
+  str(8, "WAVEfmt ");
+  dv.setUint32(16, 16, true);
+  dv.setUint16(20, 1, true); // PCM
+  dv.setUint16(22, 1, true); // mono
+  dv.setUint32(24, 8000, true);
+  dv.setUint32(28, 8000, true);
+  dv.setUint16(32, 1, true);
+  dv.setUint16(34, 8, true);
+  str(36, "data");
+  dv.setUint32(40, n, true);
+  buf.fill(128, 44); // 8bit の無音
+  let bin = "";
+  for (const b of buf) bin += String.fromCharCode(b);
+  return `data:audio/wav;base64,${btoa(bin)}`;
+}
+
+let silentAudio: HTMLAudioElement | null = null;
+
+/** iPhone / iPad で、消音スイッチの影響を受けない「メディア再生」として扱わせる（タップの流れで呼ぶ） */
+function enterPlaybackMode(): void {
+  if (!isIOS()) return;
+  try {
+    const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+    if (session && session.type !== "playback") session.type = "playback";
+  } catch {
+    // 古い iOS には audioSession がない
+  }
+  try {
+    if (!silentAudio) {
+      silentAudio = new Audio(silentWavUrl());
+      silentAudio.loop = true;
+      silentAudio.setAttribute("playsinline", "");
+    }
+    void silentAudio.play().catch(() => {});
+  } catch {
+    // 再生できなくても読み上げは続ける
+  }
+}
+
+/** 学習画面を出るときに、無音の再生を止める */
+export function leavePlaybackMode(): void {
+  try {
+    silentAudio?.pause();
+  } catch {
+    // なにもしない
+  }
+}
+
 let unlocked = false;
 /** 読み上げ中の発話（ガベージコレクションで止まらないように持っておく） */
 let current: SpeechSynthesisUtterance | null = null;
@@ -72,6 +137,7 @@ export function isSpeechUnlocked(): boolean {
 /** タップの流れで呼ぶ。無音の読み上げをして、以後の自動読み上げを許可させる */
 export function unlockSpeech(): void {
   if (unlocked || !supported()) return;
+  enterPlaybackMode();
   try {
     const u = new SpeechSynthesisUtterance(" ");
     u.volume = 0;
@@ -117,6 +183,7 @@ export function speak(text: string, lang: SpeechLang = "ja-JP", onProblem?: (p: 
   const synth = window.speechSynthesis;
   const voice = voiceFor(lang);
   if (!voice && synth.getVoices().length > 0) onProblem?.("no-voice");
+  enterPlaybackMode();
   unlocked = true;
 
   let started = false;

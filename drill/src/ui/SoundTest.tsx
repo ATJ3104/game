@@ -64,7 +64,7 @@ export function SoundTest() {
         </p>
       )}
       <p className="text-xs leading-relaxed text-gray-500">
-        きこえない ときは：おとの おおきさを あげる／iPhone・iPad は よこの マナーモードの スイッチを きる／
+        きこえない ときは：iPhone・iPad は よこの マナーモードの スイッチを きる（マナーモードだと よみあげの おとが でないことが あります）／おとの おおきさを あげる／
         iPhone は「せってい → アクセシビリティ → よみあげコンテンツ → 声」で えいご（English）の こえを ダウンロードする。
       </p>
     </section>
