@@ -8,7 +8,7 @@ import { MathTokens, Frac } from "@/ui/MathView";
 import { Keypad } from "@/ui/Keypad";
 import { ChoicePad } from "@/ui/ChoicePad";
 import { RichText, type FuriganaMode } from "@/ui/RichText";
-import { detectVoice, speak } from "@/ui/speech";
+import { detectVoice, installSpeechUnlock, isSpeechUnlocked, speak, type SpeechProblem } from "@/ui/speech";
 import { OrderPad } from "@/ui/OrderPad";
 
 type Phase = "loading" | "question" | "feedback" | "error";
@@ -148,6 +148,11 @@ export function StudyClient({
   const [focus, setFocus] = useState(0);
   const [result, setResult] = useState<AnswerResult | null>(null);
   const [order, setOrder] = useState<number[]>([]);
+  const [played, setPlayed] = useState(false);
+  const [speechProblem, setSpeechProblem] = useState<SpeechProblem | null>(null);
+
+  // スマホは最初のタップで読み上げを「解錠」する必要がある
+  useEffect(() => installSpeechUnlock(), []);
   const [sending, setSending] = useState(false);
   const timer = useActiveTimer(state?.idleSeconds ?? 60);
   const shownAtTotal = useRef(0);
@@ -166,7 +171,10 @@ export function StudyClient({
       shownAtTotal.current = timer.total();
       setOrder([]);
       setPhase("question");
-      if (s.question.speak) speak(s.question.speak, s.question.speakLang ?? "ja-JP");
+      // 自動の読み上げは解錠後だけ（解錠前は「きく」ボタンを光らせて押してもらう）
+      const autoPlay = !!s.question.speak && isSpeechUnlocked();
+      setPlayed(autoPlay);
+      if (autoPlay) speak(s.question.speak!, s.question.speakLang ?? "ja-JP", setSpeechProblem);
     },
     [router, subject, timer],
   );
@@ -359,12 +367,25 @@ export function StudyClient({
         {q?.speak && (
           <button
             type="button"
-            onClick={() => speak(q.speak!, q.speakLang ?? "ja-JP")}
-            className="min-h-14 rounded-2xl bg-sky-100 px-6 text-xl font-bold text-sky-800"
+            onClick={() => {
+              setSpeechProblem(null);
+              setPlayed(true);
+              speak(q.speak!, q.speakLang ?? "ja-JP", setSpeechProblem);
+            }}
+            className={`min-h-16 rounded-2xl bg-sky-500 px-8 text-2xl font-bold text-white shadow active:scale-95 ${
+              played ? "" : "animate-pulse ring-4 ring-sky-300"
+            }`}
             data-testid="speak"
           >
-            🔊 きく
+            🔊 {played ? "もういちど きく" : "おして きいてね"}
           </button>
+        )}
+        {q?.speak && speechProblem && (
+          <p className="max-w-xs rounded-xl bg-amber-50 p-3 text-center text-sm font-bold text-amber-800" data-testid="speech-problem">
+            {speechProblem === "unsupported" || speechProblem === "no-voice"
+              ? "この たんまつでは よみあげが つかえないみたい。おうちの人に きいてね。"
+              : "おとが きこえない ときは、おとの おおきさを あげてね。iPhone は よこの マナーモードの スイッチを きってね。"}
+          </p>
         )}
         <div className="flex items-center gap-3">
           {kind === "qr" && (

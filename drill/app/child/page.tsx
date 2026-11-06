@@ -6,6 +6,7 @@ import { ensureDailyCompletion, finalizeMonths, loadRecords, monthLabel, monthSu
 import { studyDateOf, yearMonthOf } from "@/domain/dates";
 import { SUBJECT_LABEL, SUBJECTS } from "@/domain/settings";
 import { MonthCalendar } from "@/ui/MonthCalendar";
+import { SoundTest } from "@/ui/SoundTest";
 
 export const dynamic = "force-dynamic";
 
@@ -99,6 +100,10 @@ export default async function ChildHome() {
         )}
         <MonthCalendar days={month.days} />
       </section>
+
+      <div className="text-center">
+        <SoundTest />
+      </div>
     </main>
   );
 }
