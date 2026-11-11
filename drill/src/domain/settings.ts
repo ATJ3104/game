@@ -30,6 +30,8 @@ export interface FamilySettings {
   guessThresholdMs: Record<Subject, number>;
   /** 操作がないときにタイマーを止めるまでの秒数 */
   idleSeconds: number;
+  /** 終わっていない子がいるとき LINE でお知らせする時刻（日本時間の時、15〜23） */
+  reminderHour: number;
 }
 
 export const DEFAULT_SETTINGS: FamilySettings = {
@@ -43,6 +45,7 @@ export const DEFAULT_SETTINGS: FamilySettings = {
   minEvalAnswers: 5,
   guessThresholdMs: { math: 1000, japanese: 1000, english: 1000 },
   idleSeconds: 60,
+  reminderHour: 22,
 };
 
 function num(v: unknown, fallback: number, min: number, max: number): number {
@@ -75,5 +78,6 @@ export function parseSettings(json: string | null | undefined): FamilySettings {
       english: num(g.english, d.guessThresholdMs.english, 0, 10000),
     },
     idleSeconds: Math.trunc(num(raw.idleSeconds, d.idleSeconds, 10, 600)),
+    reminderHour: Math.trunc(num(raw.reminderHour, d.reminderHour, 15, 23)),
   };
 }

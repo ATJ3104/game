@@ -294,3 +294,53 @@ export async function updateFamilySettingsAction(_prev: FormState, fd: FormData)
   revalidatePath("/parent", "layout");
   return { ok: "保存しました" };
 }
+
+// ---------- LINE 通知 ----------
+
+export interface LineCodeState {
+  error?: string;
+  code?: string;
+  expiresAt?: string;
+}
+
+export async function issueLineCodeAction(_prev: LineCodeState, _fd: FormData): Promise<LineCodeState> {
+  const { parent } = await requireParentAction();
+  const { createLinkCode } = await import("@/server/notifications");
+  try {
+    return await createLinkCode(await getDB(), parent.id);
+  } catch {
+    return { error: "コードを発行できませんでした。もう一度お試しください" };
+  }
+}
+
+export async function updateLineSettingsAction(_prev: FormState, fd: FormData): Promise<FormState> {
+  const { parent } = await requireParentAction();
+  const complete = str(fd, "notify_complete");
+  if (!["each", "all", "off"].includes(complete)) return { error: "完了通知を選んでください" };
+  const reminder = fd.get("notify_reminder") === "on" ? 1 : 0;
+  const db = await getDB();
+  const res = await db
+    .prepare("UPDATE line_links SET notify_complete = ?, notify_reminder = ? WHERE parent_id = ?")
+    .bind(complete, reminder, parent.id)
+    .run();
+  const hour = int(fd, "reminderHour", 15, 23);
+  if (hour !== null) {
+    const current = await getFamilySettings(db, parent.family_id);
+    await db
+      .prepare(
+        `INSERT INTO family_settings (family_id, settings_json, updated_at) VALUES (?, ?, ?)
+         ON CONFLICT(family_id) DO UPDATE SET settings_json = excluded.settings_json, updated_at = excluded.updated_at`,
+      )
+      .bind(parent.family_id, JSON.stringify({ ...current, reminderHour: hour }), new Date().toISOString())
+      .run();
+  }
+  revalidatePath("/parent/settings");
+  return res.meta.changes ? { ok: "保存しました" } : { error: "LINE が連携されていません" };
+}
+
+export async function unlinkLineAction(_prev: FormState, _fd: FormData): Promise<FormState> {
+  const { parent } = await requireParentAction();
+  await (await getDB()).prepare("DELETE FROM line_links WHERE parent_id = ?").bind(parent.id).run();
+  revalidatePath("/parent/settings");
+  return { ok: "LINE の連携を解除しました" };
+}

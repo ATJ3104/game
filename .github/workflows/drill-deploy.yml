@@ -1,6 +1,7 @@
 # まいにちドリル（drill/）を Cloudflare Workers にデプロイする
 # リポジトリの Secrets に CLOUDFLARE_API_TOKEN と CLOUDFLARE_ACCOUNT_ID を登録すると動く。
 # 登録前はデプロイの手順をとばす（失敗にはしない）。
+# LINE 通知を使うときは LINE_CHANNEL_ACCESS_TOKEN・LINE_CHANNEL_SECRET・LINE_BOT_ID も登録する。
 name: Deploy まいにちドリル (Cloudflare)
 
 on:
@@ -61,6 +62,14 @@ jobs:
       - name: ビルドとデプロイ
         if: steps.secrets.outputs.ready == 'true'
         run: npm run deploy 2>&1 | tee deploy.log
+
+      - name: Worker の secret（毎時の Cron の合言葉・LINE）
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_CHANNEL_SECRET: ${{ secrets.LINE_CHANNEL_SECRET }}
+          LINE_BOT_ID: ${{ secrets.LINE_BOT_ID }}
+        run: node scripts/ci-put-secrets.cjs
 
       - name: 動作確認（デプロイしたページが開けるか）
         if: steps.secrets.outputs.ready == 'true'

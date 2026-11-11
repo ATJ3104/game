@@ -8,6 +8,9 @@ import { levelOptions } from "@/server/contentPolicy";
 import {
   addChildAction,
   addParentAction,
+  issueLineCodeAction,
+  unlinkLineAction,
+  updateLineSettingsAction,
   issuePairingCodeAction,
   revokeDeviceAction,
   setLevelAction,
@@ -15,6 +18,9 @@ import {
   updateFamilySettingsAction,
 } from "./actions";
 import { PairingCode } from "./PairingCode";
+import { LineCode } from "./LineCode";
+import { getLineLink, lineAddFriendUrl, lineConfig } from "@/server/notifications";
+import { estimateMonthlyMessages, type CompleteMode } from "@/domain/notify";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +87,20 @@ export default async function SettingsPage() {
       .bind(parent.family_id)
       .all<{ child_id: string; subject: Subject; level_code: string }>(),
   ]);
+
+  const [lineLink, lineReady, friendUrl, familyLinks] = await Promise.all([
+    getLineLink(db, parent.id),
+    lineConfig().then((c) => !!c),
+    lineAddFriendUrl(),
+    db
+      .prepare("SELECT l.notify_complete, l.notify_reminder FROM line_links l JOIN parents p ON p.id = l.parent_id WHERE p.family_id = ?")
+      .bind(parent.family_id)
+      .all<{ notify_complete: CompleteMode; notify_reminder: number }>(),
+  ]);
+  const monthly = estimateMonthlyMessages(
+    familyLinks.results.map((l) => ({ complete: l.notify_complete, reminder: l.notify_reminder === 1 })),
+    children.length,
+  );
 
   return (
     <div className="space-y-8">
@@ -187,6 +207,58 @@ export default async function SettingsPage() {
             <LevelSelect name="level_english" subject="english" />
           </label>
         </ActionForm>
+      </section>
+
+      <section className="space-y-4 rounded-2xl border p-4" data-testid="line-section">
+        <h2 className="text-lg font-bold">LINE 通知</h2>
+        {!lineReady ? (
+          <p className="text-sm text-gray-600">
+            LINE の公式アカウントがまだ設定されていません（README の「LINE 通知の準備」を参照）。
+          </p>
+        ) : lineLink ? (
+          <>
+            <p className="rounded-xl bg-green-50 p-3 text-sm font-bold text-green-800" data-testid="line-linked">
+              ✅ {parent.name} さんの LINE と連携ずみ
+            </p>
+            <ActionForm action={updateLineSettingsAction} submitLabel="通知の設定を保存">
+              <label className="block">
+                <span className={labelCls}>ドリルが終わったときの通知</span>
+                <select name="notify_complete" defaultValue={lineLink.notify_complete} className={inputCls}>
+                  <option value="each">子どもが1人終わるたびに</option>
+                  <option value="all">全員が終わったときだけ</option>
+                  <option value="off">送らない</option>
+                </select>
+              </label>
+              <label className="flex min-h-12 items-center gap-3">
+                <input type="checkbox" name="notify_reminder" defaultChecked={lineLink.notify_reminder === 1} className="h-5 w-5" />
+                <span>決まった時刻に、まだ終わっていない子がいたら知らせる</span>
+              </label>
+              <Field label="知らせる時刻（日本時間・時、15〜23。家族で共通）" name="reminderHour" type="number" min={15} max={23} defaultValue={settings.reminderHour} required />
+            </ActionForm>
+            <p className="text-xs text-gray-500">
+              送る通数のめやす：月 約{monthly}通（家族全員の合計）。LINE の無料プランは月200通までで、こえた分は送られません。多いときは「全員が終わったときだけ」にしてください。
+            </p>
+            <ActionForm action={unlinkLineAction} submitLabel="LINE の連携を解除" submitClassName={btnDanger}>
+              <span />
+            </ActionForm>
+          </>
+        ) : (
+          <>
+            <ol className="list-decimal space-y-1 pl-5 text-sm text-gray-700">
+              <li>
+                {friendUrl ? (
+                  <a href={friendUrl} target="_blank" rel="noreferrer" className="font-bold text-green-700 underline">
+                    まいにちドリルの LINE アカウントを友だちに追加
+                  </a>
+                ) : (
+                  "まいにちドリルの LINE アカウントを友だちに追加"
+                )}
+              </li>
+              <li>下のボタンで連携コードを発行し、その数字を LINE のトークに送る</li>
+            </ol>
+            <LineCode action={issueLineCodeAction} />
+          </>
+        )}
       </section>
 
       <section className="space-y-4 rounded-2xl border p-4">

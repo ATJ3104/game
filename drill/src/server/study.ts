@@ -3,6 +3,8 @@ import type { ChildRow } from "./auth";
 import { newId } from "./crypto";
 import { childSubjects, getChildLevel, getFamilySettings, minutesFor } from "./repo";
 import { levelOptions } from "./contentPolicy";
+import { notifyDayComplete } from "./notifications";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { studyDateOf } from "@/domain/dates";
 import { type FamilySettings, type Subject } from "@/domain/settings";
 import { generateFor, getLevel, nextLevel, prevLevel } from "@/domain/levels";
@@ -439,10 +441,12 @@ async function completeSession(
   const doneSet = new Set(done.results.map((r) => r.subject));
   const subjects = await childSubjects(db, child.id);
   if (subjects.length > 0 && subjects.every((sub) => doneSet.has(sub))) {
-    await db
+    const res = await db
       .prepare("INSERT INTO daily_completion (child_id, study_date, completed_at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING")
       .bind(child.id, s.study_date, iso)
       .run();
+    // はじめて達成したときだけ LINE で知らせる（子どもの画面を待たせないよう、裏で送る）
+    if (res.meta.changes) await runInBackground(notifyDayComplete(db, child, s.study_date));
   }
 
   // 進級判定（親が途中でレベルを変えていたら判定しない）
@@ -464,4 +468,18 @@ async function completeSession(
       .bind(newId(), child.id, s.subject, s.level_code, next, iso),
   ]);
   return next;
+}
+
+/** レスポンスを返したあとも処理を続ける（Workers の waitUntil）。使えなければその場で待つ */
+async function runInBackground(p: Promise<unknown>): Promise<void> {
+  try {
+    const { ctx } = await getCloudflareContext({ async: true });
+    if (ctx?.waitUntil) {
+      ctx.waitUntil(p);
+      return;
+    }
+  } catch {
+    // 開発環境など
+  }
+  await p;
 }

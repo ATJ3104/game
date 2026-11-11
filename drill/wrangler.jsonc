@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "main": ".open-next/worker.js",
+  // OpenNext のアプリ本体に毎時の Cron を足した入口（worker.ts）
+  "main": "worker.ts",
   "name": "mainichi-drill",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -11,6 +12,8 @@
   "services": [
     { "binding": "WORKER_SELF_REFERENCE", "service": "mainichi-drill" }
   ],
+  // 毎時0分（LINE のお知らせ。家族ごとの時刻になったら送る）
+  "triggers": { "crons": ["0 * * * *"] },
   "d1_databases": [
     {
       "binding": "DB",
