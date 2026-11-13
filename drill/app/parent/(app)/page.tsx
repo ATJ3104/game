@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { requireParentPage } from "@/server/auth";
 import { getDB } from "@/server/db";
-import { childSubjects, getFamilySettings, listChildren } from "@/server/repo";
+import { childSubjects, getFamilySettings, listChildren, minutesFor } from "@/server/repo";
+import { questionQuota } from "@/domain/session";
 import { finalizeMonths, loadRecords, monthSummary, streakOf } from "@/server/summary";
 import { addDays, studyDateOf, weekdayOf, yearMonthOf } from "@/domain/dates";
 import type { DayStatus } from "@/domain/calendar";
@@ -57,7 +58,7 @@ export default async function ParentDashboard() {
         childSubjects(db, c.id),
         db
           .prepare(
-            "SELECT subject, status, active_seconds, target_seconds, eval_total, eval_correct, id FROM sessions WHERE child_id = ? AND study_date = ?",
+            "SELECT subject, status, active_seconds, target_seconds, target_questions, answered, eval_total, eval_correct, id FROM sessions WHERE child_id = ? AND study_date = ?",
           )
           .bind(c.id, today)
           .all<{
@@ -66,6 +67,8 @@ export default async function ParentDashboard() {
             status: SubjectStatus;
             active_seconds: number;
             target_seconds: number;
+            target_questions: number | null;
+            answered: number;
             eval_total: number | null;
             eval_correct: number | null;
           }>(),
@@ -93,13 +96,16 @@ export default async function ParentDashboard() {
       const rows = subjects.map((subject) => {
         const s = bySubject.get(subject);
         const lv = levels.results.find((l) => l.subject === subject)?.level_code ?? "";
-        const target = s?.target_seconds ?? 0;
+        const quota = s
+          ? (s.target_questions ?? questionQuota(s.target_seconds, getLevel(subject, lv)?.targetMs ?? 5000))
+          : questionQuota(minutesFor(c, subject) * 60, getLevel(subject, lv)?.targetMs ?? 5000);
         return {
           subject,
           status: (s?.status ?? "not_started") as SubjectStatus,
           minutes: Math.floor((s?.active_seconds ?? 0) / 60),
-          targetMinutes: s ? Math.round(target / 60) : null,
-          pct: s ? Math.min(100, Math.round((s.active_seconds / Math.max(1, target)) * 100)) : 0,
+          answered: s?.answered ?? 0,
+          quota,
+          pct: s ? Math.min(100, Math.round((s.answered / Math.max(1, quota)) * 100)) : 0,
           level: lv,
           levelName: getLevel(subject, lv)?.name ?? "",
         };
@@ -196,7 +202,8 @@ export default async function ParentDashboard() {
                     </span>
                     <span className={`shrink-0 font-bold ${SUBJECT_STATE[r.status].cls}`}>
                       {SUBJECT_STATE[r.status].text}
-                      {r.targetMinutes !== null ? ` ${r.minutes}/${r.targetMinutes}分` : ""}
+                      {` ${r.answered}/${r.quota}問`}
+                      {r.status !== "not_started" ? `・${r.minutes}分` : ""}
                     </span>
                   </div>
                   <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-gray-100">

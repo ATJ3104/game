@@ -3,6 +3,8 @@ import type { ChildRow } from "./auth";
 import { childSubjects, minutesFor } from "./repo";
 import { computeMonth, computeStreak, finalResultOf, finishedMonthsSince, type MonthSummary } from "@/domain/calendar";
 import { type FamilySettings, type Subject } from "@/domain/settings";
+import { questionQuota } from "@/domain/session";
+import { getLevel } from "@/domain/levels";
 
 export interface ChildRecords {
   completed: Set<string>;
@@ -53,19 +55,54 @@ export type SubjectProgress = {
   status: "not_started" | "studying" | "retry" | "done";
   activeSeconds: number;
   targetSeconds: number;
+  /** 解いた問題数・解く問題数 */
+  answered: number;
+  targetQuestions: number;
 };
 
 export async function todayProgress(db: D1Database, child: ChildRow, today: string): Promise<SubjectProgress[]> {
   const res = await db
-    .prepare("SELECT subject, status, active_seconds, target_seconds FROM sessions WHERE child_id = ? AND study_date = ?")
+    .prepare("SELECT subject, status, level_code, active_seconds, target_seconds, target_questions, answered FROM sessions WHERE child_id = ? AND study_date = ?")
     .bind(child.id, today)
-    .all<{ subject: Subject; status: SubjectProgress["status"]; active_seconds: number; target_seconds: number }>();
+    .all<{
+      subject: Subject;
+      status: SubjectProgress["status"];
+      level_code: string;
+      active_seconds: number;
+      target_seconds: number;
+      target_questions: number | null;
+      answered: number;
+    }>();
+  const levels = await db
+    .prepare("SELECT subject, level_code FROM child_levels WHERE child_id = ?")
+    .bind(child.id)
+    .all<{ subject: Subject; level_code: string }>();
+  const quota = (subject: Subject, level: string, seconds: number) =>
+    questionQuota(seconds, getLevel(subject, level)?.targetMs ?? 5000);
   const subjects = await childSubjects(db, child.id);
   return subjects.map((subject) => {
     const r = res.results.find((x) => x.subject === subject);
     return r
-      ? { subject, status: r.status, activeSeconds: Math.floor(r.active_seconds), targetSeconds: r.target_seconds }
-      : { subject, status: "not_started", activeSeconds: 0, targetSeconds: minutesFor(child, subject) * 60 };
+      ? {
+          subject,
+          status: r.status,
+          activeSeconds: Math.floor(r.active_seconds),
+          targetSeconds: r.target_seconds,
+          answered: r.answered,
+          targetQuestions: r.target_questions ?? quota(subject, r.level_code, r.target_seconds),
+        }
+      : {
+          subject,
+          status: "not_started",
+          activeSeconds: 0,
+          targetSeconds: minutesFor(child, subject) * 60,
+          answered: 0,
+          targetQuestions: quota(
+            subject,
+            levels.results.find((l) => l.subject === subject)?.level_code ?? "",
+            minutesFor(child, subject) * 60,
+          ),
+        };
   });
 }
 

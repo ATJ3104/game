@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clampActiveMs, clampResponseMs, isGuess, nextStatus, pendingRetries } from "@/domain/session";
+import { clampActiveMs, clampResponseMs, countsTowardQuota, isGuess, nextStatus, pendingRetries, questionQuota } from "@/domain/session";
 
 const now = new Date("2026-11-05T10:00:10Z");
 
@@ -22,17 +22,41 @@ describe("時間の加算", () => {
   });
 });
 
-describe("次の段階", () => {
-  it("目標時間前は学習を続ける", () => {
-    expect(nextStatus({ status: "studying", activeSeconds: 599, targetSeconds: 600, pendingRetries: 3 })).toBe("studying");
+describe("次の段階（問題数で決まる）", () => {
+  it("決まった問題数に届くまでは学習を続ける（時間がたつだけでは終わらない）", () => {
+    expect(nextStatus({ status: "studying", answered: 39, targetQuestions: 40, pendingRetries: 3 })).toBe("studying");
+    expect(nextStatus({ status: "studying", answered: 0, targetQuestions: 40, pendingRetries: 0 })).toBe("studying");
   });
-  it("目標時間に達したら間違い直しへ、なければ完了", () => {
-    expect(nextStatus({ status: "studying", activeSeconds: 600, targetSeconds: 600, pendingRetries: 2 })).toBe("retry");
-    expect(nextStatus({ status: "studying", activeSeconds: 601, targetSeconds: 600, pendingRetries: 0 })).toBe("done");
+  it("問題数に届いたら間違い直しへ、なければ完了", () => {
+    expect(nextStatus({ status: "studying", answered: 40, targetQuestions: 40, pendingRetries: 2 })).toBe("retry");
+    expect(nextStatus({ status: "studying", answered: 41, targetQuestions: 40, pendingRetries: 0 })).toBe("done");
   });
   it("間違い直しは全部正解するまで続く", () => {
-    expect(nextStatus({ status: "retry", activeSeconds: 900, targetSeconds: 600, pendingRetries: 1 })).toBe("retry");
-    expect(nextStatus({ status: "retry", activeSeconds: 900, targetSeconds: 600, pendingRetries: 0 })).toBe("done");
+    expect(nextStatus({ status: "retry", answered: 40, targetQuestions: 40, pendingRetries: 1 })).toBe("retry");
+    expect(nextStatus({ status: "retry", answered: 40, targetQuestions: 40, pendingRetries: 0 })).toBe("done");
+  });
+});
+
+describe("問題数", () => {
+  it("目標時間とレベルの目標解答時間から決まる", () => {
+    expect(questionQuota(600, 4000)).toBe(75); // 10分・10までのたし算（4秒）
+    expect(questionQuota(600, 3000)).toBe(92); // 九九（3秒）
+    expect(questionQuota(600, 30000)).toBe(13); // 2けた×2けた（30秒）
+    expect(questionQuota(600, 7000)).toBe(48); // 漢字（7秒）
+    expect(questionQuota(300, 4000)).toBe(38); // 5分なら半分
+    expect(questionQuota(1200, 4000)).toBe(150); // 20分なら2倍
+  });
+  it("少なすぎ・多すぎにはしない", () => {
+    expect(questionQuota(60, 30000)).toBe(5);
+    expect(questionQuota(7200, 3000)).toBe(200);
+  });
+  it("数えるのは、間違い直し以外の回答。速すぎる まちがいは数えない", () => {
+    const a = { isRetry: false, isCorrect: true, isGuess: false };
+    expect(countsTowardQuota(a)).toBe(true);
+    expect(countsTowardQuota({ ...a, isCorrect: false })).toBe(true); // ふつうのまちがいは数える（あとで直す）
+    expect(countsTowardQuota({ ...a, isGuess: true })).toBe(true); // 速くても正解なら数える
+    expect(countsTowardQuota({ ...a, isCorrect: false, isGuess: true })).toBe(false); // でたらめ連打
+    expect(countsTowardQuota({ ...a, isRetry: true })).toBe(false);
   });
 });
 

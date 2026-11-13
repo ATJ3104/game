@@ -22,7 +22,9 @@ import {
   clampActiveMs,
   clampResponseMs,
   isGuess,
+  countsTowardQuota,
   nextStatus,
+  questionQuota,
   pendingRetries,
   type SessionStatus,
 } from "@/domain/session";
@@ -35,6 +37,10 @@ export interface SessionRow {
   level_code: string;
   active_seconds: number;
   target_seconds: number;
+  /** この教科で解く問題数（古いデータでは null） */
+  target_questions: number | null;
+  /** 問題数に数えた回答の数 */
+  answered: number;
   status: SessionStatus;
   is_review_mix: number;
   current_question_json: string | null;
@@ -59,6 +65,9 @@ export interface StudyState {
   levelName: string;
   activeSeconds: number;
   targetSeconds: number;
+  /** 解いた問題数・解く問題数（教科の完了はこれで決まる） */
+  answered: number;
+  targetQuestions: number;
   idleSeconds: number;
   question: PublicQuestion | null;
   /** 出題中の問題の識別子（二重送信の防止） */
@@ -84,6 +93,11 @@ export class StudyError extends Error {
   ) {
     super(message ?? code);
   }
+}
+
+/** その教科で解く問題数（古いデータは目標時間とレベルから計算） */
+function quotaOf(s: SessionRow): number {
+  return s.target_questions ?? questionQuota(s.target_seconds, getLevel(s.subject, s.level_code)?.targetMs ?? 5000);
 }
 
 /** 前日に始めた学習を、日の区切りの後どれだけ続けてよいか */
@@ -194,6 +208,8 @@ async function toState(
     levelName: getLevel(s.subject, s.level_code)?.name ?? s.level_code,
     activeSeconds: Math.floor(s.active_seconds),
     targetSeconds: s.target_seconds,
+    answered: s.answered,
+    targetQuestions: quotaOf(s),
     idleSeconds: settings.idleSeconds,
     question: stored && s.status !== "done" ? toPublic(stored.q) : null,
     qid: s.status !== "done" ? s.current_shown_at : null,
@@ -239,11 +255,22 @@ export async function startOrResume(
     const stmts = [
       db
         .prepare(
-          `INSERT INTO sessions (id, child_id, study_date, subject, level_code, target_seconds, is_review_mix, started_at, last_report_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `INSERT INTO sessions (id, child_id, study_date, subject, level_code, target_seconds, target_questions, is_review_mix, started_at, last_report_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(child_id, study_date, subject) DO NOTHING`,
         )
-        .bind(id, child.id, today, subject, level, minutesFor(child, subject) * 60, review ? 1 : 0, now.toISOString(), now.toISOString()),
+        .bind(
+          id,
+          child.id,
+          today,
+          subject,
+          level,
+          minutesFor(child, subject) * 60,
+          questionQuota(minutesFor(child, subject) * 60, getLevel(subject, level)?.targetMs ?? 5000),
+          review ? 1 : 0,
+          now.toISOString(),
+          now.toISOString(),
+        ),
     ];
     if (review) {
       // 復習が始まったことを記録（レベルは変わらない）
@@ -269,6 +296,20 @@ export async function startOrResume(
       .bind(child.id, today, subject)
       .first<SessionRow>();
     if (!s) throw new StudyError("not_found");
+  }
+
+  // 問題数の方式になる前に始めた学習：問題数を決め、これまでの回答を数え直す
+  if (s.target_questions === null) {
+    const quota = quotaOf(s);
+    const rows = await db
+      .prepare("SELECT is_retry, is_correct, is_guess FROM attempts WHERE session_id = ?")
+      .bind(s.id)
+      .all<{ is_retry: number; is_correct: number; is_guess: number }>();
+    const answered = rows.results.filter((r) =>
+      countsTowardQuota({ isRetry: r.is_retry === 1, isCorrect: r.is_correct === 1, isGuess: r.is_guess === 1 }),
+    ).length;
+    await db.prepare("UPDATE sessions SET target_questions = ?, answered = ? WHERE id = ?").bind(quota, answered, s.id).run();
+    s = { ...s, target_questions: quota, answered };
   }
 
   // 読み上げが使えるかは端末ごとに違うので、開くたびに更新する
@@ -334,15 +375,17 @@ export async function submitAnswer(
   const responseMs = clampResponseMs(p.responseMs, s.current_shown_at, now);
   const addSeconds = clampActiveMs(p.activeMs, s.last_report_at, now) / 1000;
   const isRetry = s.current_retry_of !== null;
+  const guess = isGuess(responseMs, settings.guessThresholdMs[s.subject]);
+  const counted = countsTowardQuota({ isRetry, isCorrect: result.correct, isGuess: guess }) ? 1 : 0;
 
   // この問題を「回答済み」にする。qid が一致したときだけ更新できる（二重送信の防止）
   const claim = await db
     .prepare(
       `UPDATE sessions SET current_question_json = NULL, current_shown_at = NULL, current_retry_of = NULL,
-              active_seconds = active_seconds + ?, last_report_at = ?
+              active_seconds = active_seconds + ?, answered = answered + ?, last_report_at = ?
         WHERE id = ? AND current_shown_at = ?`,
     )
-    .bind(addSeconds, now.toISOString(), s.id, p.qid)
+    .bind(addSeconds, counted, now.toISOString(), s.id, p.qid)
     .run();
   if (!claim.meta.changes) throw new StudyError("stale");
 
@@ -358,7 +401,7 @@ export async function submitAnswer(
       inputText(p.input, stored.q),
       result.correct ? 1 : 0,
       responseMs,
-      isGuess(responseMs, settings.guessThresholdMs[s.subject]) ? 1 : 0,
+      guess ? 1 : 0,
       isRetry ? 1 : 0,
       s.current_retry_of,
       stored.fromPrev ? 1 : 0,
@@ -368,8 +411,9 @@ export async function submitAnswer(
 
   const activeSeconds = s.active_seconds + addSeconds;
   const queue = await retryQueue(db, s.id);
-  const status = nextStatus({ status: s.status, activeSeconds, targetSeconds: s.target_seconds, pendingRetries: queue.length });
-  let updated: SessionRow = { ...s, active_seconds: activeSeconds, status, current_question_json: null, current_shown_at: null, current_retry_of: null };
+  const answered = s.answered + counted;
+  const status = nextStatus({ status: s.status, answered, targetQuestions: quotaOf(s), pendingRetries: queue.length });
+  let updated: SessionRow = { ...s, active_seconds: activeSeconds, answered, status, current_question_json: null, current_shown_at: null, current_retry_of: null };
   let promotedTo: string | null = null;
 
   if (status === "done") {

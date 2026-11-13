@@ -128,6 +128,9 @@ export default async function SettingsPage() {
                 {c.minutes_math + (levelOf("japanese") ? c.minutes_japanese : 0) + (levelOf("english") ? c.minutes_english : 0)}
                 分（「やらない」にした教科は数えません）
               </p>
+              <p className="text-xs text-gray-500">
+                時間は目安です。教科は「その時間で終わる想定の問題数」を解くと完了になります（時間がたつだけでは終わりません）。問題数はレベルによって変わり、時間を増減すると問題数も増減します。
+              </p>
               <Field label="お小遣いの金額（円・表示用）" name="allowance_amount" type="number" inputMode="numeric" min={0} defaultValue={c.allowance_amount} required />
               <label className="block">
                 <span className={labelCls}>漢字の表示</span>

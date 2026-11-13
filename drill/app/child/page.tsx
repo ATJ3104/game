@@ -36,13 +36,15 @@ export default async function ChildHome() {
       <section className="space-y-3 rounded-3xl bg-white p-4 shadow">
         <h2 className="flex items-center justify-between font-bold text-gray-600">
           <span>きょうの メニュー</span>
-          <span className="text-sm">あわせて {Math.round(progress.reduce((t, p) => t + p.targetSeconds, 0) / 60)}ぷん</span>
+          <span className="text-sm">
+            あわせて {progress.reduce((t, p) => t + p.targetQuestions, 0)}もん（やく {Math.round(progress.reduce((t, p) => t + p.targetSeconds, 0) / 60)}ぷん）
+          </span>
         </h2>
         <ul className="space-y-2">
           {SUBJECTS.map((s) => {
             const p = progress.find((x) => x.subject === s);
             const enabled = !!p;
-            const pct = p ? Math.min(100, Math.round((p.activeSeconds / p.targetSeconds) * 100)) : 0;
+            const pct = p ? Math.min(100, Math.round((p.answered / Math.max(1, p.targetQuestions)) * 100)) : 0;
             return (
               <li key={s} className={`rounded-2xl border-2 p-3 ${enabled ? "" : "opacity-40"}`} data-testid={`menu-${s}`}>
                 <div className="flex items-center justify-between font-bold">
@@ -53,8 +55,10 @@ export default async function ChildHome() {
                       : p?.status === "done"
                         ? "✅ おわり"
                         : p?.status === "not_started"
-                          ? `${Math.round(p.targetSeconds / 60)}ぷん`
-                          : "とちゅう"}
+                          ? `${p.targetQuestions}もん`
+                          : p?.status === "retry"
+                            ? "まちがいなおし"
+                            : `${p?.answered}/${p?.targetQuestions}もん`}
                   </span>
                 </div>
                 {enabled && (

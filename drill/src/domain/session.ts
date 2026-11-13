@@ -25,18 +25,36 @@ export function isGuess(responseMs: number, thresholdMs: number): boolean {
 }
 
 /**
+ * その教科で解く問題数。「目標時間（分）で終わる想定の問題数」を、レベルの目標解答時間から決める。
+ * 1問あたり「目標の平均解答時間 × 1.5 ＋ 〇×の表示などの 2秒」かかる想定（目標より少しゆっくりでも時間内に終わる数）
+ */
+export function questionQuota(targetSeconds: number, levelTargetMs: number): number {
+  const perQuestionMs = levelTargetMs * 1.5 + 2000;
+  return Math.max(5, Math.min(200, Math.round((targetSeconds * 1000) / perQuestionMs)));
+}
+
+/**
+ * 問題数に数える回答か。間違い直しは数えない。
+ * 「速すぎる まちがい」（当て推量）も数えない（でたらめに連打しても進まないように）
+ */
+export function countsTowardQuota(a: { isRetry: boolean; isCorrect: boolean; isGuess: boolean }): boolean {
+  return !a.isRetry && (a.isCorrect || !a.isGuess);
+}
+
+/**
  * 回答した後の段階。
- * - 学習中：目標時間に達したら（今の問題は答え終わっているので）間違い直しへ。直すものがなければ完了
+ * - 学習中：決まった問題数を解いたら間違い直しへ。直すものがなければ完了
+ *   （時間がたつだけでは終わらない。時間は記録用）
  * - 間違い直し中：全部正解したら完了
  */
 export function nextStatus(p: {
   status: SessionStatus;
-  activeSeconds: number;
-  targetSeconds: number;
+  answered: number;
+  targetQuestions: number;
   pendingRetries: number;
 }): SessionStatus {
   if (p.status === "done") return "done";
-  if (p.status === "studying" && p.activeSeconds < p.targetSeconds) return "studying";
+  if (p.status === "studying" && p.answered < p.targetQuestions) return "studying";
   return p.pendingRetries > 0 ? "retry" : "done";
 }
 

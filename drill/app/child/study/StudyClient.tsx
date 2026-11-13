@@ -315,8 +315,9 @@ export function StudyClient({
     return <main className="flex min-h-dvh items-center justify-center text-xl">じゅんびちゅう…</main>;
   }
 
-  const unsentSec = timer.unsentMs() / 1000;
-  const progress = Math.min(1, (state.activeSeconds + unsentSec) / state.targetSeconds);
+  // 進み具合は「解いた問題数」。時間がたつだけでは進まない
+  const progress = Math.min(1, state.answered / Math.max(1, state.targetQuestions));
+  const remaining = Math.max(0, state.targetQuestions - state.answered);
   const q = state.question;
   const kind = q?.kind ?? "int";
 
@@ -346,10 +347,10 @@ export function StudyClient({
               まちがいなおし のこり {state.retryRemaining}もん
             </span>
           ) : (
-            <span>{progress >= 1 ? "この もんだいで おわり" : ""}</span>
+            <span data-testid="remaining">{remaining <= 1 ? "この もんだいで おわり" : `あと ${remaining}もん`}</span>
           )}
         </div>
-        <div className="h-4 overflow-hidden rounded-full bg-gray-200" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-label="のこりじかん">
+        <div className="h-4 overflow-hidden rounded-full bg-gray-200" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-label="すすみぐあい">
           <div className="h-full rounded-full bg-amber-400 transition-[width] duration-500" style={{ width: `${progress * 100}%` }} />
         </div>
       </header>
