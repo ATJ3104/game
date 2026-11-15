@@ -53,7 +53,7 @@ export default async function ParentDashboard() {
 
   const cards = await Promise.all(
     children.map(async (c) => {
-      const [rec, subjects, sessions, levels, last] = await Promise.all([
+      const [rec, subjects, sessions, levels, last, perSubject] = await Promise.all([
         loadRecords(db, c.id),
         childSubjects(db, c.id),
         db
@@ -84,6 +84,15 @@ export default async function ParentDashboard() {
           )
           .bind(c.id, today)
           .first<{ t: string | null; n: number; ok: number | null; first: number | null }>(),
+        db
+          .prepare(
+            `SELECT s.subject, SUM(CASE WHEN a.is_retry = 0 THEN 1 ELSE 0 END) AS n,
+                    SUM(CASE WHEN a.is_retry = 0 AND a.is_correct = 1 THEN 1 ELSE 0 END) AS ok
+               FROM attempts a JOIN sessions s ON s.id = a.session_id
+              WHERE s.child_id = ? AND s.study_date = ? GROUP BY s.subject`,
+          )
+          .bind(c.id, today)
+          .all<{ subject: Subject; n: number; ok: number }>(),
       ]);
       await finalizeMonths(db, c, settings, rec, today);
       const month = monthSummary(c, settings, rec, yearMonthOf(today), today);
@@ -105,6 +114,8 @@ export default async function ParentDashboard() {
           minutes: Math.floor((s?.active_seconds ?? 0) / 60),
           answered: s?.answered ?? 0,
           quota,
+          solved: perSubject.results.find((x) => x.subject === subject)?.n ?? 0,
+          correct: perSubject.results.find((x) => x.subject === subject)?.ok ?? 0,
           pct: s ? Math.min(100, Math.round((s.answered / Math.max(1, quota)) * 100)) : 0,
           level: lv,
           levelName: getLevel(subject, lv)?.name ?? "",
@@ -203,9 +214,13 @@ export default async function ParentDashboard() {
                     <span className={`shrink-0 font-bold ${SUBJECT_STATE[r.status].cls}`}>
                       {SUBJECT_STATE[r.status].text}
                       {` ${r.answered}/${r.quota}問`}
-                      {r.status !== "not_started" ? `・${r.minutes}分` : ""}
                     </span>
                   </div>
+                  {r.solved > 0 && (
+                    <div className="text-xs text-gray-600" data-testid={`solved-${r.subject}`}>
+                      正解 {r.correct}問・まちがい {r.solved - r.correct}問（正答率 {Math.round((r.correct / r.solved) * 100)}%）
+                    </div>
+                  )}
                   <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-gray-100">
                     <div
                       className={`h-full ${r.status === "done" ? "bg-green-500" : "bg-amber-400"}`}
@@ -218,9 +233,8 @@ export default async function ParentDashboard() {
             </ul>
 
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
-              <span>今日の回答 {c.answered}問</span>
-              {c.accuracy !== null && <span>正答率 {c.accuracy}%</span>}
               <span>最後の学習 {c.lastAt ? jstTime(c.lastAt) : "—"}</span>
+              <span className="font-bold text-amber-700">くわしく見る ›</span>
             </div>
 
             <div>

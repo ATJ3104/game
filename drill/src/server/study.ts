@@ -112,7 +112,7 @@ export function todayFor(settings: FamilySettings, now = new Date()): string {
 }
 
 /** 今のレベルになってから完了した学習の成績（新しい順） */
-async function recentEvals(db: D1Database, childId: string, subject: Subject, level: string): Promise<SessionEval[]> {
+export async function recentEvals(db: D1Database, childId: string, subject: Subject, level: string): Promise<SessionEval[]> {
   const since = await db
     .prepare(
       "SELECT MAX(created_at) AS t FROM level_history WHERE child_id = ? AND subject = ? AND to_level = ? AND from_level IS NOT to_level",
