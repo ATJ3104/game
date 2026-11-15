@@ -49,6 +49,10 @@ export default async function ParentDashboard() {
   const settings = await getFamilySettings(db, parent.family_id);
   const today = studyDateOf(new Date(), settings.dayBoundaryHour);
   const children = await listChildren(db, parent.family_id);
+  const familyParents = await db
+    .prepare("SELECT name FROM parents WHERE family_id = ? ORDER BY created_at")
+    .bind(parent.family_id)
+    .all<{ name: string }>();
   const week = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6));
 
   const cards = await Promise.all(
@@ -172,7 +176,9 @@ export default async function ParentDashboard() {
             </span>
           ))}
         </div>
-        <p className="mt-2 text-xs text-gray-500">1分ごとに自動で更新します。</p>
+        <p className="mt-2 text-xs text-gray-500" data-testid="family-info">
+          この家族アカウントのおうちの人：{familyParents.results.map((p) => p.name).join("・")}（ログイン中：{parent.name}）。1分ごとに自動で更新します。
+        </p>
       </section>
 
       {cards.length === 0 && (

@@ -8,6 +8,7 @@ import { levelOptions } from "@/server/contentPolicy";
 import {
   addChildAction,
   addParentAction,
+  deleteChildAction,
   issueLineCodeAction,
   unlinkLineAction,
   updateLineSettingsAction,
@@ -88,6 +89,13 @@ export default async function SettingsPage() {
       .all<{ child_id: string; subject: Subject; level_code: string }>(),
   ]);
 
+  const used = await db
+    .prepare(
+      "SELECT s.child_id, COUNT(*) AS n FROM sessions s JOIN children c ON c.id = s.child_id WHERE c.family_id = ? GROUP BY s.child_id",
+    )
+    .bind(parent.family_id)
+    .all<{ child_id: string; n: number }>();
+  const usedOf = (childId: string) => used.results.find((u) => u.child_id === childId)?.n ?? 0;
   const [lineLink, lineReady, friendUrl, familyLinks] = await Promise.all([
     getLineLink(db, parent.id),
     lineConfig().then((c) => !!c),
@@ -112,7 +120,22 @@ export default async function SettingsPage() {
         const childDevices = devices.results.filter((d) => d.child_id === c.id);
         return (
           <section key={c.id} className="space-y-5 rounded-2xl border p-4">
-            <h2 className="text-lg font-bold">{c.name}</h2>
+            <h2 className="flex flex-wrap items-baseline gap-x-2 text-lg font-bold">
+              {c.name}
+              <span className="text-xs font-normal text-gray-500">
+                小{c.grade}・端末 {childDevices.length}台・学習の記録 {usedOf(c.id) > 0 ? `${usedOf(c.id)}回` : "なし"}
+              </span>
+            </h2>
+            {usedOf(c.id) === 0 && (
+              <div className="rounded-xl bg-gray-50 p-3" data-testid="delete-child">
+                <p className="mb-2 text-xs text-gray-600">
+                  この子どもには学習の記録がありません。まちがえて登録した場合は削除できます。
+                </p>
+                <ActionForm action={deleteChildAction} submitLabel="この登録を削除" submitClassName={btnDanger}>
+                  <input type="hidden" name="child_id" value={c.id} />
+                </ActionForm>
+              </div>
+            )}
 
             <ActionForm action={updateChildAction} submitLabel="保存">
               <input type="hidden" name="child_id" value={c.id} />
@@ -191,7 +214,10 @@ export default async function SettingsPage() {
 
       <section className="space-y-4 rounded-2xl border p-4">
         <h2 className="text-lg font-bold">子どもを追加</h2>
-        <ActionForm action={addChildAction} submitLabel="追加">
+        <p className="text-sm text-gray-600">
+          すでに登録した子どもの内容を変えるときは、ここではなく上のその子の欄で「保存」を押してください。
+        </p>
+        <ActionForm action={addChildAction} submitLabel="追加" resetOnOk>
           <Field label="名前" name="name" required maxLength={20} />
           <GradeSelect />
           <Field label="算数の時間（分）" name="minutes_math" type="number" inputMode="numeric" min={1} max={120} defaultValue={10} required />

@@ -57,6 +57,10 @@ export async function addChildAction(_prev: FormState, fd: FormData): Promise<Fo
     .bind(parent.family_id)
     .first<{ n: number }>();
   if ((count?.n ?? 0) >= 10) return { error: "これ以上登録できません" };
+  // 同じ名前の二重登録を防ぐ（「追加」を何度も押してしまったとき）
+  if (await db.prepare("SELECT 1 FROM children WHERE family_id = ? AND name = ?").bind(parent.family_id, name).first()) {
+    return { error: `「${name}」さんはすでに登録されています。内容を変えるときは、上のその子の欄で「保存」を押してください` };
+  }
   const settings = await getFamilySettings(db, parent.family_id);
   const now = new Date();
   const childId = newId();
@@ -343,4 +347,26 @@ export async function unlinkLineAction(_prev: FormState, _fd: FormData): Promise
   await (await getDB()).prepare("DELETE FROM line_links WHERE parent_id = ?").bind(parent.id).run();
   revalidatePath("/parent/settings");
   return { ok: "LINE の連携を解除しました" };
+}
+
+/** 子どもの削除。学習の記録がある子どもは消せない（まちがえて作った登録を消すためのもの） */
+export async function deleteChildAction(_prev: FormState, fd: FormData): Promise<FormState> {
+  const { parent } = await requireParentAction();
+  const db = await getDB();
+  const child = await getChildOfFamily(db, parent.family_id, str(fd, "child_id"));
+  if (!child) return { error: "子どもが見つかりません" };
+  const used = await db.prepare("SELECT COUNT(*) AS n FROM sessions WHERE child_id = ?").bind(child.id).first<{ n: number }>();
+  if ((used?.n ?? 0) > 0) return { error: "学習の記録がある子どもは削除できません" };
+  await db.batch([
+    db.prepare("DELETE FROM pairing_codes WHERE child_id = ?").bind(child.id),
+    db.prepare("DELETE FROM devices WHERE child_id = ?").bind(child.id),
+    db.prepare("DELETE FROM child_levels WHERE child_id = ?").bind(child.id),
+    db.prepare("DELETE FROM level_history WHERE child_id = ?").bind(child.id),
+    db.prepare("DELETE FROM special_days WHERE child_id = ?").bind(child.id),
+    db.prepare("DELETE FROM monthly_results WHERE child_id = ?").bind(child.id),
+    db.prepare("DELETE FROM daily_completion WHERE child_id = ?").bind(child.id),
+    db.prepare("DELETE FROM children WHERE id = ?").bind(child.id),
+  ]);
+  revalidatePath("/parent", "layout");
+  return { ok: `${child.name} さんの登録を削除しました` };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState } from "react";
+import { startTransition, useActionState, useEffect, useRef } from "react";
 
 export interface ActionFormState {
   error?: string;
@@ -35,14 +35,21 @@ export function ActionForm({
   children,
   className,
   submitClassName,
+  resetOnOk,
 }: {
   action: Action;
   submitLabel: string;
   children: React.ReactNode;
   className?: string;
   submitClassName?: string;
+  /** 成功したら入力を空にもどす（「追加」のフォーム用。同じ内容を二度送らないように） */
+  resetOnOk?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, {});
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (resetOnOk && state.ok) formRef.current?.reset();
+  }, [resetOnOk, state]);
   // React 19 は action 実行後にフォームを空にするので、onSubmit で送って入力を残す
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,7 +57,7 @@ export function ActionForm({
     startTransition(() => formAction(fd));
   };
   return (
-    <form onSubmit={onSubmit} className={className ?? "space-y-4"}>
+    <form ref={formRef} onSubmit={onSubmit} className={className ?? "space-y-4"}>
       {children}
       {state.error && (
         <p role="alert" data-testid="form-error" className="rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">
