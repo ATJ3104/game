@@ -8,6 +8,8 @@ import { levelOptions } from "@/server/contentPolicy";
 import {
   addChildAction,
   addParentAction,
+  changeMyPasswordAction,
+  resetParentPasswordAction,
   deleteChildAction,
   issueFamilyInviteAction,
   issueLineCodeAction,
@@ -297,10 +299,39 @@ export default async function SettingsPage() {
         <ul className="space-y-1 text-sm">
           {parents.results.map((p) => (
             <li key={p.id}>
-              {p.name}（{p.email}）{p.has_pin ? "" : "・初回ログイン待ち"}
+              {p.name}（{p.email}）{p.id === parent.id ? "・ログイン中" : ""}
+              {p.has_pin ? "" : "・初回ログイン待ち"}
             </li>
           ))}
         </ul>
+
+        <details className="rounded-xl bg-gray-50 p-3" data-testid="my-password">
+          <summary className="min-h-10 cursor-pointer py-2 text-sm font-bold">自分のパスワードを変更（{parent.name}）</summary>
+          <p className="mb-3 text-xs text-gray-600">
+            今のパスワードを忘れていても、ここで新しく決められます。本人確認のため PIN を入力します。ログイン用のメールアドレスは {parent.email} です。
+          </p>
+          <ActionForm action={changeMyPasswordAction} submitLabel="パスワードを変更" resetOnOk>
+            <Field label="新しいパスワード（8文字以上）" name="password" type="password" autoComplete="new-password" required minLength={8} />
+            <Field label="新しいパスワード（確認）" name="password2" type="password" autoComplete="new-password" required minLength={8} />
+            <Field label="PIN（4桁）" name="pin" type="password" inputMode="numeric" maxLength={4} pattern="[0-9]{4}" autoComplete="off" required />
+          </ActionForm>
+        </details>
+
+        {parents.results
+          .filter((p) => p.id !== parent.id)
+          .map((p) => (
+            <details key={p.id} className="rounded-xl bg-gray-50 p-3" data-testid="reset-password">
+              <summary className="min-h-10 cursor-pointer py-2 text-sm font-bold">{p.name} さんのパスワードを再設定</summary>
+              <p className="mb-3 text-xs text-gray-600">
+                仮パスワードを設定します。{p.name} さんは、次のログインで自分のパスワードに変えます。あなた（{parent.name}）の PIN を入力してください。
+              </p>
+              <ActionForm action={resetParentPasswordAction} submitLabel="仮パスワードを設定" resetOnOk>
+                <input type="hidden" name="parent_id" value={p.id} />
+                <Field label="仮パスワード（8文字以上）" name="password" type="text" autoComplete="off" required minLength={8} />
+                <Field label={`${parent.name} さんの PIN（4桁）`} name="pin" type="password" inputMode="numeric" maxLength={4} pattern="[0-9]{4}" autoComplete="off" required />
+              </ActionForm>
+            </details>
+          ))}
         {parents.results.length < 4 && (
           <ActionForm action={addParentAction} submitLabel="おうちの人を追加" resetOnOk>
             <Field label="お名前" name="name" required maxLength={30} />

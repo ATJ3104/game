@@ -13,6 +13,10 @@ export default async function UnpairPage() {
       <p className="mb-6 text-sm text-gray-600">
         この端末は「{child.name}」さんの端末として登録されています。解除すると最初の画面にもどり、おうちの人としてログインできるようになります。学習の記録は消えません。
       </p>
+      <p className="mb-4 rounded-xl bg-amber-50 p-3 text-xs text-gray-700">
+        入力するのは、<strong>この子どもを登録した家族アカウント</strong>のおうちの人のメールアドレスとパスワードです（PIN ではありません）。
+        パスワードが分からないときは、ログインできている別の端末で「設定」→ この子どもの「端末」→「解除」を押すか、「設定」→「おうちの人」でパスワードを変更してください。
+      </p>
       <ActionForm action={unpairAction} submitLabel="登録を解除する" submitClassName={`${btnDanger} w-full`}>
         <Field label="おうちの人のメールアドレス" name="email" type="email" autoComplete="email" required />
         <Field label="パスワード" name="password" type="password" autoComplete="current-password" required />

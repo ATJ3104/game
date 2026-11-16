@@ -403,3 +403,58 @@ export async function joinFamilyAction(_prev: FormState, fd: FormData): Promise<
   revalidatePath("/parent", "layout");
   return { ok: "家族アカウントに参加しました。これからは同じ子ども・同じ進み具合が表示されます" };
 }
+
+// ---------- パスワードの再設定 ----------
+
+/** PIN を確かめる（パスワードの再設定など、大事な操作の前に） */
+async function checkPin(ctx: Awaited<ReturnType<typeof requireParentAction>>, pin: string): Promise<string | null> {
+  const { verifySecret } = await import("@/server/crypto");
+  const { isRateLimited, recordFailure, clearFailures } = await import("@/server/rateLimit");
+  const key = `pwreset:${ctx.parent.id}`;
+  if (await isRateLimited(key, 5, 15 * 60)) return "PIN のまちがいが続いたため、15分たってからやり直してください";
+  if (!ctx.parent.pin_hash || !/^\d{4}$/.test(pin) || !(await verifySecret(pin, ctx.parent.pin_hash))) {
+    await recordFailure(key, 15 * 60);
+    return "PIN が違います";
+  }
+  await clearFailures(key);
+  return null;
+}
+
+/** 自分のパスワードを変える（今のパスワードを忘れていても、ログイン中なら PIN で変えられる） */
+export async function changeMyPasswordAction(_prev: FormState, fd: FormData): Promise<FormState> {
+  const ctx = await requireParentAction();
+  const password = (fd.get("password") as string | null) ?? "";
+  if (!isValidPassword(password)) return { error: "新しいパスワードは8文字以上にしてください" };
+  if (password !== ((fd.get("password2") as string | null) ?? "")) return { error: "新しいパスワードが一致しません" };
+  const pinError = await checkPin(ctx, str(fd, "pin"));
+  if (pinError) return { error: pinError };
+  const db = await getDB();
+  await db.batch([
+    db.prepare("UPDATE parents SET password_hash = ?, must_change_password = 0 WHERE id = ?").bind(await hashSecret(password), ctx.parent.id),
+    // ほかの端末のログインは切る（この端末はそのまま）
+    db.prepare("DELETE FROM parent_sessions WHERE parent_id = ? AND id <> ?").bind(ctx.parent.id, ctx.sessionId),
+  ]);
+  return { ok: "パスワードを変更しました。ほかの端末では、新しいパスワードでログインし直してください" };
+}
+
+/** 同じ家族のほかのおうちの人に、仮パスワードを設定する（本人が次のログインで自分のパスワードに変える） */
+export async function resetParentPasswordAction(_prev: FormState, fd: FormData): Promise<FormState> {
+  const ctx = await requireParentAction();
+  const targetId = str(fd, "parent_id");
+  const password = (fd.get("password") as string | null) ?? "";
+  if (targetId === ctx.parent.id) return { error: "自分のパスワードは上の「自分のパスワードを変更」で変えてください" };
+  if (!isValidPassword(password)) return { error: "仮パスワードは8文字以上にしてください" };
+  const db = await getDB();
+  const target = await db
+    .prepare("SELECT id, name FROM parents WHERE id = ? AND family_id = ?")
+    .bind(targetId, ctx.parent.family_id)
+    .first<{ id: string; name: string }>();
+  if (!target) return { error: "おうちの人が見つかりません" };
+  const pinError = await checkPin(ctx, str(fd, "pin"));
+  if (pinError) return { error: pinError };
+  await db.batch([
+    db.prepare("UPDATE parents SET password_hash = ?, must_change_password = 1 WHERE id = ?").bind(await hashSecret(password), target.id),
+    db.prepare("DELETE FROM parent_sessions WHERE parent_id = ?").bind(target.id),
+  ]);
+  return { ok: `${target.name} さんに仮パスワードを設定しました。次のログインで、本人が新しいパスワードに変えます（PIN はそのまま）` };
+}
