@@ -9,7 +9,9 @@ import {
   addChildAction,
   addParentAction,
   deleteChildAction,
+  issueFamilyInviteAction,
   issueLineCodeAction,
+  joinFamilyAction,
   unlinkLineAction,
   updateLineSettingsAction,
   issuePairingCodeAction,
@@ -299,13 +301,42 @@ export default async function SettingsPage() {
             </li>
           ))}
         </ul>
-        {parents.results.length < 2 && (
-          <ActionForm action={addParentAction} submitLabel="2人目を追加">
+        {parents.results.length < 4 && (
+          <ActionForm action={addParentAction} submitLabel="おうちの人を追加" resetOnOk>
             <Field label="お名前" name="name" required maxLength={30} />
             <Field label="メールアドレス" name="email" type="email" required />
             <Field label="仮パスワード（8文字以上）" name="password" type="text" required minLength={8} autoComplete="off" />
           </ActionForm>
         )}
+      </section>
+
+      <section className="space-y-4 rounded-2xl border p-4" data-testid="merge-section">
+        <h2 className="text-lg font-bold">家族アカウントをまとめる</h2>
+        <p className="text-sm text-gray-600">
+          おうちの人がそれぞれ別の家族アカウントを作ってしまうと、見える子どもや進み具合がちがってしまいます。1つにまとめると、どの端末・だれのログインでも同じ内容になります。
+        </p>
+        <div className="space-y-2 rounded-xl bg-gray-50 p-3">
+          <h3 className="text-sm font-bold">① 子どもの端末が登録されているほうのアカウントで</h3>
+          <LineCode
+            action={issueFamilyInviteAction}
+            label="招待コードを発行"
+            help="もう一方のおうちの人が、自分の「設定」のこの欄（②）に入力します"
+            note="まで有効（30分）"
+            testId="family-invite-code"
+          />
+        </div>
+        <div className="space-y-2 rounded-xl bg-gray-50 p-3">
+          <h3 className="text-sm font-bold">② まとめられるほう（参加するほう）のアカウントで</h3>
+          <ActionForm action={joinFamilyAction} submitLabel="この家族アカウントに参加する">
+            <Field label="招待コード（8けた）" name="code" inputMode="numeric" maxLength={8} pattern="[0-9]{8}" autoComplete="off" required />
+            <label className="flex items-start gap-3 text-sm">
+              <input type="checkbox" name="confirm" className="mt-1 h-5 w-5 shrink-0" />
+              <span>
+                いまのアカウント（子ども {children.length}人）から、招待された家族アカウントに移ります。いまのアカウントの子どものうち、学習の記録がない登録は削除されます。
+              </span>
+            </label>
+          </ActionForm>
+        </div>
       </section>
 
       <section className="space-y-4 rounded-2xl border p-4">

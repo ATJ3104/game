@@ -243,7 +243,7 @@ export async function addParentAction(_prev: FormState, fd: FormData): Promise<F
     .prepare("SELECT COUNT(*) AS n FROM parents WHERE family_id = ?")
     .bind(parent.family_id)
     .first<{ n: number }>();
-  if ((count?.n ?? 0) >= 2) return { error: "おうちの人は2人まで登録できます" };
+  if ((count?.n ?? 0) >= 4) return { error: "おうちの人は4人まで登録できます" };
   const name = str(fd, "name");
   const email = str(fd, "email").toLowerCase();
   const password = (fd.get("password") as string | null) ?? "";
@@ -369,4 +369,37 @@ export async function deleteChildAction(_prev: FormState, fd: FormData): Promise
   ]);
   revalidatePath("/parent", "layout");
   return { ok: `${child.name} さんの登録を削除しました` };
+}
+
+// ---------- 家族アカウントをまとめる ----------
+
+export async function issueFamilyInviteAction(_prev: LineCodeState, _fd: FormData): Promise<LineCodeState> {
+  const { parent } = await requireParentAction();
+  const { createFamilyInvite } = await import("@/server/familyJoin");
+  try {
+    return await createFamilyInvite(await getDB(), parent.family_id, parent.id);
+  } catch {
+    return { error: "コードを発行できませんでした。もう一度お試しください" };
+  }
+}
+
+export async function joinFamilyAction(_prev: FormState, fd: FormData): Promise<FormState> {
+  const { parent } = await requireParentAction();
+  const code = str(fd, "code").replace(/\D/g, "");
+  if (code.length !== 8) return { error: "8けたの招待コードを入力してください" };
+  if (fd.get("confirm") !== "on") return { error: "確認のチェックを入れてください" };
+  const { joinFamily, MAX_PARENTS } = await import("@/server/familyJoin");
+  const r = await joinFamily(await getDB(), parent, code);
+  if (!r.ok) {
+    return {
+      error:
+        r.reason === "same_family"
+          ? "すでに同じ家族アカウントです"
+          : r.reason === "full"
+            ? `その家族アカウントは、おうちの人が${MAX_PARENTS}人で上限です`
+            : "コードがちがうか、有効期限（30分）がすぎています",
+    };
+  }
+  revalidatePath("/parent", "layout");
+  return { ok: "家族アカウントに参加しました。これからは同じ子ども・同じ進み具合が表示されます" };
 }

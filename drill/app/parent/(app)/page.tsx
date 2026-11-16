@@ -53,6 +53,13 @@ export default async function ParentDashboard() {
     .prepare("SELECT name FROM parents WHERE family_id = ? ORDER BY created_at")
     .bind(parent.family_id)
     .all<{ name: string }>();
+  const deviceCount =
+    (
+      await db
+        .prepare("SELECT COUNT(*) AS n FROM devices d JOIN children c ON c.id = d.child_id WHERE c.family_id = ? AND d.revoked_at IS NULL")
+        .bind(parent.family_id)
+        .first<{ n: number }>()
+    )?.n ?? 0;
   const week = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6));
 
   const cards = await Promise.all(
@@ -180,6 +187,16 @@ export default async function ParentDashboard() {
           この家族アカウントのおうちの人：{familyParents.results.map((p) => p.name).join("・")}（ログイン中：{parent.name}）。1分ごとに自動で更新します。
         </p>
       </section>
+
+      {cards.length > 0 && deviceCount === 0 && (
+        <p className="rounded-2xl border-2 border-amber-300 bg-white p-4 text-sm" data-testid="no-device-hint">
+          この家族アカウントには、子どもの端末が1台も登録されていません。進み具合が出ないときは、子どもの端末が<strong>別の家族アカウント</strong>に登録されている可能性があります。
+          <Link href="/parent/settings" className="font-bold text-amber-700 underline">
+            「設定」→「家族アカウントをまとめる」
+          </Link>
+          で1つにまとめられます。
+        </p>
+      )}
 
       {cards.length === 0 && (
         <p className="rounded-2xl bg-amber-50 p-4">

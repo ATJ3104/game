@@ -12,7 +12,7 @@ export default async function SignupPage() {
     <main className="mx-auto max-w-md p-6">
       <h1 className="mb-2 text-2xl font-bold">家族アカウントを作成</h1>
       <p className="mb-6 text-sm text-gray-600">
-        2人目のおうちの人は、作成後に「設定」から追加できます。
+        家族で1つだけ作ります。すでに家族のだれかが作っている場合は、ここで作らずに、その人の画面の「設定 → おうちの人を追加」で追加してもらってください（別々に作ると、進み具合が別々になります）。
       </p>
       <ActionForm action={signupAction} submitLabel="作成する">
         <Field label="お名前（表示用）" name="name" required maxLength={30} />
