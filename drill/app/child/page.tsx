@@ -105,8 +105,11 @@ export default async function ChildHome() {
         <MonthCalendar days={month.days} />
       </section>
 
-      <div className="text-center">
+      <div className="flex flex-col items-center gap-1">
         <SoundTest />
+        <Link href="/child/unpair" className="min-h-10 text-xs text-gray-400 underline" data-testid="unpair-link">
+          おうちの人へ：この端末の登録を解除
+        </Link>
       </div>
     </main>
   );
